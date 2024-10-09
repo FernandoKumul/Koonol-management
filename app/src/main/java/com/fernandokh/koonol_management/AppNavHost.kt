@@ -8,7 +8,6 @@ import androidx.navigation.compose.composable
 import com.fernandokh.koonol_management.ui.screen.LoginScreen
 import com.fernandokh.koonol_management.ui.screen.MenuScreen
 import com.fernandokh.koonol_management.ui.screen.UsersScreen
-import kotlinx.serialization.Serializable
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
