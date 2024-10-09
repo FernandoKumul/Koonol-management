@@ -95,6 +95,7 @@ fun MyApp() {
             drawerContent = {
                 ModalDrawerSheet { SideMenu(navController, drawerState) }
             },
+            gesturesEnabled = topBarState.value
         ) {
             Scaffold(
                 topBar = {
@@ -156,6 +157,8 @@ fun TopBar(route: String?, drawerState: DrawerState) {
 
 @Composable
 fun SideMenu(navController: NavHostController, drawerState: DrawerState) {
+    val scope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier.fillMaxHeight()
             .fillMaxWidth(0.8f)
@@ -190,7 +193,14 @@ fun SideMenu(navController: NavHostController, drawerState: DrawerState) {
 
         Row(
             modifier = Modifier
-                .clickable { /*Cerrar sesión*/ }
+                .clickable {
+                    navController.navigate(Screen.Login.route)
+                    scope.launch {
+                        drawerState.apply {
+                            close()
+                        }
+                    }
+                }
                 .padding(12.dp)
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
