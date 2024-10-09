@@ -8,18 +8,26 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -31,16 +39,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            KoonolmanagementTheme {
-                MyApp()
-            }
+            MyApp()
         }
     }
 }
 
 @Composable
 fun MyApp() {
-    val topBarState = rememberSaveable { (mutableStateOf(true)) }
+    val topBarState = rememberSaveable { (mutableStateOf(false)) }
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -49,26 +55,67 @@ fun MyApp() {
         Screen.Menu.route -> {
             topBarState.value = false
         }
+
         Screen.Login.route -> {
             topBarState.value = false
         }
+
+        null -> {
+            topBarState.value = false
+        }
+
         else -> {
             topBarState.value = true
         }
     }
 
-    Scaffold(
-        topBar = {
-            if (topBarState.value) {
-                Text("TopBar")
+    KoonolmanagementTheme(dynamicColor = false) {
+        Scaffold(
+            topBar = {
+                if (topBarState.value) {
+                    TopBar(navBackStackEntry?.destination?.route ?: "")
+                }
+            },
+            content = { innerPadding ->
+                AppNavHost(
+                    modifier = Modifier.padding(innerPadding),
+                    navController = navController
+                )
+            }
+        )
+    }
+
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBar(route: String) {
+    val title = when (route) {
+        "users" -> stringResource(R.string.title_route_users)
+        else -> stringResource(R.string.title_route_default)
+    }
+
+    CenterAlignedTopAppBar(
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+        title = {
+            Text(
+                title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                fontWeight = FontWeight.Medium
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = { /* do something */ }) {
+                Icon(
+                    imageVector = Icons.Filled.Menu,
+                    contentDescription = "Localized description"
+                )
             }
         },
-        content = { innerPadding ->
-            AppNavHost(
-                modifier = Modifier.padding(innerPadding).background(color = Color.Red),
-                navController = navController
-            )
-        }
     )
 }
 

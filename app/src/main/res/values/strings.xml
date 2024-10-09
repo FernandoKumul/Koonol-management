@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Koonol-management</string>
+    <string name="title_route_users">Usuarios</string>
+    <string name="title_route_default">Menú</string>
 </resources>
