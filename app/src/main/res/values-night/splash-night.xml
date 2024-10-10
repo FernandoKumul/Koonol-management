@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--    name attribute is for the name of your style and parent must be "Theme.SplashScreen"-->
+    <style name="App.Starting.Theme" parent="Theme.SplashScreen">
+
+        <!--       background color of the splash screen night mode-->
+        <item name="windowSplashScreenBackground">#0B141B</item>
+
+        <!--        icon of your splash screen or app icon-->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/g_logodark</item>
+
+        <!--        theme after splash screen is shown-->
+        <item name="postSplashScreenTheme">@android:style/Theme.Material.NoActionBar</item>
+    </style>
+
+</resources>

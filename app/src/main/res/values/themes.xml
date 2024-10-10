@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Koonolmanagement" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Koonolmanagement" parent="android:Theme.Material.Light.NoActionBar">
+
+        <!-- This line enables translucent status bar for the window.
+             It makes the status bar semi-transparent, allowing the content behind it to be visible. -->
+        <item name="android:windowTranslucentStatus">true</item>
+
+        <!-- This line enables translucent navigation bar for the window.
+            It makes the navigation bar semi-transparent, allowing the content behind it to be visible. -->
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
 </resources>

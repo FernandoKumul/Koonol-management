@@ -29,14 +29,30 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        var isCheking = true
+        lifecycleScope.launch {
+            delay(3000L)
+            isCheking = false
+        }
+        installSplashScreen().apply {
+            setKeepOnScreenCondition{
+                isCheking
+            }
+        }
+
         enableEdgeToEdge()
         setContent {
             MyApp()
