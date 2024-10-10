@@ -42,16 +42,10 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var isCheking = true
-        lifecycleScope.launch {
-            delay(3000L)
-            isCheking = false
-        }
-        installSplashScreen().apply {
-            setKeepOnScreenCondition{
-                isCheking
-            }
-        }
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+
+        installSplashScreen()
 
         enableEdgeToEdge()
         setContent {
@@ -98,6 +92,7 @@ fun MyApp() {
                     navController = navController
                 )
             }
+
         )
     }
 
