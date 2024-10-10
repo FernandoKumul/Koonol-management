@@ -42,14 +42,19 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
-
         installSplashScreen()
 
         enableEdgeToEdge()
         setContent {
-            MyApp()
+            KoonolmanagementTheme {
+                Surface (
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                )
+                {
+                    MyApp()
+                }
+            }
         }
     }
 }
