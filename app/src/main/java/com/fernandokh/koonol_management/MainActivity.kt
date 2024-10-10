@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -162,11 +164,12 @@ fun SideMenu(navController: NavHostController, drawerState: DrawerState) {
     Column(
         modifier = Modifier.fillMaxHeight()
             .fillMaxWidth(0.8f)
-            .padding(0.dp, 12.dp)
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .padding(0.dp, 16.dp)
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Row(
-                Modifier.padding(12.dp, 0.dp),
+                Modifier.padding(16.dp, 12.dp, 16.dp, 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ){
                 Image(
@@ -174,7 +177,6 @@ fun SideMenu(navController: NavHostController, drawerState: DrawerState) {
                     contentDescription = "img_user",
                     modifier = Modifier.size(64.dp)
                         .clip(CircleShape)
-
                 )
                 Column {
                     Text(
@@ -184,7 +186,8 @@ fun SideMenu(navController: NavHostController, drawerState: DrawerState) {
                     )
                     Text(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        text = "defaultemail@gmail.com"
+                        text = "defaultemail@gmail.com",
+                        fontSize = 13.sp
                     )
                 }
             }

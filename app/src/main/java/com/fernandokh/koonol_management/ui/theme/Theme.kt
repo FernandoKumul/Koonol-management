@@ -1,6 +1,5 @@
 package com.fernandokh.koonol_management.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +17,10 @@ private val DarkColorScheme = darkColorScheme(
     onPrimary = ThemeDarkOnPrimary,
     primaryContainer = ThemeDarkPrimaryContainer,
     onPrimaryContainer = ThemeDarkOnPrimaryContainer,
+    outline = ThemeDarkOutline,
+    outlineVariant = ThemeDarkOutlineVar,
+    error = ThemeDarkError,
+    onError = ThemeDarkOnError
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -26,6 +29,8 @@ private val LightColorScheme = lightColorScheme(
     tertiary = Pink40,
     primaryContainer = ThemeLightPrimaryContainer,
     onPrimaryContainer = ThemeLightOnPrimaryContainer,
+    outline = ThemeLightOutline,
+    outlineVariant = ThemeLightOutlineVar
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
