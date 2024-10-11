@@ -1,5 +1,6 @@
 package com.fernandokh.koonol_management
 
+import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -29,17 +30,17 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun AppNavHost(
-    modifier: Modifier = Modifier, navController: NavHostController
+    modifier: Modifier = Modifier, navController: NavHostController, drawerState: DrawerState
 ) {
     NavHost(navController, startDestination = Screen.Login.route, modifier = modifier) {
         composable(Screen.Login.route) { LoginScreen(navController) }
         composable(Screen.Menu.route) { MenuScreen(navController) }
-        composable(Screen.Users.route) { UsersScreen(navController) }
-        composable(Screen.Tianguis.route) { TianguisScreen(navController) }
-        composable(Screen.SalesStalls.route) { SalesStallsScreen(navController) }
-        composable(Screen.Promotions.route) { PromotionsScreen(navController) }
-        composable(Screen.Categories.route) { CategoriesScreen(navController) }
-        composable(Screen.Profile.route) { ProfileScreen(navController) }
-        composable(Screen.Sellers.route) { SellersScreen(navController) }
+        composable(Screen.Users.route) { UsersScreen(navController, drawerState) }
+        composable(Screen.Tianguis.route) { TianguisScreen(navController, drawerState) }
+        composable(Screen.SalesStalls.route) { SalesStallsScreen(navController, drawerState) }
+        composable(Screen.Promotions.route) { PromotionsScreen(navController, drawerState) }
+        composable(Screen.Categories.route) { CategoriesScreen(navController, drawerState) }
+        composable(Screen.Profile.route) { ProfileScreen(navController, drawerState) }
+        composable(Screen.Sellers.route) { SellersScreen(navController, drawerState) }
     }
 }
