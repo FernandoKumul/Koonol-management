@@ -21,6 +21,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -50,12 +51,23 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             KoonolmanagementTheme {
-                Box (
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                )
-                {
-                    MyApp()
+
+                LaunchedEffect(true) {
+                    delay(3000)
+                    //onTimeout()
+                }
+
+                Surface(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    {
+                        MyApp()
+                    }
                 }
             }
         }
@@ -109,7 +121,7 @@ fun MyApp() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(route: String) {
+fun TopBar(route: String){
     val title = when (route) {
         "users" -> stringResource(R.string.title_route_users)
         else -> stringResource(R.string.title_route_default)

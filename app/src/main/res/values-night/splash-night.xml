@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--    name attribute is for the name of your style and parent must be "Theme.SplashScreen"-->
-    <style name="App.Starting.Theme" parent="Theme.SplashScreen">
+    <style name="Theme.MySplashScreenNight" parent="Theme.SplashScreen">
 
         <!--       background color of the splash screen night mode-->
         <item name="windowSplashScreenBackground">#0B141B</item>
