@@ -3,7 +3,6 @@ package com.fernandokh.koonol_management.ui.screen.users
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,8 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -39,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
@@ -53,8 +49,8 @@ import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.ui.components.router.TopBarMenuTitle
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
-import com.fernandokh.koonol_management.utils.MenuItem.Option
 import com.fernandokh.koonol_management.utils.MenuItem.Divider
+import com.fernandokh.koonol_management.utils.MenuItem.Option
 
 @Composable
 fun UsersScreen(navController: NavHostController, drawerState: DrawerState) {
@@ -132,9 +128,10 @@ fun CardUserItem(navController: NavHostController) {
                 onDismiss = { menuOpen = false },
                 onItemClick = { option ->
                     when (option.name) {
-                        "Más información" -> navController.navigate(Screen.CreateUser.route)
+                        "Más información" -> navController.navigate(Screen.InfoUser.route)
                         "Editar" -> navController.navigate(Screen.EditUser.route)
-                        "Borrar" -> {/**/}
+                        "Borrar" -> {/**/
+                        }
                     }
                 })
         }
@@ -147,18 +144,21 @@ fun UserMenu(expanded: Boolean, onDismiss: () -> Unit, onItemClick: (Option) -> 
     val options = listOf(
         Option(
             "Más información",
-            ImageVector.vectorResource(R.drawable.ic_user_line),
+            ImageVector.vectorResource(R.drawable.ic_article_line),
             MaterialTheme.colorScheme.onBackground
         ),
         Divider,
-        Option("Editar", Icons.Filled.Home, MaterialTheme.colorScheme.primary),
+        Option(
+            "Editar",
+            ImageVector.vectorResource(R.drawable.ic_edit_2_line),
+            MaterialTheme.colorScheme.primary
+        ),
         Divider,
         Option(
             "Borrar",
-            ImageVector.vectorResource(R.drawable.ic_logout_circle),
+            ImageVector.vectorResource(R.drawable.ic_delete_bin_line),
             MaterialTheme.colorScheme.error
         ),
-        Divider,
     )
 
     DropdownMenu(
