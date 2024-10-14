@@ -1,18 +1,28 @@
 package com.fernandokh.koonol_management.ui.screen
 
-import android.content.ClipData.Item
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,9 +33,31 @@ import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.primaryContainer)
+    ) {
         Text(
-            "¡Bienvenido a Konool para Gestores!",
+            buildAnnotatedString {
+                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                    append("¡")
+                }
+                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurface)) {
+                    append("Bienvenido a ")
+                }
+                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                    append("Konool ")
+                }
+                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurface)) {
+                    append("para ")
+                }
+                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                    append("Gestores!")
+                }
+            },
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
@@ -36,25 +68,64 @@ fun LoginScreen(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    Color.White, shape = RoundedCornerShape(
+                    color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(
                         topStart = 60.dp,
                         topEnd = 60.dp,
                     )
                 )
         ) {
-            Text(
-                "Iniciar sesión",
-                textAlign = TextAlign.Center,
-                fontSize = 24.sp,
+            Column(
+                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                modifier = Modifier.padding(bottom = 46.dp)
+            ) {
+                Text(
+                    "Iniciar sesión",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
+                    fontSize = 24.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 32.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .height(2.dp)
+                        .width(120.dp)
+                        .background(
+                            MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(10.dp)
+                        )
+                )
+            }
+            Column(modifier = Modifier.padding(32.dp)) {
+                Text("Correo electrónico", color = MaterialTheme.colorScheme.secondary)
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp),
+                )
+                Text("Contraseña", color = MaterialTheme.colorScheme.secondary)
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                )
+                Text(
+                    "¿Olvidaste tu contraseña?",
+                    color = MaterialTheme.colorScheme.secondary,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            Button(
+                onClick = { navController.navigate(Screen.Menu.route) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(32.dp)
-            )
-
-            Text("Correo electrónico")
-            Text("Contraseña")
-            Button(onClick = { navController.navigate(Screen.Menu.route) }) {
-                Text("Continuar")
+                    .height(50.dp)
+                    .padding(horizontal = 32.dp)
+            ) {
+                Text("Empezar")
             }
         }
     }
