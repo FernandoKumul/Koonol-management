@@ -1,21 +1,26 @@
 package com.fernandokh.koonol_management.ui.screen.users
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
@@ -29,6 +34,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,17 +50,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
+import com.fernandokh.koonol_management.data.models.UserInModel
 import com.fernandokh.koonol_management.ui.components.router.TopBarMenuTitle
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 import com.fernandokh.koonol_management.utils.MenuItem.Divider
 import com.fernandokh.koonol_management.utils.MenuItem.Option
+import com.fernandokh.koonol_management.viewModel.UserViewModel
 
 @Composable
-fun UsersScreen(navController: NavHostController, drawerState: DrawerState) {
+fun UsersScreen(
+    navController: NavHostController,
+    drawerState: DrawerState,
+    viewModel: UserViewModel = viewModel()
+) {
+    val users by viewModel.users.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.searchUsers()
+    }
+
     Scaffold(
         topBar = { TopBarMenuTitle("Usuarios", drawerState) },
         floatingActionButton = {
@@ -66,16 +87,37 @@ fun UsersScreen(navController: NavHostController, drawerState: DrawerState) {
                 Icon(Icons.Default.Add, contentDescription = "Add")
             }
         },
+
         content = { innerPadding ->
-            LazyColumn(modifier = Modifier.padding(innerPadding)) {
-                item { CardUserItem(navController) }
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                UsersList(users, innerPadding, navController)
             }
         },
     )
 }
 
 @Composable
-fun CardUserItem(navController: NavHostController) {
+fun UsersList(users: List<UserInModel>, paddingValues: PaddingValues, navController: NavHostController) {
+    LazyColumn(
+        modifier = Modifier.padding(paddingValues)
+    ) {
+        items(users) { user ->
+            CardUserItem(navController, user)
+        }
+    }
+}
+
+@Composable
+fun CardUserItem(navController: NavHostController, user: UserInModel) {
     var menuOpen by remember { mutableStateOf(false) }
     Row(
         Modifier.padding(16.dp, 20.dp),
@@ -93,7 +135,7 @@ fun CardUserItem(navController: NavHostController) {
                 Text(
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    text = "Jonh Doe Default",
+                    text = "${user.name} ${user.lastName}",
                     fontSize = 17.sp
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -106,13 +148,13 @@ fun CardUserItem(navController: NavHostController) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    text = "Rol",
+                    text = user.rol.name,
                     fontSize = 16.sp
                 )
             }
             Text(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                text = "defaultemail@gmail.com",
+                text = user.email,
                 fontSize = 14.sp
             )
         }
