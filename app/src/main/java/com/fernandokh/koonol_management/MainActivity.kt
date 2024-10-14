@@ -53,12 +53,12 @@ class MainActivity : ComponentActivity() {
             KoonolmanagementTheme {
 
                 LaunchedEffect(true) {
-                    delay(3000)
+                    delay(5000)
                     //onTimeout()
                 }
 
                 Surface(
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.background,
                     modifier = Modifier.fillMaxSize()
                 ) {
                     Box(
