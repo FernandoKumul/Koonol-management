@@ -19,13 +19,24 @@ class UserViewModel : ViewModel() {
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _isValueSearch = MutableStateFlow("")
+    val isValueSearch: StateFlow<String> = _isValueSearch
+
+    private val _isTotalRecords = MutableStateFlow(0)
+    val isTotalRecords: StateFlow<Int> = _isTotalRecords
+
+    fun changeValueSearch(newValue: String) {
+        _isValueSearch.value = newValue
+    }
+
      fun searchUsers() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val response = apiService.search("", 1, 10, "newest", "all")
-                val usersResponse = response.data?.results ?: emptyList()
-                _users.value = usersResponse
+                val response = apiService.search(_isValueSearch.value, 1, 10, "newest", "all")
+                val data = response.data
+                _users.value = data?.results ?: emptyList()
+                _isTotalRecords.value = data?.count ?: 0
                 Log.i("dev-debug", "Usuarios obtenidos")
             } catch (e: Exception) {
                 Log.i("error-api", e.message ?: "Ah ocurrido un error")
