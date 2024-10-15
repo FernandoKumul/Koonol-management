@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Koonolmanagement" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.MySplashScreen" parent="Theme.SplashScreen">
+
+        <item name="windowSplashScreenBackground">#FFFFFF</item>
+
+        <item name="windowSplashScreenAnimatedIcon">@drawable/g_logolight</item>
+
+        <item name="postSplashScreenTheme">@style/Theme.Koonolmanagement</item>
+
+        <item name="windowSplashScreenAnimationDuration">5000</item>
+
+    </style>
+
+    <style name="Theme.Koonolmanagement" parent="android:Theme.Material.Light.NoActionBar">
+    </style>
 </resources>
