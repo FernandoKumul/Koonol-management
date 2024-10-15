@@ -55,6 +55,8 @@ dependencies {
     implementation (libs.converter.gson)
     //Coroutines
     implementation(libs.kotlinx.coroutines.android)
+    //Load images of Internet
+    implementation(libs.coil.compose)
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.ktx)

@@ -2,6 +2,7 @@ package com.fernandokh.koonol_management.ui.components.shared
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -31,6 +32,7 @@ fun SearchBarC (
     Row (modifier = modifier) {
         androidx.compose.material3.SearchBar(
             query = text,
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             onQueryChange = { onChange(it) },
             onSearch = { onSearch() },

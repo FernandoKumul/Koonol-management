@@ -1,6 +1,7 @@
 package com.fernandokh.koonol_management.ui.screen.users
 
 import android.content.res.Configuration
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
@@ -54,6 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.data.models.UserInModel
@@ -215,13 +218,24 @@ fun CardUserItem(
         Modifier.padding(16.dp, 20.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Image(
-            painter = painterResource(R.drawable.default_user),
-            contentDescription = "img_user",
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-        )
+        if (user.photo != null) {
+            AsyncImage(
+                model = user.photo,
+                contentDescription = "img_user",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .size(48.dp)
+            )
+        } else {
+            Image(
+                painter = painterResource(R.drawable.default_user),
+                contentDescription = "img_user",
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+            )
+        }
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -319,7 +333,9 @@ fun UserMenu(
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL,
+    device = "spec:parent=pixel_5"
+)
 @Composable
 fun PrevUsersScreen() {
     val navController = rememberNavController()
