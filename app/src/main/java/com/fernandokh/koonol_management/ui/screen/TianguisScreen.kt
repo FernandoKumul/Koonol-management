@@ -11,9 +11,9 @@ import androidx.navigation.NavHostController
 import com.fernandokh.koonol_management.ui.components.router.TopBarMenuTitle
 
 @Composable
-fun UsersScreen(navController: NavHostController, drawerState: DrawerState) {
+fun TianguisScreen(navController: NavHostController, drawerState: DrawerState) {
     Scaffold(
-        topBar = { TopBarMenuTitle("Usuarios", drawerState) },
+        topBar = { TopBarMenuTitle("Tianguis", drawerState) },
         content = { innerPadding ->
             Column (modifier = Modifier.padding(innerPadding)) {
                 Text("Aqui va el contenido")
