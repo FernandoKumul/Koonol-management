@@ -1,6 +1,7 @@
 package com.fernandokh.koonol_management.ui.screen.users
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -41,8 +42,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,8 +58,10 @@ import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.data.models.UserInModel
 import com.fernandokh.koonol_management.ui.components.router.TopBarMenuTitle
+import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
 import com.fernandokh.koonol_management.ui.components.shared.SearchBarC
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
+import com.fernandokh.koonol_management.utils.MenuItem
 import com.fernandokh.koonol_management.utils.MenuItem.Divider
 import com.fernandokh.koonol_management.utils.MenuItem.Option
 import com.fernandokh.koonol_management.viewModel.UserViewModel
@@ -73,8 +76,18 @@ fun UsersScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val totalRecords by viewModel.isTotalRecords.collectAsState()
 
+    val context = LocalContext.current
+    val toastMessage by viewModel.toastMessage.collectAsState()
+
     LaunchedEffect(Unit) {
         viewModel.searchUsers()
+    }
+
+    LaunchedEffect(toastMessage) {
+        toastMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            viewModel.resetToastMessage()
+        }
     }
 
     Scaffold(
@@ -102,7 +115,7 @@ fun UsersScreen(
                         CircularProgressIndicator()
                     }
                 } else {
-                    UsersList(users, navController, totalRecords)
+                    UsersList(users, navController, totalRecords, viewModel)
                 }
             }
         },
@@ -138,7 +151,45 @@ fun SearchTopBar(viewModel: UserViewModel) {
 }
 
 @Composable
-fun UsersList(users: List<UserInModel>, navController: NavHostController, total: Int) {
+fun UsersList(
+    users: List<UserInModel>,
+    navController: NavHostController,
+    total: Int,
+    viewModel: UserViewModel
+) {
+    val isUserToDelete by viewModel.isUserToDelete.collectAsState()
+    val isLoadingDelete by viewModel.isLoadingDelete.collectAsState()
+
+    if (isUserToDelete != null) {
+        AlertDialogC(
+            dialogTitle = "Borrar Usuario",
+            dialogText = "¿Estás seguro de borrar el usuario ${isUserToDelete?.name} ${isUserToDelete?.lastName}?",
+            onDismissRequest = { viewModel.dismissDialog() },
+            onConfirmation = { viewModel.deleteUser() },
+            loading = isLoadingDelete
+        )
+    }
+
+    val options = listOf(
+        Option(
+            "Más información",
+            ImageVector.vectorResource(R.drawable.ic_article_line),
+            MaterialTheme.colorScheme.onBackground
+        ),
+        Divider,
+        Option(
+            "Editar",
+            ImageVector.vectorResource(R.drawable.ic_edit_2_line),
+            MaterialTheme.colorScheme.primary
+        ),
+        Divider,
+        Option(
+            "Borrar",
+            ImageVector.vectorResource(R.drawable.ic_delete_bin_line),
+            MaterialTheme.colorScheme.error
+        ),
+    )
+
     Text(
         text = "Resultados: $total",
         textAlign = TextAlign.End,
@@ -147,13 +198,18 @@ fun UsersList(users: List<UserInModel>, navController: NavHostController, total:
     )
     LazyColumn {
         items(users) { user ->
-            CardUserItem(navController, user)
+            CardUserItem(navController, user, options) { viewModel.onUserSelectedForDelete(user) }
         }
     }
 }
 
 @Composable
-fun CardUserItem(navController: NavHostController, user: UserInModel) {
+fun CardUserItem(
+    navController: NavHostController,
+    user: UserInModel,
+    options: List<MenuItem>,
+    onSelectedToDelete: () -> Unit
+) {
     var menuOpen by remember { mutableStateOf(false) }
     Row(
         Modifier.padding(16.dp, 20.dp),
@@ -204,11 +260,13 @@ fun CardUserItem(navController: NavHostController, user: UserInModel) {
             UserMenu(
                 expanded = menuOpen,
                 onDismiss = { menuOpen = false },
+                options = options,
                 onItemClick = { option ->
                     when (option.name) {
                         "Más información" -> navController.navigate(Screen.InfoUser.route)
                         "Editar" -> navController.navigate(Screen.EditUser.route)
-                        "Borrar" -> {/**/
+                        "Borrar" -> {
+                            onSelectedToDelete()
                         }
                     }
                 })
@@ -218,27 +276,12 @@ fun CardUserItem(navController: NavHostController, user: UserInModel) {
 }
 
 @Composable
-fun UserMenu(expanded: Boolean, onDismiss: () -> Unit, onItemClick: (Option) -> Unit) {
-    val options = listOf(
-        Option(
-            "Más información",
-            ImageVector.vectorResource(R.drawable.ic_article_line),
-            MaterialTheme.colorScheme.onBackground
-        ),
-        Divider,
-        Option(
-            "Editar",
-            ImageVector.vectorResource(R.drawable.ic_edit_2_line),
-            MaterialTheme.colorScheme.primary
-        ),
-        Divider,
-        Option(
-            "Borrar",
-            ImageVector.vectorResource(R.drawable.ic_delete_bin_line),
-            MaterialTheme.colorScheme.error
-        ),
-    )
-
+fun UserMenu(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    onItemClick: (Option) -> Unit,
+    options: List<MenuItem>
+) {
     DropdownMenu(
         expanded = expanded,
 //        modifier = Modifier.shadow(),
