@@ -5,10 +5,10 @@
     android:viewportHeight="300">
 
   <group
-      android:pivotX="240"
-      android:pivotY="240"
-      android:scaleX="0.8"
-      android:scaleY="0.8"
+      android:pivotX="150"
+      android:pivotY="150"
+      android:scaleX="0.5"
+      android:scaleY="0.5"
       >
 
     <path
