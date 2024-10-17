@@ -349,8 +349,8 @@ fun CardUserItem(
                 options = options,
                 onItemClick = { option ->
                     when (option.name) {
-                        "Más información" -> navController.navigate(Screen.InfoUser.route)
-                        "Editar" -> navController.navigate(Screen.EditUser.route)
+                        "Más información" -> navController.navigate(Screen.InfoUser.createRoute(user.id))
+                        "Editar" -> navController.navigate(Screen.EditUser.createRoute(user.id))
                         "Borrar" -> {
                             onSelectedToDelete()
                         }

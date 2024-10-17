@@ -10,14 +10,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
+import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 
 @Composable
-fun EditUserScreen(navController: NavHostController) {
+fun EditUserScreen(navController: NavHostController, userId: String?) {
     Scaffold(
         topBar = { TopBarGoBack("Editar Usuario", navController) },
         content = { innerPadding ->
             Column (modifier = Modifier.padding(innerPadding)) {
-                Text("Aqui va el contenido")
+                Text("Usuario: $userId")
             }
         },
     )
@@ -27,5 +28,7 @@ fun EditUserScreen(navController: NavHostController) {
 @Composable
 fun PrevEditUserScreen() {
     val navController = rememberNavController()
-    EditUserScreen(navController)
+    KoonolmanagementTheme (dynamicColor = false) {
+        EditUserScreen(navController, "Id")
+    }
 }

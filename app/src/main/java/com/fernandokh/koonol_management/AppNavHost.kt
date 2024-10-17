@@ -4,8 +4,10 @@ import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.fernandokh.koonol_management.ui.screen.CategoriesScreen
 import com.fernandokh.koonol_management.ui.screen.LoginScreen
 import com.fernandokh.koonol_management.ui.screen.MenuScreen
@@ -29,9 +31,15 @@ sealed class Screen(val route: String) {
     object Categories : Screen("categories")
     object Users : Screen("users")
     object Sellers : Screen("sellers")
-    object EditUser : Screen("users/edit")
+    object EditUser : Screen("users/edit/{userId}") {
+        fun createRoute(userId: String) = "users/edit/$userId"
+    }
+
+    object InfoUser : Screen("users/info/{userId}") {
+        fun createRoute(userId: String) = "users/info/$userId"
+    }
+
     object CreateUser : Screen("users/create")
-    object InfoUser : Screen("users/info")
 }
 
 @Composable
@@ -48,8 +56,16 @@ fun AppNavHost(
         composable(Screen.Categories.route) { CategoriesScreen(navController, drawerState) }
         composable(Screen.Profile.route) { ProfileScreen(navController, drawerState) }
         composable(Screen.Sellers.route) { SellersScreen(navController, drawerState) }
-        composable(Screen.EditUser.route) { EditUserScreen(navController) }
+        composable(
+            Screen.EditUser.route,
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            EditUserScreen(navController, backStackEntry.arguments?.getString("userId"))
+        }
+        composable(
+            Screen.InfoUser.route,
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry -> InfoUserScreen(navController, backStackEntry.arguments?.getString("userId")) }
         composable(Screen.CreateUser.route) { CreateUserScreen(navController) }
-        composable(Screen.InfoUser.route) { InfoUserScreen(navController) }
     }
 }
