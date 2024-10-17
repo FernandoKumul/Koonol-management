@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    kotlin("plugin.serialization") version "2.0.20"
 }
 
 android {
@@ -51,7 +50,15 @@ android {
 }
 
 dependencies {
-    implementation(libs.kotlinx.serialization.json)
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation (libs.converter.gson)
+    //Coroutines
+    implementation(libs.kotlinx.coroutines.android)
+    //Load images of Internet
+    implementation(libs.coil.compose)
+    implementation(libs.pagingCompose)
+
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
