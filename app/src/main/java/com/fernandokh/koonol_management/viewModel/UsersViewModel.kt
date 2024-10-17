@@ -13,10 +13,8 @@ import com.fernandokh.koonol_management.data.api.UserApiService
 import com.fernandokh.koonol_management.data.models.UserInModel
 import com.fernandokh.koonol_management.data.pagingSource.UserPagingSource
 import com.google.gson.Gson
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
