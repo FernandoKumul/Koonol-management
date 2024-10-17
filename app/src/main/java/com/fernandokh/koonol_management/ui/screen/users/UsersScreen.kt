@@ -11,11 +11,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -43,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -56,6 +63,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
@@ -75,9 +85,9 @@ fun UsersScreen(
     drawerState: DrawerState,
     viewModel: UserViewModel = viewModel()
 ) {
-    val users by viewModel.users.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+    val users = viewModel.userPagingFlow.collectAsLazyPagingItems()
     val totalRecords by viewModel.isTotalRecords.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     val context = LocalContext.current
     val toastMessage by viewModel.toastMessage.collectAsState()
@@ -109,16 +119,41 @@ fun UsersScreen(
         content = { innerPadding ->
             Column(Modifier.padding(innerPadding)) {
                 SearchTopBar(viewModel)
-                if (isLoading) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
+
+                when {
+                    //Carga inicial
+                    users.loadState.refresh is LoadState.Loading && (users.itemCount == 0 || isLoading) -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
-                } else {
-                    UsersList(users, navController, totalRecords, viewModel)
+
+                    //Estado vacio
+                    users.loadState.refresh is LoadState.NotLoading && users.itemCount == 0 -> {
+                        Text(
+                            text = "No se encontraron usuarios",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(12.dp, 8.dp, 12.dp, 0.dp)
+                        )
+                    }
+
+                    //Error
+                    users.loadState.hasError -> {
+                        Box(
+                            Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "Ha ocurrido un error")
+                        }
+                    }
+
+                    else -> {
+                        UsersList(users, navController, totalRecords, viewModel)
+                    }
                 }
             }
         },
@@ -155,7 +190,7 @@ fun SearchTopBar(viewModel: UserViewModel) {
 
 @Composable
 fun UsersList(
-    users: List<UserInModel>,
+    users: LazyPagingItems<UserInModel>,
     navController: NavHostController,
     total: Int,
     viewModel: UserViewModel
@@ -199,9 +234,53 @@ fun UsersList(
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(12.dp, 8.dp, 12.dp, 0.dp)
     )
+
     LazyColumn {
-        items(users) { user ->
-            CardUserItem(navController, user, options) { viewModel.onUserSelectedForDelete(user) }
+        items(users.itemCount) {
+            users[it]?.let { user ->
+                CardUserItem(
+                    navController,
+                    user,
+                    options
+                ) { viewModel.onUserSelectedForDelete(user) }
+            }
+        }
+
+        when {
+            users.loadState.append is LoadState.NotLoading && users.loadState.append.endOfPaginationReached -> {
+                item {
+                    Text(
+                        text = "Has llegado al final de la lista",
+                        modifier = Modifier.fillMaxWidth().padding(0.dp, 12.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            users.loadState.append is LoadState.Loading -> {
+                // Loader al final de la lista
+                item {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                    )
+                }
+            }
+
+            users.loadState.append is LoadState.Error -> {
+                // En caso de error al cargar más datos
+                item {
+                    Text(
+                        text = "Error al cargar más datos",
+                        modifier = Modifier.fillMaxWidth().padding(0.dp, 12.dp),
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
         }
     }
 }
@@ -333,7 +412,8 @@ fun UserMenu(
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL,
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL,
     device = "spec:parent=pixel_5"
 )
 @Composable

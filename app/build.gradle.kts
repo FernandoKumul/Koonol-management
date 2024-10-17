@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     //Load images of Internet
     implementation(libs.coil.compose)
+    implementation(libs.pagingCompose)
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.ktx)

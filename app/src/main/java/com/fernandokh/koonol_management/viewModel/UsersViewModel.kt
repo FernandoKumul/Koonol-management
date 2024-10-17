@@ -3,13 +3,20 @@ package com.fernandokh.koonol_management.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.fernandokh.koonol_management.data.ApiResponseError
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.UserApiService
 import com.fernandokh.koonol_management.data.models.UserInModel
+import com.fernandokh.koonol_management.data.pagingSource.UserPagingSource
 import com.google.gson.Gson
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
@@ -36,6 +43,10 @@ class UserViewModel : ViewModel() {
 
     private val _isLoadingDelete = MutableStateFlow(false)
     val isLoadingDelete:StateFlow<Boolean> = _isLoadingDelete
+
+    //Controla la páginación
+    private val _userPagingFlow = MutableStateFlow<PagingData<UserInModel>>(PagingData.empty())
+    val userPagingFlow:StateFlow<PagingData<UserInModel>> = _userPagingFlow
 
 
     private fun showToast(message: String) {
@@ -92,18 +103,17 @@ class UserViewModel : ViewModel() {
 
 
     fun searchUsers() {
+        _isLoadingDelete.value = true
         viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                val response = apiService.search(_isValueSearch.value, 1, 10, "newest", "all")
-                val data = response.data
-                _users.value = data?.results ?: emptyList()
-                _isTotalRecords.value = data?.count ?: 0
-                Log.i("dev-debug", "Usuarios obtenidos")
-            } catch (e: Exception) {
-                Log.i("error-api", e.message ?: "Ah ocurrido un error")
-            } finally {
-                _isLoading.value = false
+            val pager = Pager(PagingConfig(pageSize = 20, prefetchDistance = 3, initialLoadSize = 20)) {
+                UserPagingSource(apiService, _isValueSearch.value, "newest", "all") {
+                    _isTotalRecords.value = it
+                }
+            }.flow.cachedIn(viewModelScope)
+
+            pager.collect { pagingData ->
+                _userPagingFlow.value = pagingData
+                _isLoadingDelete.value = false
             }
         }
     }
