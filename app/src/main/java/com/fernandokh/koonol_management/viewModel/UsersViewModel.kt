@@ -12,6 +12,7 @@ import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.UserApiService
 import com.fernandokh.koonol_management.data.models.UserInModel
 import com.fernandokh.koonol_management.data.pagingSource.UserPagingSource
+import com.fernandokh.koonol_management.utils.SelectOption
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +20,19 @@ import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
 class UserViewModel : ViewModel() {
+
+    val optionsSort = listOf(
+        SelectOption("Más nuevos", "newest"),
+        SelectOption("Más viejos", "oldest"),
+        SelectOption("A-Z", "a-z"),
+        SelectOption("Z-A", "z-a"),
+    )
+
+    val optionsRol = listOf(
+        SelectOption("Todos", "all"),
+        SelectOption("Administradores", "admin"),
+        SelectOption("Gestores", "gestor"),
+    )
 
     private val apiService = RetrofitInstance.create(UserApiService::class.java)
     private val _users = MutableStateFlow<List<UserInModel>>(emptyList())
@@ -40,11 +54,18 @@ class UserViewModel : ViewModel() {
     val isUserToDelete: StateFlow<UserInModel?> = _isUserToDelete
 
     private val _isLoadingDelete = MutableStateFlow(false)
-    val isLoadingDelete:StateFlow<Boolean> = _isLoadingDelete
+    val isLoadingDelete: StateFlow<Boolean> = _isLoadingDelete
+
 
     //Controla la páginación
     private val _userPagingFlow = MutableStateFlow<PagingData<UserInModel>>(PagingData.empty())
-    val userPagingFlow:StateFlow<PagingData<UserInModel>> = _userPagingFlow
+    val userPagingFlow: StateFlow<PagingData<UserInModel>> = _userPagingFlow
+
+    private val _isSortOption = MutableStateFlow(optionsSort[0])
+    val isSortOption: StateFlow<SelectOption> = _isSortOption
+
+    private val _isRolFilterOption = MutableStateFlow(optionsRol[0])
+    val isRolFilterOption: StateFlow<SelectOption> = _isRolFilterOption
 
 
     private fun showToast(message: String) {
@@ -57,6 +78,12 @@ class UserViewModel : ViewModel() {
 
     fun changeValueSearch(newValue: String) {
         _isValueSearch.value = newValue
+    }
+
+    fun changeFilters(sort: SelectOption, rol: SelectOption) {
+        _isSortOption.value = sort
+        _isRolFilterOption.value = rol
+        searchUsers()
     }
 
     fun onUserSelectedForDelete(user: UserInModel) {
@@ -103,11 +130,17 @@ class UserViewModel : ViewModel() {
     fun searchUsers() {
         _isLoadingDelete.value = true
         viewModelScope.launch {
-            val pager = Pager(PagingConfig(pageSize = 20, prefetchDistance = 3, initialLoadSize = 20)) {
-                UserPagingSource(apiService, _isValueSearch.value, "newest", "all") {
-                    _isTotalRecords.value = it
-                }
-            }.flow.cachedIn(viewModelScope)
+            val pager =
+                Pager(PagingConfig(pageSize = 20, prefetchDistance = 3, initialLoadSize = 20)) {
+                    UserPagingSource(
+                        apiService,
+                        _isValueSearch.value,
+                        _isSortOption.value.value,
+                        _isRolFilterOption.value.value
+                    ) {
+                        _isTotalRecords.value = it
+                    }
+                }.flow.cachedIn(viewModelScope)
 
             pager.collect { pagingData ->
                 _userPagingFlow.value = pagingData

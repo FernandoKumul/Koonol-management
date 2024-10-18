@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -65,6 +67,8 @@ import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.data.models.UserInModel
 import com.fernandokh.koonol_management.ui.components.router.TopBarMenuTitle
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
+import com.fernandokh.koonol_management.ui.components.shared.CustomSelect
+import com.fernandokh.koonol_management.ui.components.shared.DialogC
 import com.fernandokh.koonol_management.ui.components.shared.SearchBarC
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 import com.fernandokh.koonol_management.utils.MenuItem
@@ -156,6 +160,7 @@ fun UsersScreen(
 @Composable
 fun SearchTopBar(viewModel: UserViewModel) {
     val isValueSearch by viewModel.isValueSearch.collectAsState()
+    var filtersOpen by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier.padding(12.dp, 0.dp),
@@ -170,13 +175,62 @@ fun SearchTopBar(viewModel: UserViewModel) {
         )
         IconButton(
             modifier = Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp),
-            onClick = {}
+            onClick = { filtersOpen = true }
         ) {
             Icon(
                 modifier = Modifier.size(28.dp),
                 painter = painterResource(R.drawable.baseline_filter_list_alt_24),
                 contentDescription = "ic_filter"
             )
+        }
+    }
+
+    FiltersDialog(filtersOpen, onDismiss = { filtersOpen = false }, viewModel)
+}
+
+@Composable
+fun FiltersDialog(open: Boolean, onDismiss: () -> Unit, viewModel: UserViewModel) {
+    val isSortOption by viewModel.isSortOption.collectAsState()
+    val isRolFilterOption by viewModel.isRolFilterOption.collectAsState()
+
+
+    if (open) {
+        var sortOptionCurrent by remember { mutableStateOf(isSortOption) }
+        var rolOptionCurrent by remember { mutableStateOf(isRolFilterOption) }
+        DialogC(onDismissRequest = { onDismiss() }) {
+            Text(
+                "Filtros",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(Modifier.height(8.dp))
+
+            Text("Ordernar por", color = MaterialTheme.colorScheme.primary)
+            CustomSelect(
+                options = viewModel.optionsSort,
+                selectedOption = isSortOption,
+                onOptionSelected = {sortOptionCurrent = it}
+            )
+            Spacer(Modifier.height(12.dp))
+
+            Text("Roles", color = MaterialTheme.colorScheme.primary)
+            CustomSelect(
+                options = viewModel.optionsRol,
+                selectedOption = isRolFilterOption,
+                onOptionSelected = {rolOptionCurrent = it}
+            )
+            Spacer(Modifier.height(12.dp))
+
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Button(onClick = {
+                    viewModel.changeFilters(sortOptionCurrent, rolOptionCurrent)
+                    onDismiss()
+                }, Modifier.fillMaxWidth(0.8f)) {
+                    Text("Aplicar")
+                }
+            }
         }
     }
 }
@@ -244,7 +298,9 @@ fun UsersList(
                 item {
                     Text(
                         text = "Has llegado al final de la lista",
-                        modifier = Modifier.fillMaxWidth().padding(0.dp, 12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(0.dp, 12.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
@@ -268,7 +324,9 @@ fun UsersList(
                 item {
                     Text(
                         text = "Error al cargar más datos",
-                        modifier = Modifier.fillMaxWidth().padding(0.dp, 12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(0.dp, 12.dp),
                         color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center
                     )
