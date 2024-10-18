@@ -7,7 +7,7 @@ sealed interface MenuItem {
 
     data class Option(
         val name: String,
-        val icon: ImageVector,
+        val icon: ImageVector?,
         val color: Color,
         val enabled: Boolean = true
     ) : MenuItem
