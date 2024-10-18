@@ -1,6 +1,7 @@
 package com.fernandokh.koonol_management.data.api
 
 import com.fernandokh.koonol_management.data.ApiResponse
+import com.fernandokh.koonol_management.data.models.UserInModel
 import com.fernandokh.koonol_management.data.models.UserModel
 import com.fernandokh.koonol_management.data.models.UserSearchModel
 import retrofit2.http.DELETE
@@ -17,6 +18,9 @@ interface UserApiService {
         @Query("sort") sort: String,
         @Query("rol") rol: String,
     ): ApiResponse<UserSearchModel>
+
+    @GET("users/{id}")
+    suspend fun getUserById(@Path("id") id: String): ApiResponse<UserInModel>
 
     @DELETE("users/{id}")
     suspend fun deleteUserById(@Path("id") id: String): ApiResponse<UserModel>

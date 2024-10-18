@@ -1,4 +1,4 @@
-package com.fernandokh.koonol_management.viewModel
+package com.fernandokh.koonol_management.viewModel.users
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

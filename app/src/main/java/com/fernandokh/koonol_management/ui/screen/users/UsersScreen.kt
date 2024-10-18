@@ -74,7 +74,7 @@ import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 import com.fernandokh.koonol_management.utils.MenuItem
 import com.fernandokh.koonol_management.utils.MenuItem.Divider
 import com.fernandokh.koonol_management.utils.MenuItem.Option
-import com.fernandokh.koonol_management.viewModel.UserViewModel
+import com.fernandokh.koonol_management.viewModel.users.UserViewModel
 
 @Composable
 fun UsersScreen(
