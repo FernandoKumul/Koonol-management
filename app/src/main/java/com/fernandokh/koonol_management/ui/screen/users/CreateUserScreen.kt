@@ -1,7 +1,6 @@
 package com.fernandokh.koonol_management.ui.screen.users
 
 import android.content.res.Configuration
-import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
