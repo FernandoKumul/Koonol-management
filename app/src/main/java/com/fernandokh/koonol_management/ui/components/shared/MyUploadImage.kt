@@ -219,7 +219,8 @@ fun MyUploadImage(
             Icon(
                 modifier = Modifier.size(24.dp),
                 painter = painterResource(R.drawable.ic_edit_2_line),
-                contentDescription = "ic_filter"
+                contentDescription = "ic_filter",
+                tint = MaterialTheme.colorScheme.onPrimary
             )
 
             DropdownMenuC(

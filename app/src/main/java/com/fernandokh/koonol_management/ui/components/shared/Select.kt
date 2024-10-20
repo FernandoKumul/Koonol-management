@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,10 +30,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 import com.fernandokh.koonol_management.utils.SelectOption
 
@@ -78,35 +82,44 @@ fun CustomSelect(
         } else {
             Column {
                 TextButton(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onGloballyPositioned { coordinates ->
+                            buttonWidth = coordinates.size.width
+                        },
                     shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(0.dp, 12.dp),
                     onClick = { expanded = true }) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(selected.text, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            selected.text,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = if (selected.value == "") Color.Gray else MaterialTheme.colorScheme.onBackground
+                        )
                         Icon(
                             imageVector = Icons.Filled.KeyboardArrowDown,
                             contentDescription = "icon_arrow_down",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = MaterialTheme.colorScheme.outlineVariant
                         )
                     }
                 }
-                HorizontalDivider()
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
         }
 
         DropdownMenu(
-
             modifier = Modifier
                 .width(with(LocalDensity.current) { buttonWidth.toDp() })
                 .background(MaterialTheme.colorScheme.primaryContainer),
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            options.forEach { option ->
+            options.filter { it.value.isNotEmpty() }.forEach { option ->
                 DropdownMenuItem(onClick = {
                     selected = option
                     onOptionSelected(option)
@@ -124,7 +137,7 @@ fun CustomSelect(
     showBackground = true
 )
 @Composable
-fun SampleScreen() {
+fun PrevCustomSelect() {
     val options = listOf(
         SelectOption("Opcion 1", "1"),
         SelectOption("Opcion 2", "2"),
@@ -138,7 +151,7 @@ fun SampleScreen() {
                 options = options,
                 selectedOption = selectedOption,
                 onOptionSelected = { selectedOption = it },
-                fill = true
+                fill = false
             )
 
             Text(selectedOption.value)

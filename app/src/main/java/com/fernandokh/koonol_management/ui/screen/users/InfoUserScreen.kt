@@ -89,7 +89,7 @@ fun InfoUserScreen(navController: NavHostController, userId: String?, viewModel:
                     }
 
                     else -> {
-                        infoUser(isUser as UserInModel)
+                        InfoUser(isUser as UserInModel)
                     }
                 }
             }
@@ -98,7 +98,7 @@ fun InfoUserScreen(navController: NavHostController, userId: String?, viewModel:
 }
 
 @Composable
-fun infoUser(user: UserInModel) {
+fun InfoUser(user: UserInModel) {
     Spacer(modifier = Modifier.height(16.dp))
 
     if (user.photo != null) {
