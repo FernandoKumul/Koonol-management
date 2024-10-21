@@ -6,8 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.fernandokh.koonol_management.data.ApiResponseError
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.UserApiService
-import com.fernandokh.koonol_management.data.models.UserCreateModel
+import com.fernandokh.koonol_management.data.models.UserInModel
+import com.fernandokh.koonol_management.data.models.UserUpdateModel
 import com.fernandokh.koonol_management.utils.SelectOption
+import com.fernandokh.koonol_management.utils.formatIsoDateToDate
 import com.google.gson.Gson
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,31 +18,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
-data class FormErrors(
-    val nameError: String? = null,
-    val lastNameError: String? = null,
-    val emailError: String? = null,
-    val passwordError: String? = null,
-    val birthdayError: String? = null,
-    val rolError: String? = null,
-    val genderError: String? = null,
-    val phoneError: String? = null,
-) {
-    fun allErrors(): List<String?> {
-        return listOf(
-            nameError,
-            lastNameError,
-            emailError,
-            passwordError,
-            birthdayError,
-            rolError,
-            genderError,
-            phoneError
-        )
-    }
-}
-
-class CreateUserViewModel : ViewModel() {
+class EditUserViewModel : ViewModel() {
     val optionsRol = listOf(
         SelectOption("Selecciona un rol", ""),
         SelectOption("Administrador", "670318104d9824b4da0d9a9b"),
@@ -53,13 +31,21 @@ class CreateUserViewModel : ViewModel() {
         SelectOption("Fenemino", "female"),
         SelectOption("Otro", "other")
     )
+    private val emailPattern = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\$")
 
     private val apiService = RetrofitInstance.create(UserApiService::class.java)
+
+    private val _isUser = MutableStateFlow<UserInModel?>(null)
+    val isUser: StateFlow<UserInModel?> = _isUser
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
     private val _isShowDialog = MutableStateFlow(false)
     val isShowDialog: StateFlow<Boolean> = _isShowDialog
 
-    private val _isLoadingCreate = MutableStateFlow(false)
-    val isLoadingCreate: StateFlow<Boolean> = _isLoadingCreate
+    private val _isLoadingUpdate = MutableStateFlow(false)
+    val isLoadingUpdate: StateFlow<Boolean> = _isLoadingUpdate
 
     private val _isPhoto = MutableStateFlow<String?>(null)
     val isPhoto: StateFlow<String?> = _isPhoto
@@ -98,8 +84,6 @@ class CreateUserViewModel : ViewModel() {
     val formErrors: StateFlow<FormErrors> = _formErrors
 
     private val _dirtyForm = MutableStateFlow(false)
-
-    private val emailPattern = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\$")
 
     private fun showToast(message: String) {
         _toastMessage.value = message
@@ -178,15 +162,51 @@ class CreateUserViewModel : ViewModel() {
         _isShowDialog.value = true
     }
 
-    fun createUser() {
+    fun getUser(userId: String?) {
 
-        if (_dayOfBirth.value == null) {
+        if (userId == null) {
+            _isUser.value = null
+            _isLoading.value = false
             return
         }
-        val user = UserCreateModel(
+
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                val response = apiService.getUserById(userId)
+                _isUser.value = response.data
+                _isName.value = response.data?.name ?: ""
+                _lastName.value = response.data?.lastName ?: ""
+                _email.value = response.data?.email ?: ""
+                _isPhoto.value = response.data?.photo
+                _dayOfBirth.value = response.data?.birthday?.let { formatIsoDateToDate(it) } //Checar esto
+                _phone.value = response.data?.phoneNumber ?: ""
+                _rol.value = optionsRol.find { it.text == response.data?.rol?.name } ?: optionsRol[0]
+                _gender.value = optionsGender.find { it.value == response.data?.gender } ?: optionsGender[0]
+                Log.i("dev-debug", "Usuario obtenido con éxito: $userId")
+            } catch (e: HttpException) {
+                val errorResponse = e.response()
+                val errorBody = errorResponse?.errorBody()?.string()
+
+                val gson = Gson()
+                val error = gson.fromJson(errorBody, ApiResponseError::class.java)
+
+                Log.e("dev-debug", "Error Body: $error")
+                _isUser.value = null
+            } catch (e: Exception) {
+                Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
+                _isUser.value = null
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun updateUser() {
+        val user = UserUpdateModel(
             name = _isName.value.trim(),
             email = _email.value.trim(),
-            password = _password.value,
+            password = if (password.value.isEmpty()) null else _password.value,
             lastName = _lastName.value.trim(),
             photo = _isPhoto.value,
             phoneNumber = _phone.value,
@@ -194,12 +214,13 @@ class CreateUserViewModel : ViewModel() {
             gender = _gender.value.value,
             birthday = _dayOfBirth.value!!
         )
+        Log.i("dev-debug", user.toString())
 
         viewModelScope.launch {
             try {
-                _isLoadingCreate.value = true
-                apiService.createUser(user)
-                showToast("Usuario agregado con éxito")
+                _isLoadingUpdate.value = true
+                apiService.updateUser(_isUser.value?.id ?: "", user)
+                showToast("Usuario actualizado con éxito")
                 _navigationEvent.send(NavigationEvent.UserCreated)
             } catch (e: HttpException) {
                 val errorResponse = e.response()
@@ -214,7 +235,7 @@ class CreateUserViewModel : ViewModel() {
                 Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
                 showToast("Ocurrio un error al borrar")
             } finally {
-                _isLoadingCreate.value = false
+                _isLoadingUpdate.value = false
                 dismissDialog()
             }
         }
@@ -243,7 +264,8 @@ class CreateUserViewModel : ViewModel() {
         if (email.isBlank()) {
             _formErrors.value = _formErrors.value.copy(emailError = "El correo es requerido")
         } else if (!emailPattern.matches(email)) {
-            _formErrors.value = _formErrors.value.copy(emailError = "Ingresa el correo electrónico válido")
+            _formErrors.value =
+                _formErrors.value.copy(emailError = "Ingresa el correo electrónico válido")
         } else {
             _formErrors.value = _formErrors.value.copy(emailError = null)
         }
@@ -269,8 +291,8 @@ class CreateUserViewModel : ViewModel() {
 
     private fun validatePassword() {
         val password = _password.value
-        if (password.length < 3) {
-            _formErrors.value = _formErrors.value.copy(passwordError = "La contraseña es requerida")
+        if (password.length < 3 && password.isNotEmpty()) {
+            _formErrors.value = _formErrors.value.copy(passwordError = "La contraseña debe de tener al menos 3 caracteres")
         } else {
             _formErrors.value = _formErrors.value.copy(passwordError = null)
         }
@@ -279,7 +301,8 @@ class CreateUserViewModel : ViewModel() {
     private fun validateDayOfBirth() {
         val dayOfBirth = _dayOfBirth.value
         if (dayOfBirth == null) {
-            _formErrors.value = _formErrors.value.copy(birthdayError = "La fecha de nacimiento es requerida")
+            _formErrors.value =
+                _formErrors.value.copy(birthdayError = "La fecha de nacimiento es requerida")
         } else {
             _formErrors.value = _formErrors.value.copy(birthdayError = null)
         }
@@ -288,7 +311,7 @@ class CreateUserViewModel : ViewModel() {
     private fun validatePhoneNumber() {
         val phoneNumber = _phone.value
         if (phoneNumber.length < 10) {
-            _formErrors.value = _formErrors.value.copy(phoneError = "La contraseña debe de tener al menos 3 caracteres")
+            _formErrors.value = _formErrors.value.copy(phoneError = "La contraseña es requerida")
         } else {
             _formErrors.value = _formErrors.value.copy(phoneError = null)
         }
@@ -308,8 +331,4 @@ class CreateUserViewModel : ViewModel() {
 
         return _formErrors.value.allErrors().all { it === null }
     }
-}
-
-sealed class NavigationEvent {
-    object UserCreated : NavigationEvent()
 }

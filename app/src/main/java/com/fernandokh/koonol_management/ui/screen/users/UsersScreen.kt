@@ -343,7 +343,7 @@ fun CardUserItem(
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     Row(
-        Modifier.padding(16.dp, 20.dp),
+        Modifier.padding(16.dp, 14.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         if (user.photo != null) {
@@ -387,8 +387,7 @@ fun CardUserItem(
         }
         IconButton(
             modifier = Modifier
-                .size(32.dp)
-                .align(Alignment.CenterVertically),
+                .size(32.dp),
             onClick = { menuOpen = true }
         ) {
             Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "options")

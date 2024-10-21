@@ -47,7 +47,11 @@ import com.fernandokh.koonol_management.utils.formatIsoDateToLocalDate
 import com.fernandokh.koonol_management.viewModel.users.InfoUsersViewModel
 
 @Composable
-fun InfoUserScreen(navController: NavHostController, userId: String?, viewModel: InfoUsersViewModel = viewModel()) {
+fun InfoUserScreen(
+    navController: NavHostController,
+    userId: String?,
+    viewModel: InfoUsersViewModel = viewModel()
+) {
 
     val isUser by viewModel.isUser.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -140,7 +144,7 @@ fun InfoUser(user: UserInModel) {
         InformationField(
             "Día de nacimiento",
             formatIsoDateToLocalDate(user.birthday),
-            imageVector =  Icons.Filled.DateRange
+            imageVector = Icons.Filled.DateRange
         )
         Spacer(Modifier.height(24.dp))
         InformationField("Género", formatGender(user.gender))
@@ -174,7 +178,9 @@ fun InformationField(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text, modifier = Modifier.padding(0.dp, 6.dp, 0.dp, 4.dp).weight(1f))
+            Text(text, modifier = Modifier
+                .padding(0.dp, 6.dp, 0.dp, 4.dp)
+                .weight(1f))
             if (imageVector != null) {
                 Icon(
                     imageVector = imageVector,

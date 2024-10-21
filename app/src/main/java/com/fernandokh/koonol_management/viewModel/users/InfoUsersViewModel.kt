@@ -46,7 +46,7 @@ class InfoUsersViewModel : ViewModel() {
                 Log.e("dev-debug", "Error Body: $error")
                 _isUser.value = null
             } catch (e: Exception) {
-                Log.i("dev-debug", e.message ?: "Ah ocurrido un error")
+                Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
                 _isUser.value = null
             } finally {
                 _isLoading.value = false
