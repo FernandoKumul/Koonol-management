@@ -35,6 +35,7 @@ class UserPagingSource(
                 nextKey = if (users.isEmpty()) null else currentPage + 1
             )
         } catch (e: Exception) {
+            Log.e("dev-debug", "Error paginación ${e.message}")
             LoadResult.Error(e)
         }
     }
