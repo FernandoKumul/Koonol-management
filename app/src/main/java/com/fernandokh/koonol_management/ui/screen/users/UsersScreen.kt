@@ -3,7 +3,6 @@ package com.fernandokh.koonol_management.ui.screen.users
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,20 +10,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -62,15 +60,19 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
+import com.fernandokh.koonol_management.data.models.RolModel
 import com.fernandokh.koonol_management.data.models.UserInModel
 import com.fernandokh.koonol_management.ui.components.router.TopBarMenuTitle
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
+import com.fernandokh.koonol_management.ui.components.shared.CustomSelect
+import com.fernandokh.koonol_management.ui.components.shared.DialogC
+import com.fernandokh.koonol_management.ui.components.shared.DropdownMenuC
 import com.fernandokh.koonol_management.ui.components.shared.SearchBarC
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 import com.fernandokh.koonol_management.utils.MenuItem
 import com.fernandokh.koonol_management.utils.MenuItem.Divider
 import com.fernandokh.koonol_management.utils.MenuItem.Option
-import com.fernandokh.koonol_management.viewModel.UserViewModel
+import com.fernandokh.koonol_management.viewModel.users.UserViewModel
 
 @Composable
 fun UsersScreen(
@@ -156,6 +158,7 @@ fun UsersScreen(
 @Composable
 fun SearchTopBar(viewModel: UserViewModel) {
     val isValueSearch by viewModel.isValueSearch.collectAsState()
+    var filtersOpen by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier.padding(12.dp, 0.dp),
@@ -170,13 +173,62 @@ fun SearchTopBar(viewModel: UserViewModel) {
         )
         IconButton(
             modifier = Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp),
-            onClick = {}
+            onClick = { filtersOpen = true }
         ) {
             Icon(
                 modifier = Modifier.size(28.dp),
                 painter = painterResource(R.drawable.baseline_filter_list_alt_24),
                 contentDescription = "ic_filter"
             )
+        }
+    }
+
+    FiltersDialog(filtersOpen, onDismiss = { filtersOpen = false }, viewModel)
+}
+
+@Composable
+fun FiltersDialog(open: Boolean, onDismiss: () -> Unit, viewModel: UserViewModel) {
+    val isSortOption by viewModel.isSortOption.collectAsState()
+    val isRolFilterOption by viewModel.isRolFilterOption.collectAsState()
+
+
+    if (open) {
+        var sortOptionCurrent by remember { mutableStateOf(isSortOption) }
+        var rolOptionCurrent by remember { mutableStateOf(isRolFilterOption) }
+        DialogC(onDismissRequest = { onDismiss() }) {
+            Text(
+                "Filtros",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(Modifier.height(8.dp))
+
+            Text("Ordernar por", color = MaterialTheme.colorScheme.primary)
+            CustomSelect(
+                options = viewModel.optionsSort,
+                selectedOption = isSortOption,
+                onOptionSelected = { sortOptionCurrent = it }
+            )
+            Spacer(Modifier.height(12.dp))
+
+            Text("Roles", color = MaterialTheme.colorScheme.primary)
+            CustomSelect(
+                options = viewModel.optionsRol,
+                selectedOption = isRolFilterOption,
+                onOptionSelected = { rolOptionCurrent = it }
+            )
+            Spacer(Modifier.height(12.dp))
+
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Button(onClick = {
+                    viewModel.changeFilters(sortOptionCurrent, rolOptionCurrent)
+                    onDismiss()
+                }, Modifier.fillMaxWidth(0.8f)) {
+                    Text("Aplicar")
+                }
+            }
         }
     }
 }
@@ -244,7 +296,9 @@ fun UsersList(
                 item {
                     Text(
                         text = "Has llegado al final de la lista",
-                        modifier = Modifier.fillMaxWidth().padding(0.dp, 12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(0.dp, 12.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
@@ -268,7 +322,9 @@ fun UsersList(
                 item {
                     Text(
                         text = "Error al cargar más datos",
-                        modifier = Modifier.fillMaxWidth().padding(0.dp, 12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(0.dp, 12.dp),
                         color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center
                     )
@@ -287,7 +343,7 @@ fun CardUserItem(
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     Row(
-        Modifier.padding(16.dp, 20.dp),
+        Modifier.padding(16.dp, 14.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         if (user.photo != null) {
@@ -309,27 +365,20 @@ fun CardUserItem(
             )
         }
         Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    text = "${user.name} ${user.lastName}",
-                    fontSize = 17.sp
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.onPrimaryContainer)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    text = user.rol.name,
-                    fontSize = 16.sp
-                )
-            }
+            Text(
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                text = "${user.name} ${user.lastName}",
+                fontSize = 17.sp
+            )
+            Text(
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = user.rol.name,
+                fontSize = 15.sp,
+                modifier = Modifier
+                    .wrapContentWidth(),
+                maxLines = 1
+            )
             Text(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 text = user.email,
@@ -338,19 +387,18 @@ fun CardUserItem(
         }
         IconButton(
             modifier = Modifier
-                .size(32.dp)
-                .align(Alignment.CenterVertically),
+                .size(32.dp),
             onClick = { menuOpen = true }
         ) {
             Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "options")
-            UserMenu(
+            DropdownMenuC(
                 expanded = menuOpen,
                 onDismiss = { menuOpen = false },
                 options = options,
                 onItemClick = { option ->
                     when (option.name) {
-                        "Más información" -> navController.navigate(Screen.InfoUser.route)
-                        "Editar" -> navController.navigate(Screen.EditUser.route)
+                        "Más información" -> navController.navigate(Screen.InfoUser.createRoute(user.id))
+                        "Editar" -> navController.navigate(Screen.EditUser.createRoute(user.id))
                         "Borrar" -> {
                             onSelectedToDelete()
                         }
@@ -359,50 +407,6 @@ fun CardUserItem(
         }
     }
     HorizontalDivider(thickness = 1.dp)
-}
-
-@Composable
-fun UserMenu(
-    expanded: Boolean,
-    onDismiss: () -> Unit,
-    onItemClick: (Option) -> Unit,
-    options: List<MenuItem>
-) {
-    DropdownMenu(
-        expanded = expanded,
-//        modifier = Modifier.shadow(),
-        onDismissRequest = { onDismiss() }
-//                Modifier.background(MaterialTheme.colorScheme.background)
-    ) {
-
-        options.forEach { option ->
-            when (option) {
-                is Option -> {
-                    DropdownMenuItem(
-                        onClick = {
-                            onDismiss()
-                            onItemClick(option)
-                        },
-                        text = {
-                            Column {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        tint = option.color,
-                                        imageVector = option.icon,
-                                        contentDescription = option.name
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(text = option.name, color = option.color)
-                                }
-                            }
-                        }
-                    )
-                }
-
-                Divider -> HorizontalDivider()
-            }
-        }
-    }
 }
 
 @Preview(
@@ -415,5 +419,28 @@ fun PrevUsersScreen() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     KoonolmanagementTheme(dynamicColor = false) {
         UsersScreen(navController, drawerState)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PrevCardUserItem() {
+    val navController = rememberNavController()
+    val user = UserInModel(
+        id = "dfd",
+        photo = null,
+        phoneNumber = "8989898",
+        gender = "male",
+        lastName = "Jose Fernando",
+        birthday = "2020-08-23",
+        name = "Kumul Herrera",
+        email = "Fernando.kh2003@gmail.com",
+        updateDate = "dfjdkf",
+        creationDate = "dfkjdjfd",
+        password = "dkjfjdf",
+        rol = RolModel(id = "dfd", name = "Administrador")
+    )
+    KoonolmanagementTheme(dynamicColor = false) {
+        CardUserItem(navController, user, emptyList(), {})
     }
 }
