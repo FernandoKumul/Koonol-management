@@ -1,6 +1,7 @@
 package com.fernandokh.koonol_management.ui.screen.users
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,13 +19,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,6 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.fernandokh.koonol_management.R
+import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
 import com.fernandokh.koonol_management.ui.components.shared.CustomDateField
@@ -41,17 +42,38 @@ import com.fernandokh.koonol_management.ui.components.shared.CustomTextField
 import com.fernandokh.koonol_management.ui.components.shared.MyUploadImage
 import com.fernandokh.koonol_management.ui.components.shared.PasswordInput
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
-import com.fernandokh.koonol_management.utils.SelectOption
 import com.fernandokh.koonol_management.viewModel.users.CreateUserViewModel
+import com.fernandokh.koonol_management.viewModel.users.NavigationEvent
+import java.io.File
 
 @Composable
 fun CreateUserScreen(navController: NavHostController, viewModel: CreateUserViewModel = viewModel()) {
-    //val context = LocalContext.current
-    //val cacheDir: File = context.cacheDir
+    val context = LocalContext.current
+    val cacheDir: File = context.cacheDir
 
-    var imageUrl by remember { mutableStateOf<String?>(null) }
+    val imageUrl by viewModel.isPhoto.collectAsState()
     val isLoadingCreate by viewModel.isLoadingCreate.collectAsState()
     val isShowDialog by viewModel.isShowDialog.collectAsState()
+
+    val toastMessage by viewModel.toastMessage.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                is NavigationEvent.UserCreated -> {
+                    navController.navigate(Screen.Users.route)
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(toastMessage) {
+        toastMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            viewModel.resetToastMessage()
+        }
+
+    }
 
     Scaffold(
         topBar = { TopBarGoBack("Crear Usuario", navController) },
@@ -75,11 +97,11 @@ fun CreateUserScreen(navController: NavHostController, viewModel: CreateUserView
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 MyUploadImage(
-                    //directory = File(cacheDir, "images"),
+                    directory = File(cacheDir, "images"),
                     url = imageUrl,
-                    onSetImage = { imageUrl = it })
+                    onSetImage = { viewModel.onPhotoChange(it) })
                 Spacer(modifier = Modifier.height(20.dp))
-                FormUser()
+                FormUser(viewModel)
 
                 if (isShowDialog) {
                     AlertDialogC(
@@ -97,28 +119,17 @@ fun CreateUserScreen(navController: NavHostController, viewModel: CreateUserView
 }
 
 @Composable
-private fun FormUser () {
-    val optionsRol = listOf(
-        SelectOption("Selecciona un rol", ""),
-        SelectOption("Administrador", "670318104d9824b4da0d9a9b"),
-        SelectOption("Gestor", "6704214d834d7e5203cc834d")
-    )
+private fun FormUser (viewModel: CreateUserViewModel) {
 
-    val optionsGender = listOf(
-        SelectOption("Selecciona un género", ""),
-        SelectOption("Masculino", "male"),
-        SelectOption("Fenemino", "female"),
-        SelectOption("Otro", "other")
-    )
 
-    var rol by remember { mutableStateOf(optionsRol[0]) }
-    var name by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var dayOfBirth by remember { mutableStateOf<String?>(null) }
-    var gender by remember { mutableStateOf(optionsGender[0]) }
-    var phone by remember { mutableStateOf("") }
+    val rol by viewModel.rol.collectAsState()
+    val name by viewModel.isName.collectAsState()
+    val lastName by viewModel.lastName.collectAsState()
+    val email by viewModel.email.collectAsState()
+    val password by viewModel.password.collectAsState()
+    val dayOfBirth by viewModel.dayOfBirth.collectAsState()
+    val gender by viewModel.gender.collectAsState()
+    val phone by viewModel.phone.collectAsState()
 
     Column(
         modifier = Modifier
@@ -134,44 +145,44 @@ private fun FormUser () {
 
         Text("Rol", color = MaterialTheme.colorScheme.onSurfaceVariant)
         CustomSelect(
-            options = optionsRol,
+            options = viewModel.optionsRol,
             fill = false,
             selectedOption = rol,
-            onOptionSelected = { rol = it }
+            onOptionSelected = { viewModel.onRolChange(it) }
         )
         Spacer(Modifier.height(16.dp))
 
         Text("Nombre", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(name, { name = it }, "Ingresa tu nombre")
+        CustomTextField(name, { viewModel.onNameChange(it) }, "Ingresa tu nombre")
         Spacer(Modifier.height(16.dp))
 
         Text("Apellido", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(lastName, { lastName = it }, "Ingresa tu apellido")
+        CustomTextField(lastName, { viewModel.onLastNameChange(it) }, "Ingresa tu apellido")
         Spacer(Modifier.height(16.dp))
 
         Text("Correo electrónico", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(email, { email = it }, "ejemplo@gmail.com", KeyboardType.Email)
+        CustomTextField(email, { viewModel.onEmailChange(it) }, "ejemplo@gmail.com", KeyboardType.Email)
         Spacer(Modifier.height(16.dp))
 
         Text("Contraseña", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        PasswordInput(password, { password = it }, "Ingresa una contraseña segura")
+        PasswordInput(password, { viewModel.onPasswordChange(it) }, "Ingresa una contraseña segura")
         Spacer(Modifier.height(16.dp))
 
         Text("Día de nacimiento", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomDateField({ dayOfBirth = it }, dayOfBirth)
+        CustomDateField({ viewModel.onDayOfBirthChange(it) }, dayOfBirth)
         Spacer(Modifier.height(16.dp))
 
         Text("Género", color = MaterialTheme.colorScheme.onSurfaceVariant)
         CustomSelect(
-            options = optionsGender,
+            options = viewModel.optionsGender,
             fill = false,
             selectedOption = gender,
-            onOptionSelected = { gender = it }
+            onOptionSelected = { viewModel.onGenderChange(it) }
         )
         Spacer(Modifier.height(16.dp))
 
         Text("Número de celular", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(phone, { phone = it }, "999 123 45678", KeyboardType.Phone)
+        CustomTextField(phone, { viewModel.onPhoneChange(it) }, "999 123 45678", KeyboardType.Phone)
     }
 
 }

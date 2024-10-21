@@ -3,7 +3,6 @@ package com.fernandokh.koonol_management.ui.screen.users
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -62,6 +60,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
+import com.fernandokh.koonol_management.data.models.RolModel
 import com.fernandokh.koonol_management.data.models.UserInModel
 import com.fernandokh.koonol_management.ui.components.router.TopBarMenuTitle
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
@@ -210,7 +209,7 @@ fun FiltersDialog(open: Boolean, onDismiss: () -> Unit, viewModel: UserViewModel
             CustomSelect(
                 options = viewModel.optionsSort,
                 selectedOption = isSortOption,
-                onOptionSelected = {sortOptionCurrent = it}
+                onOptionSelected = { sortOptionCurrent = it }
             )
             Spacer(Modifier.height(12.dp))
 
@@ -218,7 +217,7 @@ fun FiltersDialog(open: Boolean, onDismiss: () -> Unit, viewModel: UserViewModel
             CustomSelect(
                 options = viewModel.optionsRol,
                 selectedOption = isRolFilterOption,
-                onOptionSelected = {rolOptionCurrent = it}
+                onOptionSelected = { rolOptionCurrent = it }
             )
             Spacer(Modifier.height(12.dp))
 
@@ -366,27 +365,20 @@ fun CardUserItem(
             )
         }
         Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    text = "${user.name} ${user.lastName}",
-                    fontSize = 17.sp
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.onPrimaryContainer)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    text = user.rol.name,
-                    fontSize = 16.sp
-                )
-            }
+            Text(
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                text = "${user.name} ${user.lastName}",
+                fontSize = 17.sp
+            )
+            Text(
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = user.rol.name,
+                fontSize = 15.sp,
+                modifier = Modifier
+                    .wrapContentWidth(),
+                maxLines = 1
+            )
             Text(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 text = user.email,
@@ -428,5 +420,28 @@ fun PrevUsersScreen() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     KoonolmanagementTheme(dynamicColor = false) {
         UsersScreen(navController, drawerState)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PrevCardUserItem() {
+    val navController = rememberNavController()
+    val user = UserInModel(
+        id = "dfd",
+        photo = null,
+        phoneNumber = "8989898",
+        gender = "male",
+        lastName = "Jose Fernando",
+        birthday = "2020-08-23",
+        name = "Kumul Herrera",
+        email = "Fernando.kh2003@gmail.com",
+        updateDate = "dfjdkf",
+        creationDate = "dfkjdjfd",
+        password = "dkjfjdf",
+        rol = RolModel(id = "dfd", name = "Administrador")
+    )
+    KoonolmanagementTheme(dynamicColor = false) {
+        CardUserItem(navController, user, emptyList(), {})
     }
 }
