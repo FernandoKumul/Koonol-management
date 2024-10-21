@@ -39,7 +39,7 @@ import coil.compose.AsyncImage
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.utils.MenuItem.Divider
 import com.fernandokh.koonol_management.utils.MenuItem.Option
-import com.fernandokh.koonol_management.viewModel.users.MyUploadImageViewModel
+import com.fernandokh.koonol_management.viewModel.MyUploadImageViewModel
 import java.io.File
 
 @Composable

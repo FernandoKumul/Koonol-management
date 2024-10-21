@@ -1,4 +1,4 @@
-package com.fernandokh.koonol_management.viewModel.users
+package com.fernandokh.koonol_management.viewModel
 
 import android.content.Context
 import android.net.Uri

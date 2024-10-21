@@ -29,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -47,7 +48,10 @@ import com.fernandokh.koonol_management.viewModel.users.NavigationEvent
 import java.io.File
 
 @Composable
-fun CreateUserScreen(navController: NavHostController, viewModel: CreateUserViewModel = viewModel()) {
+fun CreateUserScreen(
+    navController: NavHostController,
+    viewModel: CreateUserViewModel = viewModel()
+) {
     val context = LocalContext.current
     val cacheDir: File = context.cacheDir
 
@@ -79,7 +83,12 @@ fun CreateUserScreen(navController: NavHostController, viewModel: CreateUserView
         topBar = { TopBarGoBack("Crear Usuario", navController) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { viewModel.showDialog() },
+                onClick = {
+                    val isValid = viewModel.isFormValid()
+                    if (isValid) {
+                        viewModel.showDialog()
+                    }
+                },
                 shape = CircleShape,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -93,7 +102,7 @@ fun CreateUserScreen(navController: NavHostController, viewModel: CreateUserView
                     .padding(innerPadding)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(0.dp, 16.dp),
+                    .padding(0.dp, 16.dp, 0.dp, 40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 MyUploadImage(
@@ -119,9 +128,9 @@ fun CreateUserScreen(navController: NavHostController, viewModel: CreateUserView
 }
 
 @Composable
-private fun FormUser (viewModel: CreateUserViewModel) {
+private fun FormUser(viewModel: CreateUserViewModel) {
 
-
+    val formErrors by viewModel.formErrors.collectAsState()
     val rol by viewModel.rol.collectAsState()
     val name by viewModel.isName.collectAsState()
     val lastName by viewModel.lastName.collectAsState()
@@ -141,8 +150,6 @@ private fun FormUser (viewModel: CreateUserViewModel) {
             .padding(16.dp, 24.dp)
             .fillMaxWidth(0.8f)
     ) {
-
-
         Text("Rol", color = MaterialTheme.colorScheme.onSurfaceVariant)
         CustomSelect(
             options = viewModel.optionsRol,
@@ -150,26 +157,73 @@ private fun FormUser (viewModel: CreateUserViewModel) {
             selectedOption = rol,
             onOptionSelected = { viewModel.onRolChange(it) }
         )
+        if (formErrors.rolError != null) {
+            Text(
+                text = formErrors.rolError!!,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp
+            )
+        }
         Spacer(Modifier.height(16.dp))
 
         Text("Nombre", color = MaterialTheme.colorScheme.onSurfaceVariant)
         CustomTextField(name, { viewModel.onNameChange(it) }, "Ingresa tu nombre")
+        if (formErrors.nameError != null) {
+            Text(
+                text = formErrors.nameError!!,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp
+            )
+        }
         Spacer(Modifier.height(16.dp))
 
         Text("Apellido", color = MaterialTheme.colorScheme.onSurfaceVariant)
         CustomTextField(lastName, { viewModel.onLastNameChange(it) }, "Ingresa tu apellido")
+        if (formErrors.lastNameError != null) {
+            Text(
+                text = formErrors.lastNameError!!,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp
+            )
+        }
         Spacer(Modifier.height(16.dp))
 
         Text("Correo electrónico", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(email, { viewModel.onEmailChange(it) }, "ejemplo@gmail.com", KeyboardType.Email)
+        CustomTextField(
+            email,
+            { viewModel.onEmailChange(it) },
+            "ejemplo@gmail.com",
+            KeyboardType.Email
+        )
+        if (formErrors.emailError != null) {
+            Text(
+                text = formErrors.emailError!!,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp
+            )
+        }
         Spacer(Modifier.height(16.dp))
 
         Text("Contraseña", color = MaterialTheme.colorScheme.onSurfaceVariant)
         PasswordInput(password, { viewModel.onPasswordChange(it) }, "Ingresa una contraseña segura")
+        if (formErrors.passwordError != null) {
+            Text(
+                text = formErrors.passwordError!!,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp
+            )
+        }
         Spacer(Modifier.height(16.dp))
 
         Text("Día de nacimiento", color = MaterialTheme.colorScheme.onSurfaceVariant)
         CustomDateField({ viewModel.onDayOfBirthChange(it) }, dayOfBirth)
+        if (formErrors.birthdayError != null) {
+            Text(
+                text = formErrors.birthdayError!!,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp
+            )
+        }
         Spacer(Modifier.height(16.dp))
 
         Text("Género", color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -179,10 +233,24 @@ private fun FormUser (viewModel: CreateUserViewModel) {
             selectedOption = gender,
             onOptionSelected = { viewModel.onGenderChange(it) }
         )
+        if (formErrors.genderError != null) {
+            Text(
+                text = formErrors.genderError!!,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp
+            )
+        }
         Spacer(Modifier.height(16.dp))
 
         Text("Número de celular", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(phone, { viewModel.onPhoneChange(it) }, "999 123 45678", KeyboardType.Phone)
+        CustomTextField(phone, { viewModel.onPhoneChange(it) }, "9991234567", KeyboardType.Phone)
+        if (formErrors.phoneError != null) {
+            Text(
+                text = formErrors.phoneError!!,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp
+            )
+        }
     }
 
 }
