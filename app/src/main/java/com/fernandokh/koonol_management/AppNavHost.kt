@@ -3,6 +3,7 @@ package com.fernandokh.koonol_management
 import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -39,7 +40,7 @@ fun AppNavHost(
     modifier: Modifier = Modifier, navController: NavHostController, drawerState: DrawerState
 ) {
     NavHost(navController, startDestination = Screen.Login.route, modifier = modifier) {
-        composable(Screen.Login.route) { LoginScreen(navController) }
+        composable(Screen.Login.route) { LoginScreen(navController, viewModel()) }
         composable(Screen.Menu.route) { MenuScreen(navController) }
         composable(Screen.Users.route) { UsersScreen(navController, drawerState) }
         composable(Screen.Tianguis.route) { TianguisScreen(navController, drawerState) }

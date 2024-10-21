@@ -18,10 +18,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -35,16 +37,19 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
+import com.fernandokh.koonol_management.viewModel.AuthViewModel
 
 @Composable
-fun LoginScreen(navController: NavHostController) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+fun LoginScreen(navController: NavHostController, viewModel: AuthViewModel = viewModel()) {
+    val accessToken by viewModel.accessToken.collectAsState()
+    val email: String by viewModel.email.collectAsState()
+    val password: String by viewModel.password.collectAsState()
     var passwordVisibility by remember { mutableStateOf(false) }
 
     val icon = if (passwordVisibility) {
@@ -95,7 +100,7 @@ fun LoginScreen(navController: NavHostController) {
                         )
                 ) {
                     Column(
-                        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.padding(bottom = 46.dp)
                     ) {
                         Text(
@@ -121,7 +126,8 @@ fun LoginScreen(navController: NavHostController) {
                         Text("Correo electrónico", color = MaterialTheme.colorScheme.secondary)
                         OutlinedTextField(
                             value = email,
-                            onValueChange = { email = it },
+                            onValueChange = { viewModel.changeEmail(it) },
+                            shape = RoundedCornerShape(15.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 24.dp),
@@ -132,7 +138,8 @@ fun LoginScreen(navController: NavHostController) {
                         Text("Contraseña", color = MaterialTheme.colorScheme.secondary)
                         OutlinedTextField(
                             value = password,
-                            onValueChange = { password = it },
+                            onValueChange = { viewModel.changePassword(it) },
+                            shape = RoundedCornerShape(15.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 16.dp),
@@ -154,7 +161,7 @@ fun LoginScreen(navController: NavHostController) {
                             else PasswordVisualTransformation()
                         )
                         Text(
-                            "¿Olvidaste tu contraseña?",
+                            accessToken,
                             color = MaterialTheme.colorScheme.secondary,
                             textAlign = TextAlign.End,
                             modifier = Modifier
@@ -163,10 +170,18 @@ fun LoginScreen(navController: NavHostController) {
                         )
                     }
                     Button(
-                        onClick = { navController.navigate(Screen.Menu.route) },
+                        onClick = {
+                            viewModel.login()
+                            if (accessToken.isNotEmpty()) {
+                                navController.navigate(Screen.Menu.route)
+                            }else{
+                                navController.navigate(Screen.Users.route)
+                            }
+                        },
+                        shape = RoundedCornerShape(20.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp)
+                            .height(60.dp)
                             .padding(horizontal = 32.dp)
                     ) {
                         Text("Empezar", fontSize = 20.sp)
