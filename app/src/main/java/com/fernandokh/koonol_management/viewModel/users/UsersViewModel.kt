@@ -7,13 +7,12 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.fernandokh.koonol_management.data.ApiResponseError
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.UserApiService
 import com.fernandokh.koonol_management.data.models.UserInModel
 import com.fernandokh.koonol_management.data.pagingSource.UserPagingSource
 import com.fernandokh.koonol_management.utils.SelectOption
-import com.google.gson.Gson
+import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -108,14 +107,9 @@ class UserViewModel : ViewModel() {
                 Log.i("dev-debug", "Usuario borrado con el id: $idUser")
                 showToast("Usuario borrado con éxito")
             } catch (e: HttpException) {
-                val errorResponse = e.response()
-                val errorBody = errorResponse?.errorBody()?.string()
-
-                val gson = Gson()
-                val error = gson.fromJson(errorBody, ApiResponseError::class.java)
-
-                Log.e("dev-debug", "Error Body: $errorBody")
-                showToast(error.message)
+                val errorMessage = evaluateHttpException(e)
+                Log.e("dev-debug", "Error api: $errorMessage")
+                showToast(errorMessage)
             } catch (e: Exception) {
                 Log.i("dev-debug", e.message ?: "Ah ocurrido un error")
                 showToast("Ocurrio un error al borrar")

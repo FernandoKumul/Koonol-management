@@ -3,11 +3,10 @@ package com.fernandokh.koonol_management.viewModel.users
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.fernandokh.koonol_management.data.ApiResponseError
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.UserApiService
 import com.fernandokh.koonol_management.data.models.UserInModel
-import com.google.gson.Gson
+import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -37,13 +36,8 @@ class InfoUsersViewModel : ViewModel() {
                 _isUser.value = response.data
                 Log.i("dev-debug", "Usuario obtenido con éxito: $userId")
             } catch (e: HttpException) {
-                val errorResponse = e.response()
-                val errorBody = errorResponse?.errorBody()?.string()
-
-                val gson = Gson()
-                val error = gson.fromJson(errorBody, ApiResponseError::class.java)
-
-                Log.e("dev-debug", "Error Body: $error")
+                val messageError = evaluateHttpException(e)
+                Log.e("dev-debug", "Error Api: $messageError")
                 _isUser.value = null
             } catch (e: Exception) {
                 Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
