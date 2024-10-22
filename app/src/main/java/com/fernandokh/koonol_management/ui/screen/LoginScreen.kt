@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +20,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,13 +47,24 @@ import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 import com.fernandokh.koonol_management.viewModel.AuthViewModel
+import com.fernandokh.koonol_management.viewModel.NavigationEvent
 
 @Composable
 fun LoginScreen(navController: NavHostController, viewModel: AuthViewModel = viewModel()) {
-    val accessToken by viewModel.accessToken.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     val email: String by viewModel.email.collectAsState()
     val password: String by viewModel.password.collectAsState()
     var passwordVisibility by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                is NavigationEvent.AuthSuccess -> {
+                    navController.navigate(Screen.Menu.route)
+                }
+            }
+        }
+    }
 
     val icon = if (passwordVisibility) {
         painterResource(id = R.drawable.baseline_visibility_24)
@@ -161,7 +175,7 @@ fun LoginScreen(navController: NavHostController, viewModel: AuthViewModel = vie
                             else PasswordVisualTransformation()
                         )
                         Text(
-                            accessToken,
+                            "¿Olvidaste tu contraseña?",
                             color = MaterialTheme.colorScheme.secondary,
                             textAlign = TextAlign.End,
                             modifier = Modifier
@@ -172,11 +186,6 @@ fun LoginScreen(navController: NavHostController, viewModel: AuthViewModel = vie
                     Button(
                         onClick = {
                             viewModel.login()
-                            if (accessToken.isNotEmpty()) {
-                                navController.navigate(Screen.Menu.route)
-                            }else{
-                                navController.navigate(Screen.Users.route)
-                            }
                         },
                         shape = RoundedCornerShape(20.dp),
                         modifier = Modifier
@@ -184,7 +193,14 @@ fun LoginScreen(navController: NavHostController, viewModel: AuthViewModel = vie
                             .height(60.dp)
                             .padding(horizontal = 32.dp)
                     ) {
-                        Text("Empezar", fontSize = 20.sp)
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        } else {
+                            Text("Empezar", fontSize = 20.sp)
+                        }
                     }
                 }
             }

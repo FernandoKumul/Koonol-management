@@ -48,7 +48,7 @@ fun AppNavHost(
     modifier: Modifier = Modifier, navController: NavHostController, drawerState: DrawerState
 ) {
     NavHost(navController, startDestination = Screen.Login.route, modifier = modifier) {
-        composable(Screen.Login.route) { LoginScreen(navController, viewModel()) }
+        composable(Screen.Login.route) { LoginScreen(navController) }
         composable(Screen.Menu.route) { MenuScreen(navController) }
         composable(Screen.Users.route) { UsersScreen(navController, drawerState) }
         composable(Screen.Tianguis.route) { TianguisScreen(navController, drawerState) }
