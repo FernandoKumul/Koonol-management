@@ -33,6 +33,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,6 +43,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.components.router.RouteListMenu
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 import com.fernandokh.koonol_management.utils.routes
@@ -52,7 +54,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
-
+        val tokenManager = TokenManager(applicationContext)
         enableEdgeToEdge()
         setContent {
             KoonolmanagementTheme {
@@ -73,7 +75,9 @@ class MainActivity : ComponentActivity() {
                     {
                         KoonolmanagementTheme(dynamicColor = false) {
                 Surface (color = MaterialTheme.colorScheme.background) {
-                    MyApp()
+                    MyApp(
+                        tokenManager = tokenManager
+                    )
                     }
                 }
             }
@@ -84,7 +88,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyApp() {
+fun MyApp(
+    tokenManager: TokenManager
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
@@ -98,7 +104,7 @@ fun MyApp() {
         },
         gesturesEnabled = enabledMenu(navBackStackEntry?.destination?.route)
     ) {
-        AppNavHost(navController = navController, drawerState = drawerState)
+        AppNavHost(navController = navController, drawerState = drawerState, tokenManager = tokenManager)
     }
 }
 
@@ -191,7 +197,9 @@ fun UserDetails() {
 @Preview(showBackground = true)
 @Composable
 fun PrevMyApp() {
-    MyApp()
+    MyApp(
+        tokenManager = TokenManager(LocalContext.current)
+    )
 }
 
 @Preview(showBackground = true, showSystemUi = false)

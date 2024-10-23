@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -45,19 +46,26 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
+import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 import com.fernandokh.koonol_management.viewModel.AuthViewModel
+import com.fernandokh.koonol_management.viewModel.AuthViewModelFactory
 import com.fernandokh.koonol_management.viewModel.NavigationEvent
 
 @Composable
-fun LoginScreen(navController: NavHostController, viewModel: AuthViewModel = viewModel()) {
-    val isLoading by viewModel.isLoading.collectAsState()
-    val email: String by viewModel.email.collectAsState()
-    val password: String by viewModel.password.collectAsState()
+fun LoginScreen(navController: NavHostController, tokenManager: TokenManager) {
+
+    val authViewModel: AuthViewModel = viewModel(
+        factory = AuthViewModelFactory(tokenManager)
+    )
+
+    val isLoading by authViewModel.isLoading.collectAsState()
+    val email: String by authViewModel.email.collectAsState()
+    val password: String by authViewModel.password.collectAsState()
     var passwordVisibility by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.navigationEvent.collect { event ->
+        authViewModel.navigationEvent.collect { event ->
             when (event) {
                 is NavigationEvent.AuthSuccess -> {
                     navController.navigate(Screen.Menu.route)
@@ -140,7 +148,7 @@ fun LoginScreen(navController: NavHostController, viewModel: AuthViewModel = vie
                         Text("Correo electrónico", color = MaterialTheme.colorScheme.secondary)
                         OutlinedTextField(
                             value = email,
-                            onValueChange = { viewModel.changeEmail(it) },
+                            onValueChange = { authViewModel.changeEmail(it) },
                             shape = RoundedCornerShape(15.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -152,7 +160,7 @@ fun LoginScreen(navController: NavHostController, viewModel: AuthViewModel = vie
                         Text("Contraseña", color = MaterialTheme.colorScheme.secondary)
                         OutlinedTextField(
                             value = password,
-                            onValueChange = { viewModel.changePassword(it) },
+                            onValueChange = { authViewModel.changePassword(it) },
                             shape = RoundedCornerShape(15.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -182,10 +190,11 @@ fun LoginScreen(navController: NavHostController, viewModel: AuthViewModel = vie
                                 .fillMaxWidth()
                                 .padding(bottom = 32.dp)
                         )
+
                     }
                     Button(
                         onClick = {
-                            viewModel.login()
+                            authViewModel.login()
                         },
                         shape = RoundedCornerShape(20.dp),
                         modifier = Modifier
@@ -214,7 +223,8 @@ fun LoginScreen(navController: NavHostController, viewModel: AuthViewModel = vie
 fun LoginScreenPreview() {
     KoonolmanagementTheme(dynamicColor = false) {
         LoginScreen(
-            navController = rememberNavController()
+            navController = rememberNavController(),
+            tokenManager = TokenManager(LocalContext.current)
         )
     }
 }

@@ -3,12 +3,12 @@ package com.fernandokh.koonol_management
 import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.screen.CategoriesScreen
 import com.fernandokh.koonol_management.ui.screen.LoginScreen
 import com.fernandokh.koonol_management.ui.screen.MenuScreen
@@ -45,11 +45,11 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun AppNavHost(
-    modifier: Modifier = Modifier, navController: NavHostController, drawerState: DrawerState
+    modifier: Modifier = Modifier, navController: NavHostController, drawerState: DrawerState, tokenManager: TokenManager
 ) {
     NavHost(navController, startDestination = Screen.Login.route, modifier = modifier) {
-        composable(Screen.Login.route) { LoginScreen(navController) }
-        composable(Screen.Menu.route) { MenuScreen(navController) }
+        composable(Screen.Login.route) { LoginScreen(navController, tokenManager) }
+        composable(Screen.Menu.route) { MenuScreen(navController, tokenManager) }
         composable(Screen.Users.route) { UsersScreen(navController, drawerState) }
         composable(Screen.Tianguis.route) { TianguisScreen(navController, drawerState) }
         composable(Screen.SalesStalls.route) { SalesStallsScreen(navController, drawerState) }
