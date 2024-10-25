@@ -99,7 +99,7 @@ class SellersViewModel: ViewModel() {
                     return@launch
                 }
 
-                apiService.getSellerById(idSeller)
+                apiService.deleteSellerById(idSeller)
                 searchSellers()
                 Log.i("dev-debug", "Vendedor borrado con el id: $idSeller")
                 showToast("Vendedor borrado con éxito")

@@ -5,9 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.SellerApiService
-import com.fernandokh.koonol_management.data.api.UserApiService
 import com.fernandokh.koonol_management.data.models.SellerModel
-import com.fernandokh.koonol_management.data.models.UserInModel
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

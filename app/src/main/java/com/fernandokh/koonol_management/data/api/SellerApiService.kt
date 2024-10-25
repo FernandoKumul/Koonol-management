@@ -21,6 +21,6 @@ interface SellerApiService {
     @GET("sellers/{id}")
     suspend fun getSellerById(@Path("id") id: String): ApiResponse<SellerModel>
 
-    @DELETE("sellers")
+    @DELETE("sellers/{id}")
     suspend fun deleteSellerById(@Path("id") id: String): ApiResponse<SellerModel>
 }
