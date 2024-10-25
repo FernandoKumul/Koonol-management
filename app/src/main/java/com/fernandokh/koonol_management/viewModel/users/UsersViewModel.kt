@@ -34,8 +34,6 @@ class UserViewModel : ViewModel() {
     )
 
     private val apiService = RetrofitInstance.create(UserApiService::class.java)
-    private val _users = MutableStateFlow<List<UserInModel>>(emptyList())
-    val users: StateFlow<List<UserInModel>> = _users
 
     private val _toastMessage = MutableStateFlow<String?>(null)
     val toastMessage: StateFlow<String?> get() = _toastMessage

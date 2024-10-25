@@ -11,7 +11,7 @@ data class SellerModel(
     val photo: String?,
     val birthday: String,
     val gender: String,
-    val phoneNumber: String,
+    val phoneNumber: String?,
     val creationDate: String,
     val updateDate: String,
 )

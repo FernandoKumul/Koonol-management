@@ -137,7 +137,7 @@ private fun InfoSeller(seller: SellerModel) {
             Spacer(Modifier.height(24.dp))
             InformationField("Apellido", seller.lastName)
             Spacer(Modifier.height(24.dp))
-            InformationField("Correo electrónico", seller.email ?: "")
+            InformationField("Correo electrónico", seller.email ?: "Sin correo electrónico")
             Spacer(Modifier.height(24.dp))
             InformationField(
                 "Día de nacimiento",
@@ -147,7 +147,7 @@ private fun InfoSeller(seller: SellerModel) {
             Spacer(Modifier.height(24.dp))
             InformationField("Género", formatGender(seller.gender))
             Spacer(Modifier.height(24.dp))
-            InformationField("Número de celular", seller.phoneNumber)
+            InformationField("Número de celular", seller.phoneNumber ?: "Sin número")
         }
     }
 }
