@@ -3,20 +3,19 @@ package com.fernandokh.koonol_management.data.pagingSource
 import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.fernandokh.koonol_management.data.api.UserApiService
-import com.fernandokh.koonol_management.data.models.UserInModel
+import com.fernandokh.koonol_management.data.api.SellerApiService
+import com.fernandokh.koonol_management.data.models.SellerModel
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import retrofit2.HttpException
 
-class UserPagingSource(
-    private val apiService: UserApiService,
+class SellerPagingSource (
+    private val apiService: SellerApiService,
     private val search: String,
     private val sort: String,
-    private val rol: String,
+    private val gender: String,
     private val onUpdateTotal: (Int) -> Unit
-) : PagingSource<Int, UserInModel>() {
-
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UserInModel> {
+) : PagingSource<Int, SellerModel>() {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SellerModel> {
         return try {
             val currentPage = params.key ?: 1
 
@@ -25,7 +24,7 @@ class UserPagingSource(
                 limit = params.loadSize,
                 search = search,
                 sort = sort,
-                rol = rol
+                gender = gender
             )
 
             val users = response.data?.results ?: emptyList()
@@ -46,7 +45,7 @@ class UserPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Int, UserInModel>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, SellerModel>): Int? {
         return state.anchorPosition
     }
 }

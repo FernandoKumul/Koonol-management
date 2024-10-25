@@ -1,11 +1,9 @@
-package com.fernandokh.koonol_management.ui.screen.users
+package com.fernandokh.koonol_management.ui.screen.sellers
 
-import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,8 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,38 +27,35 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.fernandokh.koonol_management.R
-import com.fernandokh.koonol_management.data.models.UserInModel
+import com.fernandokh.koonol_management.data.models.SellerModel
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
-import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
+import com.fernandokh.koonol_management.ui.screen.users.InformationField
+import com.fernandokh.koonol_management.ui.screen.users.formatGender
 import com.fernandokh.koonol_management.utils.formatIsoDateToLocalDate
-import com.fernandokh.koonol_management.viewModel.users.InfoUsersViewModel
+import com.fernandokh.koonol_management.viewModel.sellers.InfoSellerViewModel
 
 @Composable
-fun InfoUserScreen(
+fun InfoSellersScreen(
     navController: NavHostController,
-    userId: String?,
-    viewModel: InfoUsersViewModel = viewModel()
+    sellerId: String?,
+    viewModel: InfoSellerViewModel = viewModel()
 ) {
-
-    val isUser by viewModel.isUser.collectAsState()
+    val isSeller by viewModel.isSeller.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.getUser(userId)
+        viewModel.getSeller(sellerId)
     }
 
     Scaffold(
-        topBar = { TopBarGoBack("Usuario", navController) },
+        topBar = { TopBarGoBack("Vendedor", navController) },
         content = { innerPadding ->
             Column(
                 modifier = Modifier
@@ -81,7 +74,7 @@ fun InfoUserScreen(
                         }
                     }
 
-                    isUser == null -> {
+                    isSeller == null -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -94,7 +87,7 @@ fun InfoUserScreen(
                     }
 
                     else -> {
-                        InfoUser(isUser as UserInModel)
+                        InfoSeller(isSeller as SellerModel)
                     }
                 }
             }
@@ -103,17 +96,17 @@ fun InfoUserScreen(
 }
 
 @Composable
-private fun InfoUser(user: UserInModel) {
+private fun InfoSeller(seller: SellerModel) {
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
             .padding(0.dp, 16.dp, 0.dp, 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (user.photo != null) {
+        if (seller.photo != null) {
             AsyncImage(
-                model = user.photo,
-                contentDescription = "img_user",
+                model = seller.photo,
+                contentDescription = "img_seller",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .clip(CircleShape)
@@ -123,7 +116,7 @@ private fun InfoUser(user: UserInModel) {
         } else {
             Image(
                 painter = painterResource(R.drawable.default_user),
-                contentDescription = "img_user",
+                contentDescription = "img_seller",
                 modifier = Modifier
                     .clip(CircleShape)
                     .size(96.dp)
@@ -140,75 +133,21 @@ private fun InfoUser(user: UserInModel) {
                 .padding(16.dp, 24.dp)
                 .fillMaxWidth(0.8f)
         ) {
-            InformationField("Rol", user.rol.name)
+            InformationField("Nombre", seller.name)
             Spacer(Modifier.height(24.dp))
-            InformationField("Nombre", user.name)
+            InformationField("Apellido", seller.lastName)
             Spacer(Modifier.height(24.dp))
-            InformationField("Apellido", user.lastName)
-            Spacer(Modifier.height(24.dp))
-            InformationField("Correo electrónico", user.email)
+            InformationField("Correo electrónico", seller.email ?: "Sin correo electrónico")
             Spacer(Modifier.height(24.dp))
             InformationField(
                 "Día de nacimiento",
-                formatIsoDateToLocalDate(user.birthday),
+                formatIsoDateToLocalDate(seller.birthday),
                 imageVector = Icons.Filled.DateRange
             )
             Spacer(Modifier.height(24.dp))
-            InformationField("Género", formatGender(user.gender))
+            InformationField("Género", formatGender(seller.gender))
             Spacer(Modifier.height(24.dp))
-            InformationField("Número de celular", user.phoneNumber)
+            InformationField("Número de celular", seller.phoneNumber ?: "Sin número")
         }
-    }
-}
-
-fun formatGender(gender: String): String {
-    return when (gender) {
-        "male" -> "Masculino"
-        "female" -> "Femenino"
-        else -> "Otro"
-    }
-}
-
-@Composable
-fun InformationField(
-    title: String,
-    text: String,
-    modifier: Modifier = Modifier,
-    imageVector: ImageVector? = null
-) {
-    Column(modifier) {
-        Text(
-            title,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text, modifier = Modifier
-                .padding(0.dp, 6.dp, 0.dp, 4.dp)
-                .weight(1f))
-            if (imageVector != null) {
-                Icon(
-                    imageVector = imageVector,
-                    contentDescription = "icon",
-                    tint = MaterialTheme.colorScheme.outlineVariant
-
-                )
-            }
-        }
-        HorizontalDivider()
-    }
-}
-
-@Preview(
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
-)
-@Composable
-private fun PrevInfoUserScreen() {
-    val navController = rememberNavController()
-    KoonolmanagementTheme(dynamicColor = false) {
-        InfoUserScreen(navController, "Id")
     }
 }

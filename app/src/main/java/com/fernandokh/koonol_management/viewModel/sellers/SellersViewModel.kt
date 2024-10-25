@@ -1,4 +1,4 @@
-package com.fernandokh.koonol_management.viewModel.users
+package com.fernandokh.koonol_management.viewModel.sellers
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -8,9 +8,9 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.fernandokh.koonol_management.data.RetrofitInstance
-import com.fernandokh.koonol_management.data.api.UserApiService
-import com.fernandokh.koonol_management.data.models.UserInModel
-import com.fernandokh.koonol_management.data.pagingSource.UserPagingSource
+import com.fernandokh.koonol_management.data.api.SellerApiService
+import com.fernandokh.koonol_management.data.models.SellerModel
+import com.fernandokh.koonol_management.data.pagingSource.SellerPagingSource
 import com.fernandokh.koonol_management.utils.SelectOption
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,8 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
-class UserViewModel : ViewModel() {
-
+class SellersViewModel: ViewModel() {
     val optionsSort = listOf(
         SelectOption("Más nuevos", "newest"),
         SelectOption("Más viejos", "oldest"),
@@ -27,13 +26,14 @@ class UserViewModel : ViewModel() {
         SelectOption("Z-A", "z-a"),
     )
 
-    val optionsRol = listOf(
-        SelectOption("Todos", "all"),
-        SelectOption("Administradores", "admin"),
-        SelectOption("Gestores", "gestor"),
+    val optionsGender = listOf(
+        SelectOption("Todos", ""),
+        SelectOption("Masculino", "male"),
+        SelectOption("Femenino", "female"),
+        SelectOption("Otros", "other"),
     )
 
-    private val apiService = RetrofitInstance.create(UserApiService::class.java)
+    private val apiService = RetrofitInstance.create(SellerApiService::class.java)
 
     private val _toastMessage = MutableStateFlow<String?>(null)
     val toastMessage: StateFlow<String?> get() = _toastMessage
@@ -47,23 +47,20 @@ class UserViewModel : ViewModel() {
     private val _isTotalRecords = MutableStateFlow(0)
     val isTotalRecords: StateFlow<Int> = _isTotalRecords
 
-    private val _isUserToDelete = MutableStateFlow<UserInModel?>(null)
-    val isUserToDelete: StateFlow<UserInModel?> = _isUserToDelete
+    private val _isSellerToDelete = MutableStateFlow<SellerModel?>(null)
+    val isSellerToDelete: StateFlow<SellerModel?> = _isSellerToDelete
 
     private val _isLoadingDelete = MutableStateFlow(false)
     val isLoadingDelete: StateFlow<Boolean> = _isLoadingDelete
 
-
-    //Controla la páginación
-    private val _userPagingFlow = MutableStateFlow<PagingData<UserInModel>>(PagingData.empty())
-    val userPagingFlow: StateFlow<PagingData<UserInModel>> = _userPagingFlow
-
     private val _isSortOption = MutableStateFlow(optionsSort[0])
     val isSortOption: StateFlow<SelectOption> = _isSortOption
 
-    private val _isRolFilterOption = MutableStateFlow(optionsRol[0])
-    val isRolFilterOption: StateFlow<SelectOption> = _isRolFilterOption
+    private val _isGenderFilterOption = MutableStateFlow(optionsGender[0])
+    val isGenderFilterOption: StateFlow<SelectOption> = _isGenderFilterOption
 
+    private val _sellerPagingFlow = MutableStateFlow<PagingData<SellerModel>>(PagingData.empty())
+    val sellerPagingFlow: StateFlow<PagingData<SellerModel>> = _sellerPagingFlow
 
     private fun showToast(message: String) {
         _toastMessage.value = message
@@ -77,40 +74,40 @@ class UserViewModel : ViewModel() {
         _isValueSearch.value = newValue
     }
 
-    fun changeFilters(sort: SelectOption, rol: SelectOption) {
+    fun changeFilters(sort: SelectOption, gender: SelectOption) {
         _isSortOption.value = sort
-        _isRolFilterOption.value = rol
-        searchUsers()
+        _isGenderFilterOption.value = gender
+        searchSellers()
     }
 
-    fun onUserSelectedForDelete(user: UserInModel) {
-        _isUserToDelete.value = user
+    fun onSellerSelectedForDelete(seller: SellerModel) {
+        _isSellerToDelete.value = seller
     }
 
     fun dismissDialog() {
-        _isUserToDelete.value = null
+        _isSellerToDelete.value = null
     }
 
-    fun deleteUser() {
+    fun deleteSeller() {
         viewModelScope.launch {
             try {
                 _isLoadingDelete.value = true
-                val idUser = _isUserToDelete.value?.id ?: run {
-                    showToast("ID de usuario inválido")
+                val idSeller = _isSellerToDelete.value?.id ?: run {
+                    showToast("ID de vendedor inválido")
                     return@launch
                 }
 
-                apiService.deleteUserById(idUser)
-                searchUsers()
-                Log.i("dev-debug", "Usuario borrado con el id: $idUser")
-                showToast("Usuario borrado con éxito")
+                apiService.deleteSellerById(idSeller)
+                searchSellers()
+                Log.i("dev-debug", "Vendedor borrado con el id: $idSeller")
+                showToast("Vendedor borrado con éxito")
             } catch (e: HttpException) {
                 val errorMessage = evaluateHttpException(e)
-                Log.e("dev-debug", "Error api: $errorMessage")
+                Log.e("dev-debug", "Error al borrar el vendedor: $errorMessage")
                 showToast(errorMessage)
             } catch (e: Exception) {
                 Log.i("dev-debug", e.message ?: "Ah ocurrido un error")
-                showToast("Ocurrio un error al borrar")
+                showToast("Ocurrio un error al borrar el vendedor")
             } finally {
                 _isLoadingDelete.value = false
                 dismissDialog()
@@ -119,23 +116,23 @@ class UserViewModel : ViewModel() {
     }
 
 
-    fun searchUsers() {
+    fun searchSellers() {
         _isLoadingDelete.value = true
         viewModelScope.launch {
             val pager =
                 Pager(PagingConfig(pageSize = 20, prefetchDistance = 3, initialLoadSize = 20)) {
-                    UserPagingSource(
+                    SellerPagingSource(
                         apiService,
                         _isValueSearch.value,
                         _isSortOption.value.value,
-                        _isRolFilterOption.value.value
+                        _isGenderFilterOption.value.value
                     ) {
                         _isTotalRecords.value = it
                     }
                 }.flow.cachedIn(viewModelScope)
 
             pager.collect { pagingData ->
-                _userPagingFlow.value = pagingData
+                _sellerPagingFlow.value = pagingData
                 _isLoadingDelete.value = false
             }
         }

@@ -3,14 +3,13 @@ package com.fernandokh.koonol_management.viewModel.users
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.fernandokh.koonol_management.data.ApiResponseError
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.UserApiService
 import com.fernandokh.koonol_management.data.models.UserInModel
 import com.fernandokh.koonol_management.data.models.UserUpdateModel
 import com.fernandokh.koonol_management.utils.SelectOption
+import com.fernandokh.koonol_management.utils.evaluateHttpException
 import com.fernandokh.koonol_management.utils.formatIsoDateToDate
-import com.google.gson.Gson
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -185,13 +184,8 @@ class EditUserViewModel : ViewModel() {
                 _gender.value = optionsGender.find { it.value == response.data?.gender } ?: optionsGender[0]
                 Log.i("dev-debug", "Usuario obtenido con éxito: $userId")
             } catch (e: HttpException) {
-                val errorResponse = e.response()
-                val errorBody = errorResponse?.errorBody()?.string()
-
-                val gson = Gson()
-                val error = gson.fromJson(errorBody, ApiResponseError::class.java)
-
-                Log.e("dev-debug", "Error Body: $error")
+                val errorMessage = evaluateHttpException(e)
+                Log.e("dev-debug", "Error api: $errorMessage")
                 _isUser.value = null
             } catch (e: Exception) {
                 Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
@@ -223,14 +217,9 @@ class EditUserViewModel : ViewModel() {
                 showToast("Usuario actualizado con éxito")
                 _navigationEvent.send(NavigationEvent.UserCreated)
             } catch (e: HttpException) {
-                val errorResponse = e.response()
-                val errorBody = errorResponse?.errorBody()?.string()
-
-                val gson = Gson()
-                val error = gson.fromJson(errorBody, ApiResponseError::class.java)
-
-                Log.e("dev-debug", "Error Body: $errorBody")
-                showToast(error.message)
+                val errorMessage = evaluateHttpException(e)
+                Log.e("dev-debug", "Error api: $errorMessage")
+                showToast(errorMessage)
             } catch (e: Exception) {
                 Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
                 showToast("Ocurrio un error al borrar")
