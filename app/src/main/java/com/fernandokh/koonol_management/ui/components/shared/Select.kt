@@ -45,7 +45,10 @@ fun CustomSelect(
     options: List<SelectOption>,
     selectedOption: SelectOption,
     onOptionSelected: (SelectOption) -> Unit,
-    fill: Boolean = true
+    fill: Boolean = true,
+    error: Boolean = false,
+    errorMessage: String? = null,
+    noteMessage: String? = null
 ) {
     var expanded by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf(selectedOption) }
@@ -129,6 +132,19 @@ fun CustomSelect(
                 })
             }
         }
+    }
+    if (error) {
+        Text(
+            text = errorMessage ?: "Error",
+            color = MaterialTheme.colorScheme.error,
+            fontSize = 12.sp
+        )
+    } else if (noteMessage != null) {
+        Text(
+            text = noteMessage,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 12.sp
+        )
     }
 }
 

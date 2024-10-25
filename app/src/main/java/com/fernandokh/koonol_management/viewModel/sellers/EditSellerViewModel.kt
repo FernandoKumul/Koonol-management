@@ -1,12 +1,12 @@
-package com.fernandokh.koonol_management.viewModel.users
+package com.fernandokh.koonol_management.viewModel.sellers
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fernandokh.koonol_management.data.RetrofitInstance
-import com.fernandokh.koonol_management.data.api.UserApiService
-import com.fernandokh.koonol_management.data.models.UserInModel
-import com.fernandokh.koonol_management.data.models.UserUpdateModel
+import com.fernandokh.koonol_management.data.api.SellerApiService
+import com.fernandokh.koonol_management.data.models.SellerCreateEditModel
+import com.fernandokh.koonol_management.data.models.SellerModel
 import com.fernandokh.koonol_management.utils.SelectOption
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import com.fernandokh.koonol_management.utils.formatIsoDateToDate
@@ -17,13 +17,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
-class EditUserViewModel : ViewModel() {
-    val optionsRol = listOf(
-        SelectOption("Selecciona un rol", ""),
-        SelectOption("Administrador", "670318104d9824b4da0d9a9b"),
-        SelectOption("Gestor", "6704214d834d7e5203cc834d")
-    )
-
+class EditSellerViewModel : ViewModel() {
     val optionsGender = listOf(
         SelectOption("Selecciona un género", ""),
         SelectOption("Masculino", "male"),
@@ -32,10 +26,10 @@ class EditUserViewModel : ViewModel() {
     )
     private val emailPattern = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\$")
 
-    private val apiService = RetrofitInstance.create(UserApiService::class.java)
+    private val apiService = RetrofitInstance.create(SellerApiService::class.java)
 
-    private val _isUser = MutableStateFlow<UserInModel?>(null)
-    val isUser: StateFlow<UserInModel?> = _isUser
+    private val _isSeller = MutableStateFlow<SellerModel?>(null)
+    val isSeller: StateFlow<SellerModel?> = _isSeller
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -58,17 +52,11 @@ class EditUserViewModel : ViewModel() {
     private val _email = MutableStateFlow("")
     val email: StateFlow<String> = _email
 
-    private val _password = MutableStateFlow("")
-    val password: StateFlow<String> = _password
-
     private val _dayOfBirth = MutableStateFlow<String?>(null)
     val dayOfBirth: StateFlow<String?> = _dayOfBirth
 
     private val _phone = MutableStateFlow("")
     val phone: StateFlow<String> = _phone
-
-    private val _rol = MutableStateFlow(optionsRol[0])
-    val rol: StateFlow<SelectOption> = _rol
 
     private val _gender = MutableStateFlow(optionsGender[0])
     val gender: StateFlow<SelectOption> = _gender
@@ -113,13 +101,6 @@ class EditUserViewModel : ViewModel() {
         }
     }
 
-    fun onPasswordChange(value: String) {
-        _password.value = value
-        if (_dirtyForm.value) {
-            validatePassword()
-        }
-    }
-
     fun onDayOfBirthChange(value: String?) {
         _dayOfBirth.value = value
         if (_dirtyForm.value) {
@@ -141,13 +122,6 @@ class EditUserViewModel : ViewModel() {
         }
     }
 
-    fun onRolChange(value: SelectOption) {
-        _rol.value = value
-        if (_dirtyForm.value) {
-            validateRol()
-        }
-    }
-
     fun onPhotoChange(value: String?) {
         _isPhoto.value = value
     }
@@ -161,10 +135,10 @@ class EditUserViewModel : ViewModel() {
         _isShowDialog.value = true
     }
 
-    fun getUser(userId: String?) {
+    fun getSeller(sellerId: String?) {
 
-        if (userId == null) {
-            _isUser.value = null
+        if (sellerId == null) {
+            _isSeller.value = null
             _isLoading.value = false
             return
         }
@@ -172,57 +146,55 @@ class EditUserViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
-                val response = apiService.getUserById(userId)
-                _isUser.value = response.data
+                val response = apiService.getSellerById(sellerId)
+                _isSeller.value = response.data
                 _isName.value = response.data?.name ?: ""
                 _lastName.value = response.data?.lastName ?: ""
                 _email.value = response.data?.email ?: ""
                 _isPhoto.value = response.data?.photo
-                _dayOfBirth.value = response.data?.birthday?.let { formatIsoDateToDate(it) } //Checar esto
+                _dayOfBirth.value = response.data?.birthday?.let { formatIsoDateToDate(it) }
                 _phone.value = response.data?.phoneNumber ?: ""
-                _rol.value = optionsRol.find { it.text == response.data?.rol?.name } ?: optionsRol[0]
-                _gender.value = optionsGender.find { it.value == response.data?.gender } ?: optionsGender[0]
-                Log.i("dev-debug", "Usuario obtenido con éxito: $userId")
+                _gender.value =
+                    optionsGender.find { it.value == response.data?.gender } ?: optionsGender[0]
+                Log.i("dev-debug", "Vendedor obtenido con éxito: $sellerId")
             } catch (e: HttpException) {
                 val errorMessage = evaluateHttpException(e)
-                Log.e("dev-debug", "Error api: $errorMessage")
-                _isUser.value = null
+                Log.e("dev-debug", "Error al obtener el vendedor: $errorMessage")
+                _isSeller.value = null
             } catch (e: Exception) {
                 Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
-                _isUser.value = null
+                _isSeller.value = null
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    fun updateUser() {
-        val user = UserUpdateModel(
+    fun updateSeller() {
+        val seller = SellerCreateEditModel(
             name = _isName.value.trim(),
-            email = _email.value.trim(),
-            password = if (password.value.isEmpty()) null else _password.value,
+            email = _email.value.trim().ifBlank { null },
             lastName = _lastName.value.trim(),
             photo = _isPhoto.value,
-            phoneNumber = _phone.value,
-            rolId = _rol.value.value,
+            phoneNumber = _phone.value.ifBlank { null },
             gender = _gender.value.value,
             birthday = _dayOfBirth.value!!
         )
-        Log.i("dev-debug", user.toString())
+        Log.i("dev-debug", seller.toString())
 
         viewModelScope.launch {
             try {
                 _isLoadingUpdate.value = true
-                apiService.updateUser(_isUser.value?.id ?: "", user)
-                showToast("Usuario actualizado con éxito")
-                _navigationEvent.send(NavigationEvent.UserCreated)
+                apiService.updateSeller(_isSeller.value?.id ?: "", seller)
+                showToast("Vendedor actualizado con éxito")
+                _navigationEvent.send(NavigationEvent.Navigate)
             } catch (e: HttpException) {
                 val errorMessage = evaluateHttpException(e)
-                Log.e("dev-debug", "Error api: $errorMessage")
+                Log.e("dev-debug", "Error al editar el vendedor: $errorMessage")
                 showToast(errorMessage)
             } catch (e: Exception) {
                 Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
-                showToast("Ocurrio un error al borrar")
+                showToast("Ocurrio un error al actualizar el vendedor")
             } finally {
                 _isLoadingUpdate.value = false
                 dismissDialog()
@@ -250,22 +222,11 @@ class EditUserViewModel : ViewModel() {
 
     private fun validateEmail() {
         val email = _email.value
-        if (email.isBlank()) {
-            _formErrors.value = _formErrors.value.copy(emailError = "El correo es requerido")
-        } else if (!emailPattern.matches(email)) {
+        if (!emailPattern.matches(email) && email.isNotBlank()) {
             _formErrors.value =
                 _formErrors.value.copy(emailError = "Ingresa el correo electrónico válido")
         } else {
             _formErrors.value = _formErrors.value.copy(emailError = null)
-        }
-    }
-
-    private fun validateRol() {
-        val rol = _rol.value
-        if (rol.value == "") {
-            _formErrors.value = _formErrors.value.copy(rolError = "El rol es requerido")
-        } else {
-            _formErrors.value = _formErrors.value.copy(rolError = null)
         }
     }
 
@@ -275,15 +236,6 @@ class EditUserViewModel : ViewModel() {
             _formErrors.value = _formErrors.value.copy(genderError = "El género es requerido")
         } else {
             _formErrors.value = _formErrors.value.copy(genderError = null)
-        }
-    }
-
-    private fun validatePassword() {
-        val password = _password.value
-        if (password.length < 3 && password.isNotEmpty()) {
-            _formErrors.value = _formErrors.value.copy(passwordError = "La contraseña debe de tener al menos 3 caracteres")
-        } else {
-            _formErrors.value = _formErrors.value.copy(passwordError = null)
         }
     }
 
@@ -299,8 +251,9 @@ class EditUserViewModel : ViewModel() {
 
     private fun validatePhoneNumber() {
         val phoneNumber = _phone.value
-        if (phoneNumber.length < 10) {
-            _formErrors.value = _formErrors.value.copy(phoneError = "El número debe de tener al menos 10 números")
+        if (phoneNumber.length in 1..9) {
+            _formErrors.value =
+                _formErrors.value.copy(phoneError = "El número debe de tener al menos 10 números")
         } else {
             _formErrors.value = _formErrors.value.copy(phoneError = null)
         }
@@ -313,8 +266,6 @@ class EditUserViewModel : ViewModel() {
         validateLastName()
         validateEmail()
         validateGender()
-        validateRol()
-        validatePassword()
         validateDayOfBirth()
         validatePhoneNumber()
 
