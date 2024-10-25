@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
@@ -38,8 +39,11 @@ fun SearchBarC (
             onSearch = { onSearch() },
             placeholder = {
                 Text(
+                    modifier = Modifier.fillMaxWidth(),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    text = placeholder
+                    text = placeholder,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             },
             active = false,
@@ -57,7 +61,6 @@ fun SearchBarC (
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showSystemUi = false, showBackground = true)
 @Composable
 fun PrevSearchBarC() {

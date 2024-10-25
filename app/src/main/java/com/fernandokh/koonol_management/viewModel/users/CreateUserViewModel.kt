@@ -3,12 +3,11 @@ package com.fernandokh.koonol_management.viewModel.users
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.fernandokh.koonol_management.data.ApiResponseError
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.UserApiService
 import com.fernandokh.koonol_management.data.models.UserCreateModel
 import com.fernandokh.koonol_management.utils.SelectOption
-import com.google.gson.Gson
+import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -202,14 +201,8 @@ class CreateUserViewModel : ViewModel() {
                 showToast("Usuario agregado con éxito")
                 _navigationEvent.send(NavigationEvent.UserCreated)
             } catch (e: HttpException) {
-                val errorResponse = e.response()
-                val errorBody = errorResponse?.errorBody()?.string()
-
-                val gson = Gson()
-                val error = gson.fromJson(errorBody, ApiResponseError::class.java)
-
-                Log.e("dev-debug", "Error Body: $errorBody")
-                showToast(error.message)
+                val errorMessage = evaluateHttpException(e)
+                showToast(errorMessage)
             } catch (e: Exception) {
                 Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
                 showToast("Ocurrio un error al borrar")

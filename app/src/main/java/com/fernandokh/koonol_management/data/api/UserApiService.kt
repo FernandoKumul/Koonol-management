@@ -1,10 +1,10 @@
 package com.fernandokh.koonol_management.data.api
 
 import com.fernandokh.koonol_management.data.ApiResponse
+import com.fernandokh.koonol_management.data.models.SearchModel
 import com.fernandokh.koonol_management.data.models.UserCreateModel
 import com.fernandokh.koonol_management.data.models.UserInModel
 import com.fernandokh.koonol_management.data.models.UserModel
-import com.fernandokh.koonol_management.data.models.UserSearchModel
 import com.fernandokh.koonol_management.data.models.UserUpdateModel
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -22,7 +22,7 @@ interface UserApiService {
         @Query("limit") limit: Int,
         @Query("sort") sort: String,
         @Query("rol") rol: String,
-    ): ApiResponse<UserSearchModel>
+    ): ApiResponse<SearchModel<UserInModel>>
 
     @GET("users/{id}")
     suspend fun getUserById(@Path("id") id: String): ApiResponse<UserInModel>
