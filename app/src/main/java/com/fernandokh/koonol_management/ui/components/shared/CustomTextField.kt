@@ -22,7 +22,10 @@ fun CustomTextField(
     text: String,
     onTextChange: (String) -> Unit,
     placeholder: String = "",
-    keyboardType: KeyboardType = KeyboardType.Text
+    keyboardType: KeyboardType = KeyboardType.Text,
+    error: Boolean = false,
+    errorMessage: String? = null,
+    noteMessage: String? = null
 ) {
     val borderColor = MaterialTheme.colorScheme.outlineVariant
     BasicTextField(
@@ -63,4 +66,18 @@ fun CustomTextField(
             innerTextField()
         }
     )
+
+    if (error) {
+        Text(
+            text = errorMessage ?: "Error",
+            color = MaterialTheme.colorScheme.error,
+            fontSize = 12.sp
+        )
+    } else if (noteMessage != null) {
+        Text(
+            text = noteMessage,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 12.sp
+        )
+    }
 }

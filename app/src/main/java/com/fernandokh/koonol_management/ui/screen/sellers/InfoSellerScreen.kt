@@ -36,7 +36,7 @@ import coil.compose.AsyncImage
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.data.models.SellerModel
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
-import com.fernandokh.koonol_management.ui.screen.users.InformationField
+import com.fernandokh.koonol_management.ui.components.shared.InformationField
 import com.fernandokh.koonol_management.ui.screen.users.formatGender
 import com.fernandokh.koonol_management.utils.formatIsoDateToLocalDate
 import com.fernandokh.koonol_management.viewModel.sellers.InfoSellerViewModel
