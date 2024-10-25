@@ -28,6 +28,5 @@ fun MenuScreen(navController: NavHostController, tokenManager: TokenManager) {
         Button(onClick = { navController.navigate(Screen.Users.route) }) {
             Text("Usuarios")
         }
-        Text("Token: $accessToken")
     }
 }

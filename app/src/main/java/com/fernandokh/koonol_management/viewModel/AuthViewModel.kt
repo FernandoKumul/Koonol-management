@@ -36,6 +36,9 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
     val accessToken: StateFlow<String?> = tokenManager.accessToken
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    private val _toastMessage = MutableStateFlow<String?>(null)
+    val toastMessage: StateFlow<String?> get() = _toastMessage
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -56,6 +59,15 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
         _password.value = passwordData
     }
 
+    private fun showToast(message: String) {
+        _toastMessage.value = message
+    }
+
+    fun resetToastMessage() {
+        _toastMessage.value = null
+    }
+
+
     private fun isValidEmail(email: String): Boolean = Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
     private fun isValidPassword(password: String): Boolean = password.length >= 6
@@ -68,7 +80,7 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
                     val authModel = AuthModel(email = email.value, password = password.value)
                     val response = apiService.login(authModel)
                     if (response.data != null) {
-                        Log.i("dev-devug", "token: ${response.data.token}")
+                        Log.i("dev-debug", "token: ${response.data.token}")
                         tokenManager.saveAccessToken(response.data.token)
                         _navigationEvent.send(NavigationEvent.AuthSuccess)
                     } else {
@@ -78,15 +90,11 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
                     throw IllegalArgumentException("Email o contraseña inválidos")
                 }
             } catch (e: HttpException) {
-                val errorResponse = e.response()
-                val errorBody = errorResponse?.errorBody()?.string()
-
-                val gson = Gson()
-                val error = gson.fromJson(errorBody, ApiResponseError::class.java)
-
-                Log.e("dev-debug", "Error Body: $errorBody")
+                val errorBody = e.response()?.errorBody()?.string()
+                val apiResponseError = Gson().fromJson(errorBody, ApiResponseError::class.java)
+                showToast(apiResponseError.message)
             } catch (e: Exception) {
-                Log.i("dev-debug", e.message ?: "Ah ocurrido un error")
+                showToast("Error al iniciar sesión")
             } finally {
                 _isLoading.value = false
             }

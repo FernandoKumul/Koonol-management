@@ -1,5 +1,6 @@
 package com.fernandokh.koonol_management.ui.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,7 +60,9 @@ fun LoginScreen(navController: NavHostController, tokenManager: TokenManager) {
         factory = AuthViewModelFactory(tokenManager)
     )
 
+    val context = LocalContext.current
     val isLoading by authViewModel.isLoading.collectAsState()
+    val toastMessage by authViewModel.toastMessage.collectAsState()
     val email: String by authViewModel.email.collectAsState()
     val password: String by authViewModel.password.collectAsState()
     var passwordVisibility by remember { mutableStateOf(false) }
@@ -71,6 +74,13 @@ fun LoginScreen(navController: NavHostController, tokenManager: TokenManager) {
                     navController.navigate(Screen.Menu.route)
                 }
             }
+        }
+    }
+
+    LaunchedEffect(toastMessage) {
+        toastMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            authViewModel.resetToastMessage()
         }
     }
 
