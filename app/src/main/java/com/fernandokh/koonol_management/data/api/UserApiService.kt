@@ -9,6 +9,7 @@ import com.fernandokh.koonol_management.data.models.UserUpdateModel
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -35,4 +36,7 @@ interface UserApiService {
 
     @DELETE("users/{id}")
     suspend fun deleteUserById(@Path("id") id: String): ApiResponse<UserModel>
+
+    @GET("users/profile")
+    suspend fun getProfile(@Header("Authorization") authHeader: String): ApiResponse<UserInModel>
 }

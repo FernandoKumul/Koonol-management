@@ -11,11 +11,13 @@ import androidx.navigation.navArgument
 import com.fernandokh.koonol_management.ui.screen.CategoriesScreen
 import com.fernandokh.koonol_management.ui.screen.LoginScreen
 import com.fernandokh.koonol_management.ui.screen.MenuScreen
-import com.fernandokh.koonol_management.ui.screen.ProfileScreen
+import com.fernandokh.koonol_management.ui.screen.profile.ProfileScreen
 import com.fernandokh.koonol_management.ui.screen.PromotionsScreen
 import com.fernandokh.koonol_management.ui.screen.SalesStallsScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.SellersScreen
 import com.fernandokh.koonol_management.ui.screen.TianguisScreen
+import com.fernandokh.koonol_management.ui.screen.profile.ChangePasswordScreen
+import com.fernandokh.koonol_management.ui.screen.profile.EditProfileScreen
 import com.fernandokh.koonol_management.ui.screen.users.EditUserScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.CreateSellersScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.EditSellersScreen
@@ -28,6 +30,8 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Menu : Screen("menu")
     object Profile : Screen("profile")
+    object EditProfile : Screen("profile/edit")
+    object ChangePassword : Screen("change-password")
     object Tianguis : Screen("tianguis")
     object SalesStalls : Screen("sales-stalls")
     object Promotions : Screen("promotions")
@@ -64,6 +68,8 @@ fun AppNavHost(
         composable(Screen.Promotions.route) { PromotionsScreen(navController, drawerState) }
         composable(Screen.Categories.route) { CategoriesScreen(navController, drawerState) }
         composable(Screen.Profile.route) { ProfileScreen(navController, drawerState) }
+        composable(Screen.EditProfile.route) { EditProfileScreen(navController) }
+        composable(Screen.ChangePassword.route) { ChangePasswordScreen(navController) }
         composable(
             Screen.EditSeller.route,
             arguments = listOf(navArgument("sellerId") { type = NavType.StringType })
