@@ -4,7 +4,6 @@ import android.util.Log
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -42,7 +41,7 @@ fun formatIsoDateToDate(isoDate: String): String? {
     }
 }
 
-fun formatDateToDayMonthYear(isoDate: String, locale: Locale = Locale.getDefault()): String {
+fun formatDateToDayMonthYear(isoDate: String): String {
     return try {
         val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val outputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
