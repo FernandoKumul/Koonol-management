@@ -1,6 +1,7 @@
 package com.fernandokh.koonol_management.data.api
 
 import com.fernandokh.koonol_management.data.ApiResponse
+import com.fernandokh.koonol_management.data.models.ProfileEditModel
 import com.fernandokh.koonol_management.data.models.SearchModel
 import com.fernandokh.koonol_management.data.models.UserCreateModel
 import com.fernandokh.koonol_management.data.models.UserInModel
@@ -39,4 +40,10 @@ interface UserApiService {
 
     @GET("users/profile")
     suspend fun getProfile(@Header("Authorization") authHeader: String): ApiResponse<UserInModel>
+
+    @PUT("users/profile/")
+    suspend fun updateProfile(@Header("Authorization") authHeader: String, @Body profile: ProfileEditModel): ApiResponse<UserModel>
+
+    @PUT("users/profile/change-password")
+    suspend fun changePasswordProfile(@Header("Authorization") authHeader: String): ApiResponse<Boolean>
 }

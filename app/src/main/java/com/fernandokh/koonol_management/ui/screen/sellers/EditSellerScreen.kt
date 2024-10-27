@@ -39,8 +39,8 @@ import com.fernandokh.koonol_management.ui.components.shared.CustomDateField
 import com.fernandokh.koonol_management.ui.components.shared.CustomSelect
 import com.fernandokh.koonol_management.ui.components.shared.CustomTextField
 import com.fernandokh.koonol_management.ui.components.shared.MyUploadImage
+import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.viewModel.sellers.EditSellerViewModel
-import com.fernandokh.koonol_management.viewModel.sellers.NavigationEvent
 import java.io.File
 
 @Composable

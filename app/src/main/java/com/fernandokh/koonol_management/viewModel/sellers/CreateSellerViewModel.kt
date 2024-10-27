@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.SellerApiService
 import com.fernandokh.koonol_management.data.models.SellerCreateEditModel
+import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.utils.SelectOption
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.channels.Channel
@@ -250,8 +251,4 @@ class CreateSellerViewModel : ViewModel() {
         return _formErrors.value.allErrors().all { it === null }
     }
 
-}
-
-sealed class NavigationEvent {
-    data object Navigate : NavigationEvent()
 }
