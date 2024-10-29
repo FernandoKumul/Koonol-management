@@ -33,9 +33,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
+import com.fernandokh.koonol_management.utils.formatDateToDayMonthYear
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,7 +90,7 @@ fun CustomDateField(
         ) {
             if (validDate) {
                 Text(
-                    text = defaultDateISO ?: placeholder,
+                    text = defaultDateISO?.let { formatDateToDayMonthYear(it) } ?: placeholder,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal,
                     color = if (defaultDateISO == null) Color.Gray else MaterialTheme.colorScheme.onBackground
@@ -130,7 +132,7 @@ fun CustomDateField(
                     val selectedDateMillis = datePickerState.selectedDateMillis
                     val selectedDateISO = selectedDateMillis?.let {
                         val selectedDate = Instant.ofEpochMilli(it)
-                            .atZone(ZoneId.systemDefault())
+                            .atZone(ZoneOffset.UTC)
                             .toLocalDate()
                         selectedDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
                     }
