@@ -14,6 +14,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -55,6 +56,16 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
 
     private val _password = MutableStateFlow("")
     val password: StateFlow<String> = _password
+
+    init {
+        viewModelScope.launch {
+            val savedEmail = tokenManager.email.first()
+            val savedPassword = tokenManager.password.first()
+
+            _email.value = savedEmail
+            _password.value = savedPassword
+        }
+    }
 
     fun changeEmail(emailData: String) {
         _email.value = emailData
@@ -119,6 +130,29 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
             } finally {
                 _isLoading.value = false
                 dismissDialog()
+            }
+        }
+    }
+
+    fun loginStorage(emailS: String, passwordS: String){
+        viewModelScope.launch {
+            try {
+                if (isValidEmail(emailS) && isValidPassword(passwordS)) {
+                    val authModel = AuthModel(email = emailS, password = passwordS)
+                    val response = apiService.login(authModel)
+                    Log.i("dev-debug", "token: ${response.data?.token}")
+                    response.data?.let { tokenManager.saveAccessToken(it.token) }
+                    handleCredentials(emailS, passwordS)
+                    _navigationEvent.send(NavigationEvent.AuthSuccess)
+                } else {
+                    throw IllegalArgumentException("Email o contraseña inválidos")
+                }
+            } catch (e: HttpException) {
+                val errorMessage = evaluateHttpException(e)
+                showToast(errorMessage)
+            } catch (e: Exception) {
+                Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
+                showToast("Credenciales no validas")
             }
         }
     }
