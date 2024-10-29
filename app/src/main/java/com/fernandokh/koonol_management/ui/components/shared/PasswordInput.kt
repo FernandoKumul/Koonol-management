@@ -37,7 +37,10 @@ fun PasswordInput(
     text: String,
     onTextChange: (String) -> Unit,
     placeholder: String = "",
-    showPasswordDefault: Boolean = false
+    showPasswordDefault: Boolean = false,
+    error: Boolean = false,
+    errorMessage: String? = null,
+    noteMessage: String? = null
 ) {
     val borderColor = MaterialTheme.colorScheme.outlineVariant
     var showPassword by remember { mutableStateOf(showPasswordDefault) }
@@ -97,4 +100,17 @@ fun PasswordInput(
             }
         }
     )
+    if (error) {
+        Text(
+            text = errorMessage ?: "Error",
+            color = MaterialTheme.colorScheme.error,
+            fontSize = 12.sp
+        )
+    } else if (noteMessage != null) {
+        Text(
+            text = noteMessage,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 12.sp
+        )
+    }
 }

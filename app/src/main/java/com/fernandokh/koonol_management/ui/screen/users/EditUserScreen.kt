@@ -190,37 +190,30 @@ private fun FormUser(viewModel: EditUserViewModel) {
             options = viewModel.optionsRol,
             fill = false,
             selectedOption = rol,
-            onOptionSelected = { viewModel.onRolChange(it) }
+            onOptionSelected = { viewModel.onRolChange(it) },
+            error = formErrors.rolError != null,
+            errorMessage = formErrors.rolError
         )
-        if (formErrors.rolError != null) {
-            Text(
-                text = formErrors.rolError!!,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp
-            )
-        }
         Spacer(Modifier.height(16.dp))
 
         Text("Nombre", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(name, { viewModel.onNameChange(it) }, "Ingresa tu nombre")
-        if (formErrors.nameError != null) {
-            Text(
-                text = formErrors.nameError!!,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp
-            )
-        }
+        CustomTextField(
+            name,
+            { viewModel.onNameChange(it) },
+            "Ingresa tu nombre",
+            error = formErrors.nameError != null,
+            errorMessage = formErrors.nameError
+        )
         Spacer(Modifier.height(16.dp))
 
         Text("Apellido", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(lastName, { viewModel.onLastNameChange(it) }, "Ingresa tu apellido")
-        if (formErrors.lastNameError != null) {
-            Text(
-                text = formErrors.lastNameError!!,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp
-            )
-        }
+        CustomTextField(
+            lastName,
+            { viewModel.onLastNameChange(it) },
+            "Ingresa tu apellido",
+            error = formErrors.lastNameError != null,
+            errorMessage = formErrors.lastNameError
+        )
         Spacer(Modifier.height(16.dp))
 
         Text("Correo electrónico", color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -228,43 +221,30 @@ private fun FormUser(viewModel: EditUserViewModel) {
             email,
             { viewModel.onEmailChange(it) },
             "ejemplo@gmail.com",
-            KeyboardType.Email
+            KeyboardType.Email,
+            error = formErrors.emailError != null,
+            errorMessage = formErrors.emailError
         )
-        if (formErrors.emailError != null) {
-            Text(
-                text = formErrors.emailError!!,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp
-            )
-        }
         Spacer(Modifier.height(16.dp))
 
         Text("Contraseña", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        PasswordInput(password, { viewModel.onPasswordChange(it) }, "Ingresa una contraseña segura")
-        if (formErrors.passwordError != null) {
-            Text(
-                text = formErrors.passwordError!!,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp
-            )
-        } else {
-            Text(
-                text = "Nota: Solo se cambiará la contraseña si llena este campo",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 12.sp
-            )
-        }
+        PasswordInput(
+            password,
+            { viewModel.onPasswordChange(it) },
+            "Ingresa una contraseña segura",
+            error = formErrors.passwordError != null,
+            errorMessage = formErrors.passwordError,
+            noteMessage = "Nota: Solo se cambiará la contraseña si llena este campo"
+        )
         Spacer(Modifier.height(16.dp))
 
         Text("Día de nacimiento", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomDateField({ viewModel.onDayOfBirthChange(it) }, dayOfBirth)
-        if (formErrors.birthdayError != null) {
-            Text(
-                text = formErrors.birthdayError!!,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp
-            )
-        }
+        CustomDateField(
+            { viewModel.onDayOfBirthChange(it) },
+            dayOfBirth,
+            error = formErrors.birthdayError != null,
+            errorMessage = formErrors.birthdayError
+        )
         Spacer(Modifier.height(16.dp))
 
         Text("Género", color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -272,26 +252,21 @@ private fun FormUser(viewModel: EditUserViewModel) {
             options = viewModel.optionsGender,
             fill = false,
             selectedOption = gender,
-            onOptionSelected = { viewModel.onGenderChange(it) }
+            onOptionSelected = { viewModel.onGenderChange(it) },
+            error = formErrors.genderError != null,
+            errorMessage = formErrors.genderError
         )
-        if (formErrors.genderError != null) {
-            Text(
-                text = formErrors.genderError!!,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp
-            )
-        }
         Spacer(Modifier.height(16.dp))
 
         Text("Número de celular", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(phone, { viewModel.onPhoneChange(it) }, "9991234567", KeyboardType.Phone)
-        if (formErrors.phoneError != null) {
-            Text(
-                text = formErrors.phoneError!!,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp
-            )
-        }
+        CustomTextField(
+            phone,
+            { viewModel.onPhoneChange(it) },
+            "9991234567",
+            KeyboardType.Phone,
+            error = formErrors.phoneError != null,
+            errorMessage = formErrors.phoneError
+        )
     }
 
 }

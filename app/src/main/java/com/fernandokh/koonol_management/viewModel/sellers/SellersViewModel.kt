@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
-class SellersViewModel: ViewModel() {
+class SellersViewModel : ViewModel() {
     val optionsSort = listOf(
         SelectOption("Más nuevos", "newest"),
         SelectOption("Más viejos", "oldest"),
@@ -27,7 +27,7 @@ class SellersViewModel: ViewModel() {
     )
 
     val optionsGender = listOf(
-        SelectOption("Todos", ""),
+        SelectOption("Todos", "all"),
         SelectOption("Masculino", "male"),
         SelectOption("Femenino", "female"),
         SelectOption("Otros", "other"),
@@ -125,7 +125,7 @@ class SellersViewModel: ViewModel() {
                         apiService,
                         _isValueSearch.value,
                         _isSortOption.value.value,
-                        _isGenderFilterOption.value.value
+                        if (_isGenderFilterOption.value.value == "all") "" else _isGenderFilterOption.value.value
                     ) {
                         _isTotalRecords.value = it
                     }

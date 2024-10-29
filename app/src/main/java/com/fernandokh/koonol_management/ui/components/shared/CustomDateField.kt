@@ -43,7 +43,10 @@ import java.time.format.DateTimeFormatter
 fun CustomDateField(
     onDateSelected: (String?) -> Unit,
     defaultDateISO: String? = null,
-    placeholder: String = "Selecciona una fecha"
+    placeholder: String = "Selecciona una fecha",
+    error: Boolean = false,
+    errorMessage: String? = null,
+    noteMessage: String? = null
 ) {
     var validDate = true
     val defaultDateMillis: Long? = defaultDateISO?.let {
@@ -104,6 +107,19 @@ fun CustomDateField(
                 tint = MaterialTheme.colorScheme.outlineVariant
             )
         }
+    }
+    if (error) {
+        Text(
+            text = errorMessage ?: "Error",
+            color = MaterialTheme.colorScheme.error,
+            fontSize = 12.sp
+        )
+    } else if (noteMessage != null) {
+        Text(
+            text = noteMessage,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 12.sp
+        )
     }
 
     if (isDatePickerVisible) {
