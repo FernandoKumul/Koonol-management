@@ -1,4 +1,4 @@
-package com.fernandokh.koonol_management.ui.screen.sellers
+package com.fernandokh.koonol_management.ui.screen.profile
 
 import android.widget.Toast
 import androidx.compose.foundation.border
@@ -40,16 +40,12 @@ import com.fernandokh.koonol_management.ui.components.shared.CustomSelect
 import com.fernandokh.koonol_management.ui.components.shared.CustomTextField
 import com.fernandokh.koonol_management.ui.components.shared.MyUploadImage
 import com.fernandokh.koonol_management.utils.NavigationEvent
-import com.fernandokh.koonol_management.viewModel.sellers.EditSellerViewModel
+import com.fernandokh.koonol_management.viewModel.profile.EditProfileViewModel
 import java.io.File
 
 @Composable
-fun EditSellersScreen(
-    navController: NavHostController,
-    sellerId: String?,
-    viewModel: EditSellerViewModel = viewModel()
-) {
-    val isSeller by viewModel.isSeller.collectAsState()
+fun EditProfileScreen(navController: NavHostController, viewModel: EditProfileViewModel = viewModel()) {
+    val isUser by viewModel.isUser.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
     val context = LocalContext.current
@@ -62,11 +58,11 @@ fun EditSellersScreen(
     val toastMessage by viewModel.toastMessage.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.getSeller(sellerId)
+        viewModel.getProfile()
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is NavigationEvent.Navigate -> {
-                    navController.navigate(Screen.Sellers.route)
+                    navController.navigate(Screen.Profile.route)
                 }
             }
         }
@@ -80,7 +76,7 @@ fun EditSellersScreen(
     }
 
     Scaffold(
-        topBar = { TopBarGoBack("Editar Vendedor", navController) },
+        topBar = { TopBarGoBack("Editar Perfil", navController) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -114,13 +110,13 @@ fun EditSellersScreen(
                         }
                     }
 
-                    isSeller == null -> {
+                    isUser == null -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "No se encontró el vendedor",
+                                text = "No se encontró el usuario",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
@@ -138,14 +134,14 @@ fun EditSellersScreen(
                                 url = imageUrl,
                                 onSetImage = { viewModel.onPhotoChange(it) })
                             Spacer(modifier = Modifier.height(20.dp))
-                            FormSeller(viewModel)
+                            FormUser(viewModel)
 
                             if (isShowDialog) {
                                 AlertDialogC(
-                                    dialogTitle = "Editar vendedor",
-                                    dialogText = "¿Estás seguro de los nuevos datos para el vendedor?",
+                                    dialogTitle = "Editar perfil",
+                                    dialogText = "¿Estás seguro de los nuevos datos de tu perfil?",
                                     onDismissRequest = { viewModel.dismissDialog() },
-                                    onConfirmation = { viewModel.updateSeller() },
+                                    onConfirmation = { viewModel.updateProfile() },
                                     loading = isLoadingUpdate
                                 )
                             }
@@ -155,20 +151,13 @@ fun EditSellersScreen(
             }
         },
     )
-
 }
 
-
 @Composable
-private fun FormSeller(viewModel: EditSellerViewModel) {
+private fun FormUser(viewModel: EditProfileViewModel) {
 
     val formErrors by viewModel.formErrors.collectAsState()
-    val name by viewModel.isName.collectAsState()
-    val lastName by viewModel.lastName.collectAsState()
-    val email by viewModel.email.collectAsState()
-    val dayOfBirth by viewModel.dayOfBirth.collectAsState()
-    val gender by viewModel.gender.collectAsState()
-    val phone by viewModel.phone.collectAsState()
+    val form by viewModel.formUser.collectAsState()
 
     Column(
         modifier = Modifier
@@ -182,7 +171,7 @@ private fun FormSeller(viewModel: EditSellerViewModel) {
     ) {
         Text("Nombre", color = MaterialTheme.colorScheme.onSurfaceVariant)
         CustomTextField(
-            name,
+            form.name,
             { viewModel.onNameChange(it) },
             "Ingresa tu nombre",
             error = formErrors.nameError != null,
@@ -192,7 +181,7 @@ private fun FormSeller(viewModel: EditSellerViewModel) {
 
         Text("Apellido", color = MaterialTheme.colorScheme.onSurfaceVariant)
         CustomTextField(
-            lastName,
+            form.lastName,
             { viewModel.onLastNameChange(it) },
             "Ingresa tu apellido",
             error = formErrors.lastNameError != null,
@@ -200,21 +189,10 @@ private fun FormSeller(viewModel: EditSellerViewModel) {
         )
         Spacer(Modifier.height(16.dp))
 
-        Text("Correo electrónico (opcional)", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(
-            email,
-            { viewModel.onEmailChange(it) },
-            "ejemplo@gmail.com",
-            KeyboardType.Email,
-            error = formErrors.emailError != null,
-            errorMessage = formErrors.emailError
-        )
-        Spacer(Modifier.height(16.dp))
-
         Text("Día de nacimiento", color = MaterialTheme.colorScheme.onSurfaceVariant)
         CustomDateField(
             { viewModel.onDayOfBirthChange(it) },
-            dayOfBirth,
+            form.birthday,
             error = formErrors.birthdayError != null,
             errorMessage = formErrors.birthdayError
         )
@@ -224,16 +202,16 @@ private fun FormSeller(viewModel: EditSellerViewModel) {
         CustomSelect(
             options = viewModel.optionsGender,
             fill = false,
-            selectedOption = gender,
+            selectedOption = form.gender,
             onOptionSelected = { viewModel.onGenderChange(it) },
             error = formErrors.genderError != null,
             errorMessage = formErrors.genderError
         )
         Spacer(Modifier.height(16.dp))
 
-        Text("Número de celular (opcional)", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("Número de celular", color = MaterialTheme.colorScheme.onSurfaceVariant)
         CustomTextField(
-            phone,
+            form.phone,
             { viewModel.onPhoneChange(it) },
             "9991234567",
             KeyboardType.Phone,
@@ -241,4 +219,5 @@ private fun FormSeller(viewModel: EditSellerViewModel) {
             errorMessage = formErrors.phoneError
         )
     }
+
 }

@@ -7,6 +7,7 @@ import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.SellerApiService
 import com.fernandokh.koonol_management.data.models.SellerCreateEditModel
 import com.fernandokh.koonol_management.data.models.SellerModel
+import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.utils.SelectOption
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import com.fernandokh.koonol_management.utils.formatIsoDateToDate
