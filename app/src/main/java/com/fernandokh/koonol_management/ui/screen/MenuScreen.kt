@@ -18,7 +18,6 @@ fun MenuScreen(navController: NavHostController, tokenManager: TokenManager) {
     val authViewModel: AuthViewModel = viewModel(
         factory = AuthViewModelFactory(tokenManager)
     )
-    val accessToken by authViewModel.accessToken.collectAsState()
     Column {
         Text("Menú")
 

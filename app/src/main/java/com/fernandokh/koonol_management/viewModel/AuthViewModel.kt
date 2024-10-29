@@ -5,12 +5,11 @@ import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.fernandokh.koonol_management.data.ApiResponseError
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.AuthApiService
 import com.fernandokh.koonol_management.data.models.AuthModel
 import com.fernandokh.koonol_management.data.repository.TokenManager
-import com.google.gson.Gson
+import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,8 +35,14 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
     val accessToken: StateFlow<String?> = tokenManager.accessToken
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    val rememberMe: StateFlow<Boolean> = tokenManager.rememberMe
+        .stateIn(viewModelScope, SharingStarted.Lazily, false)
+
     private val _toastMessage = MutableStateFlow<String?>(null)
     val toastMessage: StateFlow<String?> get() = _toastMessage
+
+    private val _isShowDialog = MutableStateFlow(false)
+    val isShowDialog: StateFlow<Boolean> = _isShowDialog
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -59,6 +64,22 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
         _password.value = passwordData
     }
 
+    fun handleRememberMe(checked: Boolean) {
+        viewModelScope.launch {
+            tokenManager.saveRememberMe(checked)
+        }
+    }
+
+    private fun handleCredentials(email: String, password: String) {
+        viewModelScope.launch {
+            if (rememberMe.value) {
+                tokenManager.saveCredentials(email, password)
+            } else {
+                tokenManager.clearCredentials()
+            }
+        }
+    }
+
     private fun showToast(message: String) {
         _toastMessage.value = message
     }
@@ -67,6 +88,9 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
         _toastMessage.value = null
     }
 
+    fun dismissDialog() {
+        _isShowDialog.value = false
+    }
 
     private fun isValidEmail(email: String): Boolean = Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
@@ -79,27 +103,26 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
                 if (isValidEmail(email.value) && isValidPassword(password.value)) {
                     val authModel = AuthModel(email = email.value, password = password.value)
                     val response = apiService.login(authModel)
-                    if (response.data != null) {
-                        Log.i("dev-debug", "token: ${response.data.token}")
-                        tokenManager.saveAccessToken(response.data.token)
-                        _navigationEvent.send(NavigationEvent.AuthSuccess)
-                    } else {
-                        throw IllegalArgumentException("Error al iniciar sesión")
-                    }
+                    Log.i("dev-debug", "token: ${response.data?.token}")
+                    response.data?.let { tokenManager.saveAccessToken(it.token) }
+                    handleCredentials(email.value, password.value)
+                    _navigationEvent.send(NavigationEvent.AuthSuccess)
                 } else {
                     throw IllegalArgumentException("Email o contraseña inválidos")
                 }
             } catch (e: HttpException) {
-                val errorBody = e.response()?.errorBody()?.string()
-                val apiResponseError = Gson().fromJson(errorBody, ApiResponseError::class.java)
-                showToast(apiResponseError.message)
+                val errorMessage = evaluateHttpException(e)
+                showToast(errorMessage)
             } catch (e: Exception) {
-                showToast("Error al iniciar sesión")
+                Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
+                showToast("Credenciales no validas")
             } finally {
                 _isLoading.value = false
+                dismissDialog()
             }
         }
     }
+
 }
 
 sealed class NavigationEvent {

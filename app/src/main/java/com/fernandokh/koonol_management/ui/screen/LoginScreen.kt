@@ -1,9 +1,11 @@
 package com.fernandokh.koonol_management.ui.screen
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -65,7 +68,8 @@ fun LoginScreen(navController: NavHostController, tokenManager: TokenManager) {
     val toastMessage by authViewModel.toastMessage.collectAsState()
     val email: String by authViewModel.email.collectAsState()
     val password: String by authViewModel.password.collectAsState()
-    var passwordVisibility by remember { mutableStateOf(false) }
+    val checked by authViewModel.rememberMe.collectAsState()
+    var passwordVisibility: Boolean by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         authViewModel.navigationEvent.collect { event ->
@@ -192,15 +196,10 @@ fun LoginScreen(navController: NavHostController, tokenManager: TokenManager) {
                             visualTransformation = if (passwordVisibility) VisualTransformation.None
                             else PasswordVisualTransformation()
                         )
-                        Text(
-                            "¿Olvidaste tu contraseña?",
-                            color = MaterialTheme.colorScheme.secondary,
-                            textAlign = TextAlign.End,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 32.dp)
+                        RememberMe(
+                            "Recuérdame: $checked", checked,
+                            onCheckedChange = { authViewModel.handleRememberMe(it) }
                         )
-
                     }
                     Button(
                         onClick = {
@@ -226,6 +225,23 @@ fun LoginScreen(navController: NavHostController, tokenManager: TokenManager) {
         },
     )
 
+}
+
+@Composable
+fun RememberMe(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier.padding(0.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+        )
+        Text(
+            text = label,
+            color = MaterialTheme.colorScheme.secondary
+        )
+    }
 }
 
 @Preview(showSystemUi = true, showBackground = true)
