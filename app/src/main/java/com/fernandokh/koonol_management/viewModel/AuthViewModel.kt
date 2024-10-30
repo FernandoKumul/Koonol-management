@@ -102,7 +102,7 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
 
     private fun isValidEmail(email: String): Boolean = Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
-    private fun isValidPassword(password: String): Boolean = password.length >= 6
+    private fun isValidPassword(password: String): Boolean = password.length >= 3
 
     fun login() {
         viewModelScope.launch {
