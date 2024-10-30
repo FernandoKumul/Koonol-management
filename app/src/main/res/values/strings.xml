@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Koonol-management</string>
+    <string name="title_route_users">Usuarios</string>
+    <string name="title_route_default">Menú</string>
+    <string name="file_provider">com.fernandokh.koonol_management.fileprovider</string>
 </resources>
