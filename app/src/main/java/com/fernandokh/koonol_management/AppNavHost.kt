@@ -8,8 +8,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.fernandokh.koonol_management.ui.screen.categories.CategoriesScreen
 import com.fernandokh.koonol_management.data.repository.TokenManager
-import com.fernandokh.koonol_management.ui.screen.CategoriesScreen
 import com.fernandokh.koonol_management.ui.screen.LoginScreen
 import com.fernandokh.koonol_management.ui.screen.MenuScreen
 import com.fernandokh.koonol_management.ui.screen.profile.ProfileScreen
@@ -17,6 +17,9 @@ import com.fernandokh.koonol_management.ui.screen.PromotionsScreen
 import com.fernandokh.koonol_management.ui.screen.SalesStallsScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.SellersScreen
 import com.fernandokh.koonol_management.ui.screen.TianguisScreen
+import com.fernandokh.koonol_management.ui.screen.categories.CreateCategoryScreen
+import com.fernandokh.koonol_management.ui.screen.categories.EditCategoryScreen
+import com.fernandokh.koonol_management.ui.screen.categories.InfoCategoryScreen
 import com.fernandokh.koonol_management.ui.screen.profile.ChangePasswordScreen
 import com.fernandokh.koonol_management.ui.screen.profile.EditProfileScreen
 import com.fernandokh.koonol_management.ui.screen.users.EditUserScreen
@@ -54,6 +57,14 @@ sealed class Screen(val route: String) {
         fun createRoute(userId: String) = "users/info/$userId"
     }
     object CreateUser : Screen("users/create")
+
+    object EditCategory : Screen("category/edit/{categoryId}") {
+        fun createRoute(categoryId: String) = "category/edit/$categoryId"
+    }
+    object InfoCategory : Screen("category/info/{categoryId}") {
+        fun createRoute(categoryId: String) = "category/info/$categoryId"
+    }
+    object CreateCategory : Screen("category/create")
 }
 
 @Composable
@@ -94,5 +105,16 @@ fun AppNavHost(
             arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry -> InfoUserScreen(navController, backStackEntry.arguments?.getString("userId")) }
         composable(Screen.CreateUser.route) { CreateUserScreen(navController) }
+        composable(
+            Screen.EditCategory.route,
+            arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            EditCategoryScreen(navController, backStackEntry.arguments?.getString("categoryId"))
+        }
+        composable(
+            Screen.InfoCategory.route,
+            arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
+        ) { backStackEntry -> InfoCategoryScreen(navController, backStackEntry.arguments?.getString("categoryId")) }
+        composable(Screen.CreateCategory.route) { CreateCategoryScreen(navController) }
     }
 }
