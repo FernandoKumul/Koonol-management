@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,20 +24,24 @@ import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBarC (
+fun SearchBarC(
     text: String,
     placeholder: String,
     onChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     onSearch: () -> Unit,
 ) {
-    Row (modifier = modifier) {
+    val focusManager = LocalFocusManager.current
+    Row(modifier = modifier) {
         androidx.compose.material3.SearchBar(
             query = text,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             onQueryChange = { onChange(it) },
-            onSearch = { onSearch() },
+            onSearch = {
+                focusManager.clearFocus()
+                onSearch()
+            },
             placeholder = {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
@@ -67,7 +72,7 @@ fun PrevSearchBarC() {
     var name by remember { mutableStateOf("") }
     KoonolmanagementTheme {
         SearchBarC(
-         name, "Buscar", {name = it}, Modifier, {}
+            name, "Buscar", { name = it }, Modifier, {}
         )
     }
 }
