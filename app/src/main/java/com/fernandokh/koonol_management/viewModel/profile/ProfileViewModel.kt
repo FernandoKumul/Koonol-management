@@ -51,9 +51,9 @@ class ProfileViewModel(private val tokenManager: TokenManager) : ViewModel() {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
-                Log.i("dev-debug", "Token: ${accessToken}")
+                Log.i("dev-debug", "Token: $accessToken")
                 val response =
-                    apiService.getProfile("Bearer ${accessToken}")
+                    apiService.getProfile("Bearer $accessToken")
                 _isUser.value = response.data
                 Log.i("dev-debug", "Perfil obtenido con éxito")
             } catch (e: HttpException) {

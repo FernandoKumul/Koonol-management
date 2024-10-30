@@ -197,7 +197,7 @@ fun LoginScreen(navController: NavHostController, tokenManager: TokenManager) {
                             else PasswordVisualTransformation()
                         )
                         RememberMe(
-                            "Recuérdame: $checked", checked,
+                            "Recuérdame", checked,
                             onCheckedChange = { authViewModel.handleRememberMe(it) }
                         )
                     }

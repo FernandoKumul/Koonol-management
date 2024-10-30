@@ -69,7 +69,7 @@ fun AppNavHost(
         composable(Screen.Promotions.route) { PromotionsScreen(navController, drawerState) }
         composable(Screen.Categories.route) { CategoriesScreen(navController, drawerState) }
         composable(Screen.Profile.route) { ProfileScreen(navController, drawerState, tokenManager) }
-        composable(Screen.EditProfile.route) { EditProfileScreen(navController) }
+        composable(Screen.EditProfile.route) { EditProfileScreen(navController, tokenManager) }
         composable(Screen.ChangePassword.route) { ChangePasswordScreen(navController) }
         composable(
             Screen.EditSeller.route,
