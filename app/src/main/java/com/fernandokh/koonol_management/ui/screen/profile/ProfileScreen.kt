@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,24 +46,33 @@ import coil.compose.AsyncImage
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.data.models.UserInModel
+import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.components.router.TopBarMenuTitle
 import com.fernandokh.koonol_management.ui.components.shared.InformationField
 import com.fernandokh.koonol_management.ui.screen.users.formatGender
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 import com.fernandokh.koonol_management.utils.formatIsoDateToLocalDate
 import com.fernandokh.koonol_management.viewModel.profile.ProfileViewModel
+import com.fernandokh.koonol_management.viewModel.profile.ProfileViewModelFactory
 
 @Composable
 fun ProfileScreen(
     navController: NavHostController,
     drawerState: DrawerState,
-    viewModel: ProfileViewModel = viewModel()
+    tokenManager: TokenManager
 ) {
+
+    val viewModel: ProfileViewModel = viewModel(
+        factory = ProfileViewModelFactory(tokenManager)
+    )
+
     val isUser by viewModel.isUser.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.getUser()
+        tokenManager.accessToken.collect { token ->
+            viewModel.getUser(token)
+        }
     }
 
     Scaffold(
@@ -197,6 +207,6 @@ private fun PrevProfileScreen() {
     KoonolmanagementTheme(dynamicColor = false) {
         val navController = rememberNavController()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        ProfileScreen(navController, drawerState)
+        ProfileScreen(navController, drawerState, TokenManager(LocalContext.current))
     }
 }

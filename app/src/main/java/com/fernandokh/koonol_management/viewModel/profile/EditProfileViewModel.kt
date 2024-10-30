@@ -2,11 +2,13 @@ package com.fernandokh.koonol_management.viewModel.profile
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.UserApiService
 import com.fernandokh.koonol_management.data.models.ProfileEditModel
 import com.fernandokh.koonol_management.data.models.UserInModel
+import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.utils.SelectOption
 import com.fernandokh.koonol_management.utils.evaluateHttpException
@@ -14,11 +16,22 @@ import com.fernandokh.koonol_management.utils.formatIsoDateToDate
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
-class EditProfileViewModel : ViewModel() {
+class EditProfileViewModelFactory(private val tokenManager: TokenManager) :
+    ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(EditProfileViewModel::class.java)) {
+            return EditProfileViewModel(tokenManager) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class EditProfileViewModel(private val tokenManager: TokenManager) : ViewModel() {
 
     data class FormErrors(
         val nameError: String? = null,
@@ -54,6 +67,9 @@ class EditProfileViewModel : ViewModel() {
     )
 
     private val apiService = RetrofitInstance.create(UserApiService::class.java)
+
+    private val _accessToken = MutableStateFlow("")
+    val accessToken: StateFlow<String> = _accessToken
 
     private val _isUser = MutableStateFlow<UserInModel?>(null)
     val isUser: StateFlow<UserInModel?> = _isUser
@@ -104,14 +120,21 @@ class EditProfileViewModel : ViewModel() {
         _isShowDialog.value = true
     }
 
+    init {
+        viewModelScope.launch {
+            val savedToken = tokenManager.accessToken.first()
+            _accessToken.value = savedToken
+        }
+    }
+
     //Main functions
 
-    fun getProfile() {
+    fun getProfile(accessToken: String) {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
                 val response =
-                    apiService.getProfile("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzE1YjFhN2RjNTAxZTZlZWZjNTJkMTAiLCJ1c2VyTmFtZSI6Ikpvc2UgRmVybmFuZG8iLCJyb2xJZCI6IjY3MDMxODEwNGQ5ODI0YjRkYTBkOWE5YiIsInJvbE5hbWUiOiJBZG1pbmlzdHJhZG9yIiwiaWF0IjoxNzI5OTIzMzY1LCJleHAiOjE3MzAwOTYxNjV9.imxcfScfVzEDIGwguisL4lQ-8OnGKHoE9jxF2RTfZEs")
+                    apiService.getProfile("Bearer $accessToken")
                 val data = response.data
                 _isUser.value = data
                 _isPhoto.value = response.data?.photo
@@ -136,7 +159,7 @@ class EditProfileViewModel : ViewModel() {
         }
     }
 
-    fun updateProfile() {
+    fun updateProfile(accessToken: String) {
         val user = ProfileEditModel(
             name = _formUser.value.name.trim(),
             lastName = _formUser.value.lastName.trim(),
@@ -151,7 +174,7 @@ class EditProfileViewModel : ViewModel() {
             try {
                 _isLoadingUpdate.value = true
                 apiService.updateProfile(
-                    "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzE1YjFhN2RjNTAxZTZlZWZjNTJkMTAiLCJ1c2VyTmFtZSI6Ikpvc2UgRmVybmFuZG8iLCJyb2xJZCI6IjY3MDMxODEwNGQ5ODI0YjRkYTBkOWE5YiIsInJvbE5hbWUiOiJBZG1pbmlzdHJhZG9yIiwiaWF0IjoxNzI5OTIzMzY1LCJleHAiOjE3MzAwOTYxNjV9.imxcfScfVzEDIGwguisL4lQ-8OnGKHoE9jxF2RTfZEs",
+                    "Bearer $accessToken",
                     user
                 )
                 showToast("Perfil actualizado con éxito")
