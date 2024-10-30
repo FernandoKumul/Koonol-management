@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.fernandokh.koonol_management.ui.screen.categories.CategoriesScreen
+import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.screen.LoginScreen
 import com.fernandokh.koonol_management.ui.screen.MenuScreen
 import com.fernandokh.koonol_management.ui.screen.profile.ProfileScreen
@@ -68,19 +69,19 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun AppNavHost(
-    modifier: Modifier = Modifier, navController: NavHostController, drawerState: DrawerState
+    modifier: Modifier = Modifier, navController: NavHostController, drawerState: DrawerState, tokenManager: TokenManager
 ) {
     NavHost(navController, startDestination = Screen.Login.route, modifier = modifier) {
-        composable(Screen.Login.route) { LoginScreen(navController) }
+        composable(Screen.Login.route) { LoginScreen(navController, tokenManager) }
         composable(Screen.Menu.route) { MenuScreen(navController) }
         composable(Screen.Users.route) { UsersScreen(navController, drawerState) }
         composable(Screen.Tianguis.route) { TianguisScreen(navController, drawerState) }
         composable(Screen.SalesStalls.route) { SalesStallsScreen(navController, drawerState) }
         composable(Screen.Promotions.route) { PromotionsScreen(navController, drawerState) }
         composable(Screen.Categories.route) { CategoriesScreen(navController, drawerState) }
-        composable(Screen.Profile.route) { ProfileScreen(navController, drawerState) }
-        composable(Screen.EditProfile.route) { EditProfileScreen(navController) }
-        composable(Screen.ChangePassword.route) { ChangePasswordScreen(navController) }
+        composable(Screen.Profile.route) { ProfileScreen(navController, drawerState, tokenManager) }
+        composable(Screen.EditProfile.route) { EditProfileScreen(navController, tokenManager) }
+        composable(Screen.ChangePassword.route) { ChangePasswordScreen(navController, tokenManager) }
         composable(
             Screen.EditSeller.route,
             arguments = listOf(navArgument("sellerId") { type = NavType.StringType })

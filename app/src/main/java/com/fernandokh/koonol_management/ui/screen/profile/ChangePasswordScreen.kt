@@ -30,17 +30,26 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
+import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
 import com.fernandokh.koonol_management.ui.components.shared.PasswordInput
 import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.viewModel.profile.ChangePasswordViewModel
+import com.fernandokh.koonol_management.viewModel.profile.ChangePasswordViewModelFactory
 
 @Composable
 fun ChangePasswordScreen(
     navController: NavHostController,
-    viewModel: ChangePasswordViewModel = viewModel()
+    tokenManager: TokenManager,
 ) {
+
+    val viewModel: ChangePasswordViewModel = viewModel(
+        factory = ChangePasswordViewModelFactory(tokenManager)
+    )
+
+    val token by viewModel.accessToken.collectAsState()
+
     val isLoadingUpdate by viewModel.isLoadingUpdate.collectAsState()
     val isShowDialog by viewModel.isShowDialog.collectAsState()
     val context = LocalContext.current
@@ -100,7 +109,7 @@ fun ChangePasswordScreen(
                             dialogTitle = "Editar usuario",
                             dialogText = "¿Estás seguro de los nuevos datos para el usuario?",
                             onDismissRequest = { viewModel.dismissDialog() },
-                            onConfirmation = { viewModel.changePassword() },
+                            onConfirmation = { viewModel.changePassword(token) },
                             loading = isLoadingUpdate
                         )
                     }

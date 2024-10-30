@@ -33,6 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
+import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
 import com.fernandokh.koonol_management.ui.components.shared.CustomDateField
@@ -41,10 +42,17 @@ import com.fernandokh.koonol_management.ui.components.shared.CustomTextField
 import com.fernandokh.koonol_management.ui.components.shared.MyUploadImage
 import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.viewModel.profile.EditProfileViewModel
+import com.fernandokh.koonol_management.viewModel.profile.EditProfileViewModelFactory
 import java.io.File
 
 @Composable
-fun EditProfileScreen(navController: NavHostController, viewModel: EditProfileViewModel = viewModel()) {
+fun EditProfileScreen(navController: NavHostController, tokenManager: TokenManager) {
+    val viewModel: EditProfileViewModel = viewModel(
+        factory = EditProfileViewModelFactory(tokenManager)
+    )
+
+    val token by viewModel.accessToken.collectAsState()
+
     val isUser by viewModel.isUser.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
@@ -58,11 +66,14 @@ fun EditProfileScreen(navController: NavHostController, viewModel: EditProfileVi
     val toastMessage by viewModel.toastMessage.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.getProfile()
-        viewModel.navigationEvent.collect { event ->
-            when (event) {
-                is NavigationEvent.Navigate -> {
-                    navController.navigate(Screen.Profile.route)
+        tokenManager.accessToken.collect { token ->
+
+            viewModel.getProfile(token)
+            viewModel.navigationEvent.collect { event ->
+                when (event) {
+                    is NavigationEvent.Navigate -> {
+                        navController.navigate(Screen.Profile.route)
+                    }
                 }
             }
         }
@@ -141,7 +152,7 @@ fun EditProfileScreen(navController: NavHostController, viewModel: EditProfileVi
                                     dialogTitle = "Editar perfil",
                                     dialogText = "¿Estás seguro de los nuevos datos de tu perfil?",
                                     onDismissRequest = { viewModel.dismissDialog() },
-                                    onConfirmation = { viewModel.updateProfile() },
+                                    onConfirmation = { viewModel.updateProfile(token) },
                                     loading = isLoadingUpdate
                                 )
                             }
