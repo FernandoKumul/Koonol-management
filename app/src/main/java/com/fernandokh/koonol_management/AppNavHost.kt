@@ -62,13 +62,13 @@ fun AppNavHost(
 ) {
     NavHost(navController, startDestination = Screen.Login.route, modifier = modifier) {
         composable(Screen.Login.route) { LoginScreen(navController, tokenManager) }
-        composable(Screen.Menu.route) { MenuScreen(navController, tokenManager) }
+        composable(Screen.Menu.route) { MenuScreen(navController) }
         composable(Screen.Users.route) { UsersScreen(navController, drawerState) }
         composable(Screen.Tianguis.route) { TianguisScreen(navController, drawerState) }
         composable(Screen.SalesStalls.route) { SalesStallsScreen(navController, drawerState) }
         composable(Screen.Promotions.route) { PromotionsScreen(navController, drawerState) }
         composable(Screen.Categories.route) { CategoriesScreen(navController, drawerState) }
-        composable(Screen.Profile.route) { ProfileScreen(navController, drawerState) }
+        composable(Screen.Profile.route) { ProfileScreen(navController, drawerState, tokenManager) }
         composable(Screen.EditProfile.route) { EditProfileScreen(navController) }
         composable(Screen.ChangePassword.route) { ChangePasswordScreen(navController) }
         composable(

@@ -33,9 +33,6 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
 
     private val apiService = RetrofitInstance.create(AuthApiService::class.java)
 
-    val accessToken: StateFlow<String?> = tokenManager.accessToken
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
     val rememberMe: StateFlow<Boolean> = tokenManager.rememberMe
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
@@ -114,8 +111,8 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
                 if (isValidEmail(email.value) && isValidPassword(password.value)) {
                     val authModel = AuthModel(email = email.value, password = password.value)
                     val response = apiService.login(authModel)
-                    Log.i("dev-debug", "token: ${response.data?.token}")
                     response.data?.let { tokenManager.saveAccessToken(it.token) }
+                    Log.i("dev-debug", "token: ${response.data?.token}")
                     handleCredentials(email.value, password.value)
                     _navigationEvent.send(NavigationEvent.AuthSuccess)
                 } else {
@@ -141,7 +138,6 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
                     val authModel = AuthModel(email = emailS, password = passwordS)
                     val response = apiService.login(authModel)
                     Log.i("dev-debug", "token: ${response.data?.token}")
-                    response.data?.let { tokenManager.saveAccessToken(it.token) }
                     handleCredentials(emailS, passwordS)
                     _navigationEvent.send(NavigationEvent.AuthSuccess)
                 } else {

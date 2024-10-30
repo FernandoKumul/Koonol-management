@@ -22,7 +22,7 @@ class TokenManager(private val context: Context) {
         val REMEMBER_ME_KEY = booleanPreferencesKey("remember_me")
     }
 
-    val accessToken: Flow<String?> = context.dataStore.data
+    val accessToken: Flow<String> = context.dataStore.data
         .map { preferences ->
             preferences[ACCESS_TOKEN_KEY] ?: ""
         }
