@@ -10,7 +10,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.fernandokh.koonol_management.ui.screen.categories.CategoriesScreen
 import com.fernandokh.koonol_management.data.repository.TokenManager
+import com.fernandokh.koonol_management.ui.screen.CreateTianguisScreen
 import com.fernandokh.koonol_management.ui.screen.LoginScreen
+import com.fernandokh.koonol_management.ui.screen.MapScreen
 import com.fernandokh.koonol_management.ui.screen.MenuScreen
 import com.fernandokh.koonol_management.ui.screen.profile.ProfileScreen
 import com.fernandokh.koonol_management.ui.screen.PromotionsScreen
@@ -42,6 +44,8 @@ sealed class Screen(val route: String) {
     object Categories : Screen("categories")
     object Users : Screen("users")
     object Sellers : Screen("sellers")
+    object CreateTianguis : Screen("tianguis/create")
+    object Maps : Screen("maps")
     object EditSeller : Screen("sellers/edit/{sellerId}") {
         fun createRoute(sellerId: String) = "sellers/edit/$sellerId"
     }
@@ -79,6 +83,8 @@ fun AppNavHost(
         composable(Screen.SalesStalls.route) { SalesStallsScreen(navController, drawerState) }
         composable(Screen.Promotions.route) { PromotionsScreen(navController, drawerState) }
         composable(Screen.Categories.route) { CategoriesScreen(navController, drawerState) }
+        composable(Screen.CreateTianguis.route) { CreateTianguisScreen(navController) }
+        composable(Screen.Maps.route) { MapScreen(navController) }
         composable(Screen.Profile.route) { ProfileScreen(navController, drawerState, tokenManager) }
         composable(Screen.EditProfile.route) { EditProfileScreen(navController, tokenManager) }
         composable(Screen.ChangePassword.route) { ChangePasswordScreen(navController, tokenManager) }
