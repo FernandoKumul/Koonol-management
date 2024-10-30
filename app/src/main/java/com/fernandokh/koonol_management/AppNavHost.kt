@@ -70,7 +70,7 @@ fun AppNavHost(
         composable(Screen.Categories.route) { CategoriesScreen(navController, drawerState) }
         composable(Screen.Profile.route) { ProfileScreen(navController, drawerState, tokenManager) }
         composable(Screen.EditProfile.route) { EditProfileScreen(navController, tokenManager) }
-        composable(Screen.ChangePassword.route) { ChangePasswordScreen(navController) }
+        composable(Screen.ChangePassword.route) { ChangePasswordScreen(navController, tokenManager) }
         composable(
             Screen.EditSeller.route,
             arguments = listOf(navArgument("sellerId") { type = NavType.StringType })

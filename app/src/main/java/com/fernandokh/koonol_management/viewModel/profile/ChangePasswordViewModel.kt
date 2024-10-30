@@ -2,20 +2,32 @@ package com.fernandokh.koonol_management.viewModel.profile
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.UserApiService
 import com.fernandokh.koonol_management.data.models.ChangePasswordModel
+import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
-class ChangePasswordViewModel : ViewModel() {
+class ChangePasswordViewModelFactory(private val tokenManager: TokenManager) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(ChangePasswordViewModel::class.java)) {
+            return ChangePasswordViewModel(tokenManager) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class ChangePasswordViewModel(private val tokenManager: TokenManager) : ViewModel() {
     data class FormErrors(
         val password: String? = null,
         val confirmPassword: String? = null,
@@ -34,6 +46,9 @@ class ChangePasswordViewModel : ViewModel() {
     )
 
     private val apiService = RetrofitInstance.create(UserApiService::class.java)
+
+    private val _accessToken = MutableStateFlow("")
+    val accessToken: StateFlow<String> = _accessToken
 
     private val _isShowDialog = MutableStateFlow(false)
     val isShowDialog: StateFlow<Boolean> = _isShowDialog
@@ -69,14 +84,21 @@ class ChangePasswordViewModel : ViewModel() {
         _isShowDialog.value = true
     }
 
-    fun changePassword() {
+    init {
+        viewModelScope.launch {
+            val savedToken = tokenManager.accessToken.first()
+            _accessToken.value = savedToken
+        }
+    }
+
+    fun changePassword(accessToken: String) {
         val password = ChangePasswordModel(password = _form.value.password)
 
         viewModelScope.launch {
             try {
                 _isLoadingUpdate.value = true
                 apiService.changePasswordProfile(
-                    "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzE1YjFhN2RjNTAxZTZlZWZjNTJkMTAiLCJ1c2VyTmFtZSI6Ikpvc2UgRmVybmFuZG8iLCJyb2xJZCI6IjY3MDMxODEwNGQ5ODI0YjRkYTBkOWE5YiIsInJvbE5hbWUiOiJBZG1pbmlzdHJhZG9yIiwiaWF0IjoxNzI5OTIzMzY1LCJleHAiOjE3MzAwOTYxNjV9.imxcfScfVzEDIGwguisL4lQ-8OnGKHoE9jxF2RTfZEs",
+                    "Bearer $accessToken",
                     password
                 )
                 showToast("Contraseña actualizada con éxito")
