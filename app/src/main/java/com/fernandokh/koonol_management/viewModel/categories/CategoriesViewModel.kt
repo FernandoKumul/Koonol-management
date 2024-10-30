@@ -10,9 +10,7 @@ import androidx.paging.cachedIn
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.CategoriesApiService
 import com.fernandokh.koonol_management.data.models.CategoryModel
-import com.fernandokh.koonol_management.data.models.UserInModel
 import com.fernandokh.koonol_management.data.pagingSource.CategoryPagingSource
-import com.fernandokh.koonol_management.data.pagingSource.UserPagingSource
 import com.fernandokh.koonol_management.utils.SelectOption
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.flow.MutableStateFlow
