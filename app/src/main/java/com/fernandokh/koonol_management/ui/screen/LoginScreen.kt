@@ -1,6 +1,5 @@
 package com.fernandokh.koonol_management.ui.screen
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -72,6 +71,7 @@ fun LoginScreen(navController: NavHostController, tokenManager: TokenManager) {
     var passwordVisibility: Boolean by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        tokenManager.clearAccessToken()
         authViewModel.navigationEvent.collect { event ->
             when (event) {
                 is NavigationEvent.AuthSuccess -> {

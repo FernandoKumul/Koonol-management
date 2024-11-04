@@ -40,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -47,6 +48,9 @@ import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.components.router.RouteListMenu
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 import com.fernandokh.koonol_management.utils.routes
+import com.fernandokh.koonol_management.viewModel.AuthViewModel
+import com.fernandokh.koonol_management.viewModel.AuthViewModelFactory
+import com.fernandokh.koonol_management.viewModel.NavigationEvent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -134,19 +138,33 @@ fun SideMenu(navController: NavHostController, drawerState: DrawerState) {
             RouteListMenu(routes = routes, navController, drawerState)
         }
 
-        BtnLogout(navController, drawerState)
+        BtnLogout(navController, drawerState, TokenManager(LocalContext.current))
     }
 }
 
 @Composable
-fun BtnLogout(navController: NavHostController, drawerState: DrawerState) {
+fun BtnLogout(navController: NavHostController, drawerState: DrawerState, tokenManager: TokenManager) {
     val scope = rememberCoroutineScope()
+    val viewModel: AuthViewModel = viewModel(
+        factory = AuthViewModelFactory(tokenManager)
+    )
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                is NavigationEvent.AuthSuccess -> {
+                    navController.navigate(Screen.Login.route)
+                }
+            }
+        }
+    }
+
     Row(
         modifier = Modifier
             .clickable {
-                navController.navigate(Screen.Login.route)
+                viewModel.logout()
+
                 scope.launch {
-                    drawerState.apply { close() }
+                    drawerState.close()
                 }
             }
             .padding(12.dp)
