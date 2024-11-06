@@ -1,32 +1,40 @@
 package com.fernandokh.koonol_management
 
+import android.util.Log
 import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.fernandokh.koonol_management.ui.screen.categories.CategoriesScreen
 import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.screen.LoginScreen
 import com.fernandokh.koonol_management.ui.screen.MenuScreen
-import com.fernandokh.koonol_management.ui.screen.profile.ProfileScreen
 import com.fernandokh.koonol_management.ui.screen.PromotionsScreen
 import com.fernandokh.koonol_management.ui.screen.SalesStallsScreen
-import com.fernandokh.koonol_management.ui.screen.sellers.SellersScreen
 import com.fernandokh.koonol_management.ui.screen.TianguisScreen
+import com.fernandokh.koonol_management.ui.screen.categories.CategoriesScreen
 import com.fernandokh.koonol_management.ui.screen.categories.CreateCategoryScreen
 import com.fernandokh.koonol_management.ui.screen.categories.EditCategoryScreen
 import com.fernandokh.koonol_management.ui.screen.categories.InfoCategoryScreen
 import com.fernandokh.koonol_management.ui.screen.profile.ChangePasswordScreen
 import com.fernandokh.koonol_management.ui.screen.profile.EditProfileScreen
-import com.fernandokh.koonol_management.ui.screen.users.EditUserScreen
+import com.fernandokh.koonol_management.ui.screen.profile.ProfileScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.CreateSellersScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.EditSellersScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.InfoSellersScreen
+import com.fernandokh.koonol_management.ui.screen.sellers.SellersScreen
 import com.fernandokh.koonol_management.ui.screen.users.CreateUserScreen
+import com.fernandokh.koonol_management.ui.screen.users.EditUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.InfoUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.UsersScreen
 
@@ -67,21 +75,55 @@ sealed class Screen(val route: String) {
     object CreateCategory : Screen("category/create")
 }
 
+fun NavGraphBuilder.protectedComposable(
+    route: String,
+    navController: NavHostController,
+    tokenManager: TokenManager,
+    content: @Composable (NavBackStackEntry) -> Unit
+) {
+    composable(route) { backStackEntry ->
+        var isTokenValid by remember { mutableStateOf<Boolean?>(null) }
+        var hasNavigated by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) {
+            isTokenValid = tokenManager.isTokenValid()
+        }
+        when (isTokenValid) {
+            true -> {
+                content(backStackEntry)
+            }
+            false -> {
+                if (!hasNavigated) {
+                    hasNavigated = true
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(route)
+                    }
+                }
+            }
+            null -> {
+            }
+        }
+    }
+}
+
+
+
+
+
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier, navController: NavHostController, drawerState: DrawerState, tokenManager: TokenManager
 ) {
     NavHost(navController, startDestination = Screen.Login.route, modifier = modifier) {
         composable(Screen.Login.route) { LoginScreen(navController, tokenManager) }
-        composable(Screen.Menu.route) { MenuScreen(navController) }
-        composable(Screen.Users.route) { UsersScreen(navController, drawerState) }
-        composable(Screen.Tianguis.route) { TianguisScreen(navController, drawerState) }
-        composable(Screen.SalesStalls.route) { SalesStallsScreen(navController, drawerState) }
-        composable(Screen.Promotions.route) { PromotionsScreen(navController, drawerState) }
-        composable(Screen.Categories.route) { CategoriesScreen(navController, drawerState) }
-        composable(Screen.Profile.route) { ProfileScreen(navController, drawerState, tokenManager) }
-        composable(Screen.EditProfile.route) { EditProfileScreen(navController, tokenManager) }
-        composable(Screen.ChangePassword.route) { ChangePasswordScreen(navController, tokenManager) }
+        protectedComposable(Screen.Menu.route, navController, tokenManager) { MenuScreen(navController) }
+        protectedComposable(Screen.Users.route, navController, tokenManager) { UsersScreen(navController, drawerState) }
+        protectedComposable(Screen.Tianguis.route, navController, tokenManager) { TianguisScreen(navController, drawerState) }
+        protectedComposable(Screen.SalesStalls.route, navController, tokenManager) { SalesStallsScreen(navController, drawerState) }
+        protectedComposable(Screen.Promotions.route, navController, tokenManager) { PromotionsScreen(navController, drawerState) }
+        protectedComposable(Screen.Categories.route, navController, tokenManager) { CategoriesScreen(navController, drawerState) }
+        protectedComposable(Screen.Profile.route, navController, tokenManager) { ProfileScreen(navController, drawerState, tokenManager) }
+        protectedComposable(Screen.EditProfile.route, navController, tokenManager) { EditProfileScreen(navController, tokenManager) }
+        protectedComposable(Screen.ChangePassword.route, navController, tokenManager) { ChangePasswordScreen(navController, tokenManager) }
         composable(
             Screen.EditSeller.route,
             arguments = listOf(navArgument("sellerId") { type = NavType.StringType })

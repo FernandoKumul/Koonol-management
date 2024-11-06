@@ -123,7 +123,7 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
                 showToast(errorMessage)
             } catch (e: Exception) {
                 Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
-                showToast("Credenciales no validas")
+                showToast(e.message ?: "Ha ocurrido un error")
             } finally {
                 _isLoading.value = false
                 dismissDialog()
@@ -131,28 +131,20 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
         }
     }
 
-    fun loginStorage(emailS: String, passwordS: String){
+    fun logout() {
         viewModelScope.launch {
             try {
-                if (isValidEmail(emailS) && isValidPassword(passwordS)) {
-                    val authModel = AuthModel(email = emailS, password = passwordS)
-                    val response = apiService.login(authModel)
-                    Log.i("dev-debug", "token: ${response.data?.token}")
-                    handleCredentials(emailS, passwordS)
-                    _navigationEvent.send(NavigationEvent.AuthSuccess)
-                } else {
-                    throw IllegalArgumentException("Email o contraseña inválidos")
-                }
-            } catch (e: HttpException) {
-                val errorMessage = evaluateHttpException(e)
-                showToast(errorMessage)
+                _isLoading.value = true
+                tokenManager.clearAccessToken()
+                _navigationEvent.send(NavigationEvent.AuthSuccess)
             } catch (e: Exception) {
                 Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
-                showToast("Credenciales no validas")
+                showToast(e.message ?: "Ha ocurrido un error")
+            } finally {
+                _isLoading.value = false
             }
         }
     }
-
 }
 
 sealed class NavigationEvent {
