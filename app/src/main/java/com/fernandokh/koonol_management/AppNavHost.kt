@@ -117,13 +117,13 @@ fun AppNavHost(
         composable(Screen.Login.route) { LoginScreen(navController, tokenManager) }
         protectedComposable(Screen.Menu.route, navController, tokenManager) { MenuScreen(navController) }
         protectedComposable(Screen.Users.route, navController, tokenManager) { UsersScreen(navController, drawerState) }
-        composable(Screen.Tianguis.route) { TianguisScreen(navController, drawerState) }
-        composable(Screen.SalesStalls.route) { SalesStallsScreen(navController, drawerState) }
-        composable(Screen.Promotions.route) { PromotionsScreen(navController, drawerState) }
-        composable(Screen.Categories.route) { CategoriesScreen(navController, drawerState) }
+        protectedComposable(Screen.Tianguis.route, navController, tokenManager) { TianguisScreen(navController, drawerState) }
+        protectedComposable(Screen.SalesStalls.route, navController, tokenManager) { SalesStallsScreen(navController, drawerState) }
+        protectedComposable(Screen.Promotions.route, navController, tokenManager) { PromotionsScreen(navController, drawerState) }
+        protectedComposable(Screen.Categories.route, navController, tokenManager) { CategoriesScreen(navController, drawerState) }
         protectedComposable(Screen.Profile.route, navController, tokenManager) { ProfileScreen(navController, drawerState, tokenManager) }
         protectedComposable(Screen.EditProfile.route, navController, tokenManager) { EditProfileScreen(navController, tokenManager) }
-        composable(Screen.ChangePassword.route) { ChangePasswordScreen(navController, tokenManager) }
+        protectedComposable(Screen.ChangePassword.route, navController, tokenManager) { ChangePasswordScreen(navController, tokenManager) }
         composable(
             Screen.EditSeller.route,
             arguments = listOf(navArgument("sellerId") { type = NavType.StringType })
