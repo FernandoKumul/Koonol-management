@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
@@ -28,11 +29,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +47,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
+import com.fernandokh.koonol_management.data.models.UserPreviewModel
 import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.components.router.RouteListMenu
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
@@ -51,6 +56,8 @@ import com.fernandokh.koonol_management.utils.routes
 import com.fernandokh.koonol_management.viewModel.AuthViewModel
 import com.fernandokh.koonol_management.viewModel.AuthViewModelFactory
 import com.fernandokh.koonol_management.viewModel.NavigationEvent
+import com.fernandokh.koonol_management.viewModel.profile.ProfileViewModel
+import com.fernandokh.koonol_management.viewModel.profile.ProfileViewModelFactory
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -104,7 +111,7 @@ fun MyApp(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet { SideMenu(navController, drawerState) }
+            ModalDrawerSheet { SideMenu(navController, drawerState, tokenManager) }
         },
         gesturesEnabled = enabledMenu(navBackStackEntry?.destination?.route)
     ) {
@@ -125,7 +132,25 @@ fun enabledMenu(route: String?): Boolean {
 }
 
 @Composable
-fun SideMenu(navController: NavHostController, drawerState: DrawerState) {
+fun SideMenu(
+    navController: NavHostController,
+    drawerState: DrawerState,
+    tokenManager: TokenManager
+) {
+
+    val viewModel: ProfileViewModel = viewModel(
+        factory = ProfileViewModelFactory(tokenManager)
+    )
+
+    val isUser by viewModel.isPreview.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+
+    LaunchedEffect(Unit) {
+        tokenManager.accessToken.collect { token ->
+            viewModel.getPreview(token)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -134,11 +159,36 @@ fun SideMenu(navController: NavHostController, drawerState: DrawerState) {
             .padding(0.dp, 16.dp)
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            UserDetails()
+            when {
+                isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                isUser == null -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No se encontró el usuario",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
+                else -> {
+                    UserDetails(isUser!!)
+                }
+            }
             RouteListMenu(routes = routes, navController, drawerState)
         }
 
-        BtnLogout(navController, drawerState, TokenManager(LocalContext.current))
+        BtnLogout(navController, drawerState, tokenManager)
     }
 }
 
@@ -185,27 +235,40 @@ fun BtnLogout(navController: NavHostController, drawerState: DrawerState, tokenM
 }
 
 @Composable
-fun UserDetails() {
+fun UserDetails(user: UserPreviewModel) {
     Row(
         Modifier.padding(16.dp, 12.dp, 16.dp, 24.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Image(
-            painter = painterResource(R.drawable.default_user),
-            contentDescription = "img_user",
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape)
-        )
+        if (user.photo != null) {
+            AsyncImage(
+                model = user.photo,
+                contentDescription = "img_user",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape),
+                placeholder = painterResource(R.drawable.default_user)
+            )
+        } else {
+            Image(
+                painter = painterResource(R.drawable.default_user),
+                contentDescription = "img_user",
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+            )
+        }
+
         Column {
             Text(
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                text = "Jonh Doe Default"
+                text = user.name,
             )
             Text(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                text = "defaultemail@gmail.com",
+                text = user.email,
                 fontSize = 13.sp
             )
         }
@@ -220,11 +283,11 @@ fun PrevMyApp() {
     )
 }
 
-@Preview(showBackground = true, showSystemUi = false)
-@Composable
-fun PrevSideMenu() {
-    SideMenu(
-        navController = rememberNavController(),
-        rememberDrawerState(initialValue = DrawerValue.Closed)
-    )
-}
+//@Preview(showBackground = true, showSystemUi = false)
+//@Composable
+//fun PrevSideMenu() {
+//    SideMenu(
+//        navController = rememberNavController(),
+//        rememberDrawerState(initialValue = DrawerValue.Closed)
+//    )
+//}

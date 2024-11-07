@@ -7,6 +7,7 @@ import com.fernandokh.koonol_management.data.models.SearchModel
 import com.fernandokh.koonol_management.data.models.UserCreateModel
 import com.fernandokh.koonol_management.data.models.UserInModel
 import com.fernandokh.koonol_management.data.models.UserModel
+import com.fernandokh.koonol_management.data.models.UserPreviewModel
 import com.fernandokh.koonol_management.data.models.UserUpdateModel
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -47,4 +48,7 @@ interface UserApiService {
 
     @PUT("users/profile/change-password")
     suspend fun changePasswordProfile(@Header("Authorization") authHeader: String, @Body password: ChangePasswordModel): ApiResponse<Boolean>
+
+    @GET("users/profile")
+    suspend fun getPreview(@Header("Authorization") authHeader: String): ApiResponse<UserPreviewModel>
 }
