@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -79,9 +80,10 @@ fun NavGraphBuilder.protectedComposable(
     route: String,
     navController: NavHostController,
     tokenManager: TokenManager,
+    arguments: List<NamedNavArgument> = emptyList(),
     content: @Composable (NavBackStackEntry) -> Unit
 ) {
-    composable(route) { backStackEntry ->
+    composable(route, arguments) { backStackEntry ->
         var isTokenValid by remember { mutableStateOf<Boolean?>(null) }
         var hasNavigated by remember { mutableStateOf(false) }
         LaunchedEffect(Unit) {
@@ -124,39 +126,38 @@ fun AppNavHost(
         protectedComposable(Screen.Profile.route, navController, tokenManager) { ProfileScreen(navController, drawerState, tokenManager) }
         protectedComposable(Screen.EditProfile.route, navController, tokenManager) { EditProfileScreen(navController, tokenManager) }
         protectedComposable(Screen.ChangePassword.route, navController, tokenManager) { ChangePasswordScreen(navController, tokenManager) }
-        composable(
-            Screen.EditSeller.route,
-            arguments = listOf(navArgument("sellerId") { type = NavType.StringType })
+        protectedComposable(
+            Screen.EditSeller.route, navController, tokenManager, arguments = listOf(navArgument("sellerId") { type = NavType.StringType })
         ) { backStackEntry ->
             EditSellersScreen(navController, backStackEntry.arguments?.getString("sellerId"))
         }
-        composable(
-            Screen.InfoSeller.route,
+        protectedComposable(
+            Screen.InfoSeller.route, navController, tokenManager,
             arguments = listOf(navArgument("sellerId") { type = NavType.StringType })
         ) { backStackEntry -> InfoSellersScreen(navController, backStackEntry.arguments?.getString("sellerId")) }
-        composable(Screen.CreateSeller.route) { CreateSellersScreen(navController) }
-        composable(Screen.Sellers.route) { SellersScreen(navController, drawerState) }
-        composable(
-            Screen.EditUser.route,
+        protectedComposable(Screen.CreateSeller.route, navController, tokenManager) { CreateSellersScreen(navController) }
+        protectedComposable(Screen.Sellers.route, navController, tokenManager) { SellersScreen(navController, drawerState) }
+        protectedComposable(
+            Screen.EditUser.route, navController, tokenManager,
             arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry ->
             EditUserScreen(navController, backStackEntry.arguments?.getString("userId"))
         }
-        composable(
-            Screen.InfoUser.route,
+        protectedComposable(
+            Screen.InfoUser.route, navController, tokenManager,
             arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry -> InfoUserScreen(navController, backStackEntry.arguments?.getString("userId")) }
-        composable(Screen.CreateUser.route) { CreateUserScreen(navController) }
-        composable(
-            Screen.EditCategory.route,
+        protectedComposable(Screen.CreateUser.route, navController, tokenManager) { CreateUserScreen(navController) }
+        protectedComposable(
+            Screen.EditCategory.route, navController, tokenManager,
             arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
         ) { backStackEntry ->
             EditCategoryScreen(navController, backStackEntry.arguments?.getString("categoryId"))
         }
-        composable(
-            Screen.InfoCategory.route,
+        protectedComposable(
+            Screen.InfoCategory.route, navController, tokenManager,
             arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
         ) { backStackEntry -> InfoCategoryScreen(navController, backStackEntry.arguments?.getString("categoryId")) }
-        composable(Screen.CreateCategory.route) { CreateCategoryScreen(navController) }
+        protectedComposable(Screen.CreateCategory.route, navController, tokenManager) { CreateCategoryScreen(navController) }
     }
 }
