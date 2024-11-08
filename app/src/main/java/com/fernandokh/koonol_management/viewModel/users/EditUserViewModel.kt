@@ -27,7 +27,7 @@ class EditUserViewModel : ViewModel() {
     val optionsGender = listOf(
         SelectOption("Selecciona un género", ""),
         SelectOption("Masculino", "male"),
-        SelectOption("Fenemino", "female"),
+        SelectOption("Femenino", "female"),
         SelectOption("Otro", "other")
     )
     private val emailPattern = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\$")

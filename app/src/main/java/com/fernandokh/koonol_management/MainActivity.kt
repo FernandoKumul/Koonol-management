@@ -238,7 +238,7 @@ fun BtnLogout(navController: NavHostController, drawerState: DrawerState, tokenM
 fun UserDetails(user: UserPreviewModel) {
     Row(
         Modifier.padding(16.dp, 12.dp, 16.dp, 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (user.photo != null) {
             AsyncImage(
@@ -264,6 +264,7 @@ fun UserDetails(user: UserPreviewModel) {
             Text(
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.padding(top = 10.dp),
                 text = user.name,
             )
             Text(

@@ -62,7 +62,7 @@ class EditProfileViewModel(private val tokenManager: TokenManager) : ViewModel()
     val optionsGender = listOf(
         SelectOption("Selecciona un género", ""),
         SelectOption("Masculino", "male"),
-        SelectOption("Fenemino", "female"),
+        SelectOption("Femenino", "female"),
         SelectOption("Otro", "other")
     )
 
@@ -270,7 +270,7 @@ class EditProfileViewModel(private val tokenManager: TokenManager) : ViewModel()
 
     private fun validatePhoneNumber() {
         val phoneNumber = _formUser.value.phone
-        if (phoneNumber.length < 10) {
+        if (phoneNumber.length < 10 ) {
             _formErrors.value =
                 _formErrors.value.copy(phoneError = "El número debe de tener al menos 10 números")
         } else {

@@ -40,7 +40,7 @@ class CreateSellerViewModel : ViewModel() {
     val optionsGender = listOf(
         SelectOption("Selecciona un género", ""),
         SelectOption("Masculino", "male"),
-        SelectOption("Fenemino", "female"),
+        SelectOption("Femenino", "female"),
         SelectOption("Otro", "other")
     )
 
@@ -158,7 +158,7 @@ class CreateSellerViewModel : ViewModel() {
             email = _email.value.trim(),
             lastName = _lastName.value.trim(),
             photo = _isPhoto.value,
-            phoneNumber = _phone.value,
+            phoneNumber = if (_phone.value.isBlank()) null else _phone.value.trim(),
             gender = _gender.value.value,
             birthday = _dayOfBirth.value!!
         )
@@ -166,6 +166,7 @@ class CreateSellerViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 _isLoadingCreate.value = true
+                Log.i("dev-debug", _phone.value.length.toString())
                 apiService.createSeller(seller)
                 showToast("Vendedor agregado con éxito")
                 _navigationEvent.send(NavigationEvent.Navigate)
