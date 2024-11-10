@@ -22,7 +22,7 @@ import com.fernandokh.koonol_management.ui.screen.LoginScreen
 import com.fernandokh.koonol_management.ui.screen.MenuScreen
 import com.fernandokh.koonol_management.ui.screen.PromotionsScreen
 import com.fernandokh.koonol_management.ui.screen.SalesStallsScreen
-import com.fernandokh.koonol_management.ui.screen.TianguisScreen
+import com.fernandokh.koonol_management.ui.screen.tianguis.TianguisScreen
 import com.fernandokh.koonol_management.ui.screen.categories.CategoriesScreen
 import com.fernandokh.koonol_management.ui.screen.categories.CreateCategoryScreen
 import com.fernandokh.koonol_management.ui.screen.categories.EditCategoryScreen
