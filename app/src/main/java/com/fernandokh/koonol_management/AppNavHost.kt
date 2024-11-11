@@ -1,6 +1,5 @@
 package com.fernandokh.koonol_management
 
-import android.util.Log
 import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,7 +20,7 @@ import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.screen.LoginScreen
 import com.fernandokh.koonol_management.ui.screen.MenuScreen
 import com.fernandokh.koonol_management.ui.screen.PromotionsScreen
-import com.fernandokh.koonol_management.ui.screen.SalesStallsScreen
+import com.fernandokh.koonol_management.ui.screen.salestalls.SalesStallsScreen
 import com.fernandokh.koonol_management.ui.screen.TianguisScreen
 import com.fernandokh.koonol_management.ui.screen.categories.CategoriesScreen
 import com.fernandokh.koonol_management.ui.screen.categories.CreateCategoryScreen
@@ -30,6 +29,7 @@ import com.fernandokh.koonol_management.ui.screen.categories.InfoCategoryScreen
 import com.fernandokh.koonol_management.ui.screen.profile.ChangePasswordScreen
 import com.fernandokh.koonol_management.ui.screen.profile.EditProfileScreen
 import com.fernandokh.koonol_management.ui.screen.profile.ProfileScreen
+import com.fernandokh.koonol_management.ui.screen.salestalls.CreateSaleStallScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.CreateSellersScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.EditSellersScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.InfoSellersScreen
@@ -38,6 +38,8 @@ import com.fernandokh.koonol_management.ui.screen.users.CreateUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.EditUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.InfoUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.UsersScreen
+import com.fernandokh.koonol_management.ui.screen.salestalls.EditSaleStallScreen
+import com.fernandokh.koonol_management.ui.screen.salestalls.InfoSaleStallScreen
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
@@ -74,6 +76,14 @@ sealed class Screen(val route: String) {
         fun createRoute(categoryId: String) = "category/info/$categoryId"
     }
     object CreateCategory : Screen("category/create")
+
+    object EditSaleStall : Screen("sales-stalls/edit/{salesStallId}"){
+        fun createRoute(salesStallId: String) = "sales-stalls/edit/$salesStallId"
+    }
+    object InfoSaleStall : Screen("sales-stalls/info/{salesStallId}"){
+        fun createRoute(salesStallId: String) = "sales-stalls/info/$salesStallId"
+    }
+    object CreateSaleStall : Screen("sales-stalls/create")
 }
 
 fun NavGraphBuilder.protectedComposable(
@@ -107,10 +117,6 @@ fun NavGraphBuilder.protectedComposable(
     }
 }
 
-
-
-
-
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier, navController: NavHostController, drawerState: DrawerState, tokenManager: TokenManager
@@ -127,16 +133,20 @@ fun AppNavHost(
         protectedComposable(Screen.EditProfile.route, navController, tokenManager) { EditProfileScreen(navController, tokenManager) }
         protectedComposable(Screen.ChangePassword.route, navController, tokenManager) { ChangePasswordScreen(navController, tokenManager) }
         protectedComposable(
-            Screen.EditSeller.route, navController, tokenManager, arguments = listOf(navArgument("sellerId") { type = NavType.StringType })
+            Screen.EditSeller.route, navController, tokenManager,
+            arguments = listOf(navArgument("sellerId") { type = NavType.StringType })
         ) { backStackEntry ->
             EditSellersScreen(navController, backStackEntry.arguments?.getString("sellerId"))
         }
         protectedComposable(
             Screen.InfoSeller.route, navController, tokenManager,
             arguments = listOf(navArgument("sellerId") { type = NavType.StringType })
-        ) { backStackEntry -> InfoSellersScreen(navController, backStackEntry.arguments?.getString("sellerId")) }
+        ) { backStackEntry ->
+            InfoSellersScreen(navController, backStackEntry.arguments?.getString("sellerId"))
+        }
         protectedComposable(Screen.CreateSeller.route, navController, tokenManager) { CreateSellersScreen(navController) }
         protectedComposable(Screen.Sellers.route, navController, tokenManager) { SellersScreen(navController, drawerState) }
+
         protectedComposable(
             Screen.EditUser.route, navController, tokenManager,
             arguments = listOf(navArgument("userId") { type = NavType.StringType })
@@ -148,6 +158,7 @@ fun AppNavHost(
             arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry -> InfoUserScreen(navController, backStackEntry.arguments?.getString("userId")) }
         protectedComposable(Screen.CreateUser.route, navController, tokenManager) { CreateUserScreen(navController) }
+
         protectedComposable(
             Screen.EditCategory.route, navController, tokenManager,
             arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
@@ -159,5 +170,18 @@ fun AppNavHost(
             arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
         ) { backStackEntry -> InfoCategoryScreen(navController, backStackEntry.arguments?.getString("categoryId")) }
         protectedComposable(Screen.CreateCategory.route, navController, tokenManager) { CreateCategoryScreen(navController) }
+
+        protectedComposable(Screen.EditSaleStall.route, navController, tokenManager,
+            arguments = listOf(navArgument("salesStallId") { type = NavType.StringType })
+        ) {
+            backStackEntry ->
+            EditSaleStallScreen(navController, backStackEntry.arguments?.getString("salesStallId"))
+        }
+        protectedComposable(Screen.InfoSaleStall.route, navController, tokenManager,
+            arguments = listOf(navArgument("salesStallId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            InfoSaleStallScreen(navController, backStackEntry.arguments?.getString("salesStallId"))
+        }
+        protectedComposable(Screen.CreateSaleStall.route, navController, tokenManager) { CreateSaleStallScreen(navController) }
     }
 }

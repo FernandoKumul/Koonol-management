@@ -1,5 +1,6 @@
 package com.fernandokh.koonol_management.viewModel.salesstalls
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -11,9 +12,11 @@ import com.fernandokh.koonol_management.data.api.SalesStallsApiService
 import com.fernandokh.koonol_management.data.models.SalesStallsModel
 import com.fernandokh.koonol_management.data.pagingSource.SalesStallsPagingSource
 import com.fernandokh.koonol_management.utils.SelectOption
+import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 class SalesStallsViewModel : ViewModel() {
     val optionsSort = listOf(
@@ -73,6 +76,33 @@ class SalesStallsViewModel : ViewModel() {
 
     fun dismissDialog() {
         _isSalesStallsToDelete.value = null
+    }
+
+    fun deleteSalesStalls() {
+        viewModelScope.launch {
+            try {
+                _isLoadingDelete.value = true
+                val idSalesStalls = _isSalesStallsToDelete.value?.id ?: run {
+                    showToast("ID de vendedor inválido")
+                    return@launch
+                }
+                
+                apiService.deleteSalesStallsById(idSalesStalls)
+                searchSalesStalls()
+                Log.i("dev-debug", "Vendedor borrado con el id: $idSalesStalls")
+                showToast("Vendedor borrado con éxito")
+            } catch (e: HttpException) {
+                val errorMessage = evaluateHttpException(e)
+                Log.e("dev-debug", "Error al borrar el vendedor: $errorMessage")
+                showToast(errorMessage)
+            } catch (e: Exception) {
+                Log.i("dev-debug", e.message ?: "Ah ocurrido un error")
+                showToast("Ocurrio un error al borrar el vendedor")
+            } finally {
+                _isLoadingDelete.value = false
+                dismissDialog()
+            }
+        }
     }
 
     fun searchSalesStalls() {

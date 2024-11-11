@@ -12,7 +12,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface SalesStallsApiService {
-    @GET("sales-stalls")
+    @GET("sales-stalls/all")
     suspend fun search(
         @Query("search") search: String,
         @Query("page") page: Int,

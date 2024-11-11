@@ -6,7 +6,7 @@ data class SalesStallsModel(
     @SerializedName("_id")
     val id: String,
     val name: String,
-    val photo: String,
+    val photo: String?,
     val description: String,
     val type: String,
     val probation: Boolean,

@@ -24,20 +24,19 @@ class SalesStallsPagingSource(
                 sort = sort
             )
 
-            val users = response.data?.results ?: emptyList()
+            val salesStalls = response.data?.results ?: emptyList()
             onUpdateTotal(response.data?.count ?: 0)
-
             LoadResult.Page(
-                data = users,
+                data = salesStalls,
                 prevKey = if (currentPage == 1) null else currentPage - 1,
-                nextKey = if (users.isEmpty()) null else currentPage + 1
+                nextKey = if (salesStalls.isEmpty()) null else currentPage + 1
             )
         } catch (e: HttpException) {
             val errorMessage = evaluateHttpException(e)
-            Log.e("dev-debug", "Error paginación: $errorMessage")
+            Log.e("dev-debug", "Error paginación HttpExpeception: $errorMessage")
             LoadResult.Error(e)
         } catch (e: Exception) {
-            Log.e("dev-debug", "Error paginación ${e.message}")
+            Log.e("dev-debug", "Error paginación Exception ${e.message}")
             LoadResult.Error(e)
         }
     }
