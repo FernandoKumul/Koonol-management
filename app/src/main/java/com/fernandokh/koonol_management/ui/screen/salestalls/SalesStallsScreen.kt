@@ -336,7 +336,7 @@ private fun CardSalesStallItem(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .clip(CircleShape)
-                    .size(64.dp)
+                    .size(48.dp)
             )
         } else {
             Image(
@@ -345,22 +345,27 @@ private fun CardSalesStallItem(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .clip(CircleShape)
-                    .size(64.dp)
+                    .size(48.dp)
             )
         }
         Column(
             Modifier.weight(1f),
         ) {
             Text(
-                text = "${salesStall.name} · ${salesStall.type}",
+                text = salesStall.name,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Medium,
                 fontSize = 17.sp
             )
             Text(
-                text = salesStall.description,
+                text = salesStall.type,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 14.sp
+                fontSize = 15.sp
+            )
+            Text(
+                text = salesStall.subCategoryId.name,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 15.sp
             )
         }
         IconButton(
