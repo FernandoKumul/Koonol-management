@@ -5,9 +5,10 @@ import com.google.gson.annotations.SerializedName
 data class SalesStallsModel(
     @SerializedName("_id")
     val id: String,
+    val sellerId: SellerModel,
     val subCategoryId: SubCategoryModel,
     val name: String,
-    val photo: String?,
+    val photos: ArrayList<String>?,
     val description: String,
     val type: String,
     val probation: Boolean,

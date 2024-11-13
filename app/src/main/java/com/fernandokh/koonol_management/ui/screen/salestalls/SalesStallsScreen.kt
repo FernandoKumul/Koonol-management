@@ -329,9 +329,9 @@ private fun CardSalesStallItem(
         Modifier.padding(16.dp, 14.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        if (salesStall.photo != null) {
+        if (salesStall.photos != null) {
             AsyncImage(
-                model = salesStall.photo,
+                model = salesStall.photos[0],
                 contentDescription = "img_SalesStalls",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -340,7 +340,7 @@ private fun CardSalesStallItem(
             )
         } else {
             Image(
-                painter = painterResource(R.drawable.default_user),
+                painter = painterResource(R.drawable.default_image),
                 contentDescription = "img_SalesStalls",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
