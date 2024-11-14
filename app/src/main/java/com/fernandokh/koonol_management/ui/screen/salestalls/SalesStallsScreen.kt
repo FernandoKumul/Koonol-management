@@ -278,15 +278,17 @@ private fun SalesStallsList(
 
         when {
             salesstalls.loadState.append is LoadState.NotLoading && salesstalls.loadState.append.endOfPaginationReached -> {
-                item {
-                    Text(
-                        text = "Has llegado al final de la lista",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(0.dp, 12.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
+                if (salesstalls.itemCount >= 7) {
+                    item {
+                        Text(
+                            text = "Has llegado al final de la lista",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(0.dp, 12.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
 
