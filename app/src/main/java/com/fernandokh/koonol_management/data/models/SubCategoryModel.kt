@@ -6,6 +6,6 @@ data class SubCategoryModel(
     @SerializedName("_id")
     val id: String,
     val name: String,
-    val categoryId: String,
+    val categoryId: CategoryModel,
     val creationDate: String
 )

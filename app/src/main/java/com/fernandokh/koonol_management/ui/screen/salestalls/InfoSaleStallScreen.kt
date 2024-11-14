@@ -192,6 +192,8 @@ private fun InfoSaleStall(saleStall: SalesStallsModel) {
             Spacer(Modifier.height(24.dp))
             InformationField("Vendedor", "${saleStall.sellerId.name} ${saleStall.sellerId.lastName}")
             Spacer(Modifier.height(24.dp))
+            InformationField("Categoría", saleStall.subCategoryId.categoryId.name)
+            Spacer(Modifier.height(24.dp))
             InformationField("SubCategoría", saleStall.subCategoryId.name)
             Spacer(Modifier.height(24.dp))
             InformationField("Tipo de puesto", saleStall.type)

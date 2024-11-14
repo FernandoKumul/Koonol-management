@@ -355,7 +355,7 @@ private fun CardSalesStallItem(
         ) {
             Text(
                 text = salesStall.name,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontWeight = FontWeight.Medium,
                 fontSize = 17.sp
             )
