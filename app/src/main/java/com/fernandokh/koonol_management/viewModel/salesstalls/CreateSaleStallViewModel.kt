@@ -1,13 +1,19 @@
 package com.fernandokh.koonol_management.viewModel.salesstalls
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.SalesStallsApiService
+import com.fernandokh.koonol_management.data.models.SaleStallCreateEditModel
 import com.fernandokh.koonol_management.utils.NavigationEvent
+import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 data class FormErrors(
     val sellerIdError: String? = null,
@@ -83,12 +89,43 @@ class CreateSaleStallViewModel : ViewModel() {
 
     private val _dirtyForm = MutableStateFlow(false)
 
+    private val photosList = ArrayList<String>()
+
+    private fun managePhotosList() {
+        if (isSecondPhoto.value == null && isThirdPhoto.value == null) {
+            photosList.add(isPrincipalPhoto.value)
+            isSecondPhoto.value?.let { photosList.add(it) }
+            isThirdPhoto.value?.let { photosList.add(it) }
+        } else if (isSecondPhoto.value == null) {
+            photosList.add(isPrincipalPhoto.value)
+            isSecondPhoto.value?.let { photosList.add(it) }
+        } else if (isThirdPhoto.value == null) {
+            photosList.add(isPrincipalPhoto.value)
+            isThirdPhoto.value?.let { photosList.add(it) }
+        } else {
+            photosList.add(isPrincipalPhoto.value)
+        }
+    }
+
     private fun showToast(message: String) {
         _toastMessage.value = message
     }
 
     fun resetToastMessage() {
         _toastMessage.value = null
+    }
+
+    fun onSellerIdChange(value: String) {
+        _sellerId.value = value
+        if (_dirtyForm.value) {
+            validateSellerId()
+        }
+    }
+    fun onSubCategoryIdChange(value: String) {
+        _subCategoryId.value = value
+        if (_dirtyForm.value) {
+            validateSubCategoryId()
+        }
     }
 
     fun onNameChange(value: String) {
@@ -98,10 +135,87 @@ class CreateSaleStallViewModel : ViewModel() {
         }
     }
 
+    fun onPrincipalPhotoChange(value: String) {
+        _isPrincipalPhoto.value = value
+        if (_dirtyForm.value) {
+            validatePrincipalPhoto()
+        }
+    }
+
+    fun onSecondPhotoChange(value: String?) {
+        _isSecondPhoto.value = value
+    }
+
+    fun onThirdPhotoChange(value: String?) {
+        _isThirdPhoto.value = value
+    }
+
     fun onDescriptionChange(value: String) {
         _description.value = value
         if (_dirtyForm.value) {
             validateDescription()
+        }
+    }
+
+    fun onTypeChange(value: String) {
+        _type.value = value
+        if (_dirtyForm.value) {
+            validateType()
+        }
+    }
+
+    fun onProbationChange(value: Boolean) {
+        _probation.value = value
+        if (_dirtyForm.value) {
+            validateProbation()
+        }
+    }
+
+    fun onActiveChange(value: Boolean) {
+        _active.value = value
+        if (_dirtyForm.value) {
+            validateActive()
+        }
+    }
+
+    fun dismissDialog() {
+        _isShowDialog.value = false
+    }
+
+    fun showDialog() {
+        _isShowDialog.value = true
+    }
+
+    fun createSaleStall() {
+        managePhotosList()
+
+        val saleStall = SaleStallCreateEditModel(
+            sellerId = _sellerId.value,
+            subCategoryId = _subCategoryId.value,
+            name = _isName.value,
+            photos = photosList,
+            description = _description.value,
+            type = _type.value,
+            probation = _probation.value,
+            active = _active.value
+        )
+
+        viewModelScope.launch {
+            try {
+                _isLoadingCreate.value = true
+                apiService.createSalesStalls(saleStall)
+                showToast("Puesto agregado con éxito")
+                _navigationEvent.send(NavigationEvent.Navigate)
+            } catch (e: HttpException) {
+                val errorMessage = evaluateHttpException(e)
+                showToast(errorMessage)
+            } catch (e: Exception) {
+                Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
+                showToast("Ocurrio un error al crear el puesto")
+            } finally {
+                _isLoadingCreate.value = false
+                dismissDialog()
+            }
         }
     }
 
@@ -183,4 +297,18 @@ class CreateSaleStallViewModel : ViewModel() {
             _formErrors.value = _formErrors.value.copy(activeError = null)
         }
     }
+
+    fun isFormValid(): Boolean {
+        validateSellerId()
+        validateSubCategoryId()
+        validateName()
+        validatePrincipalPhoto()
+        validateDescription()
+        validateType()
+        validateProbation()
+        validateActive()
+
+        return _formErrors.value.allErrors().all { it == null }
+    }
+
 }

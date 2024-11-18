@@ -206,12 +206,3 @@ private fun InfoSaleStall(saleStall: SalesStallsModel) {
         }
     }
 }
-
-
-@Preview(showSystemUi = true, showBackground = true)
-@Composable
-fun InfoSaleStallScreenPreview() {
-    KoonolmanagementTheme(dynamicColor = false) {
-        InfoSaleStallScreen(navController = rememberNavController(), saleStallId = 1.toString())
-    }
-}
