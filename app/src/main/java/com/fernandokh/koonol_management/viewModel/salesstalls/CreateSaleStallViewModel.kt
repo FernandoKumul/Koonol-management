@@ -48,8 +48,8 @@ class CreateSaleStallViewModel : ViewModel() {
     private val _isLoadingCreate = MutableStateFlow(false)
     val isLoadingCreate: StateFlow<Boolean> = _isLoadingCreate
 
-    private val _isPrincipalPhoto = MutableStateFlow<String>("")
-    val isPrincipalPhoto: StateFlow<String> = _isPrincipalPhoto
+    private val _isPrincipalPhoto = MutableStateFlow<String?>(null)
+    val isPrincipalPhoto: StateFlow<String?> = _isPrincipalPhoto
 
     private val _isSecondPhoto = MutableStateFlow<String?>(null)
     val isSecondPhoto: StateFlow<String?> = _isSecondPhoto
@@ -93,17 +93,17 @@ class CreateSaleStallViewModel : ViewModel() {
 
     private fun managePhotosList() {
         if (isSecondPhoto.value == null && isThirdPhoto.value == null) {
-            photosList.add(isPrincipalPhoto.value)
+            isPrincipalPhoto.value?.let { photosList.add(it) }
             isSecondPhoto.value?.let { photosList.add(it) }
             isThirdPhoto.value?.let { photosList.add(it) }
         } else if (isSecondPhoto.value == null) {
-            photosList.add(isPrincipalPhoto.value)
+            isPrincipalPhoto.value?.let { photosList.add(it) }
             isSecondPhoto.value?.let { photosList.add(it) }
         } else if (isThirdPhoto.value == null) {
-            photosList.add(isPrincipalPhoto.value)
+            isPrincipalPhoto.value?.let { photosList.add(it) }
             isThirdPhoto.value?.let { photosList.add(it) }
         } else {
-            photosList.add(isPrincipalPhoto.value)
+            isPrincipalPhoto.value?.let { photosList.add(it) }
         }
     }
 
@@ -135,7 +135,7 @@ class CreateSaleStallViewModel : ViewModel() {
         }
     }
 
-    fun onPrincipalPhotoChange(value: String) {
+    fun onPrincipalPhotoChange(value: String?) {
         _isPrincipalPhoto.value = value
         if (_dirtyForm.value) {
             validatePrincipalPhoto()
@@ -250,9 +250,9 @@ class CreateSaleStallViewModel : ViewModel() {
 
     private fun validatePrincipalPhoto() {
         val photo = _isPrincipalPhoto.value
-        if (photo.isBlank()) {
+        if (photo == null) {
             _formErrors.value =
-                _formErrors.value.copy(principalPhotoError = "La foto principal es requerida")
+                _formErrors.value.copy(principalPhotoError = "La imagen principal es requerida")
         } else {
             _formErrors.value = _formErrors.value.copy(principalPhotoError = null)
         }

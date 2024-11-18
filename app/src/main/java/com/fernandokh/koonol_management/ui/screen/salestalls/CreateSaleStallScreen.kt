@@ -33,7 +33,7 @@ import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
 import com.fernandokh.koonol_management.ui.components.shared.CustomTextField
-import com.fernandokh.koonol_management.ui.components.shared.MyUploadImage
+import com.fernandokh.koonol_management.ui.components.shared.UploadImage
 import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.viewModel.salesstalls.CreateSaleStallViewModel
 import java.io.File
@@ -44,11 +44,6 @@ fun CreateSaleStallScreen(
     viewModel: CreateSaleStallViewModel = viewModel()
 ) {
     val context = LocalContext.current
-    val cacheDir: File = context.cacheDir
-
-    val principalPhoto by viewModel.isPrincipalPhoto.collectAsState()
-    val secondPhoto by viewModel.isSecondPhoto.collectAsState()
-    val thirdPhoto by viewModel.isThirdPhoto.collectAsState()
     val isLoadingCreate by viewModel.isLoadingCreate.collectAsState()
     val isShowDialog by viewModel.isShowDialog.collectAsState()
 
@@ -97,23 +92,6 @@ fun CreateSaleStallScreen(
                     .padding(0.dp, 16.dp, 0.dp, 40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                MyUploadImage(
-                    directory = File(cacheDir, "images"),
-                    url = principalPhoto,
-                    onSetImage = {
-                        if (it != null) {
-                            viewModel.onPrincipalPhotoChange(it)
-                        }
-                    })
-                MyUploadImage(
-                    directory = File(cacheDir, "images"),
-                    url = secondPhoto,
-                    onSetImage = { viewModel.onSecondPhotoChange(it) })
-                MyUploadImage(
-                    directory = File(cacheDir, "images"),
-                    url = thirdPhoto,
-                    onSetImage = { viewModel.onThirdPhotoChange(it) })
-                Spacer(modifier = Modifier.height(20.dp))
                 FormSaleStall(viewModel)
 
                 if (isShowDialog) {
@@ -133,10 +111,16 @@ fun CreateSaleStallScreen(
 
 @Composable
 private fun FormSaleStall(viewModel: CreateSaleStallViewModel) {
+    val context = LocalContext.current
+    val cacheDir: File = context.cacheDir
+
     val formErrors by viewModel.formErrors.collectAsState()
     val name by viewModel.isName.collectAsState()
     val description by viewModel.description.collectAsState()
     val type by viewModel.type.collectAsState()
+    val principalPhoto by viewModel.isPrincipalPhoto.collectAsState()
+    val secondPhoto by viewModel.isSecondPhoto.collectAsState()
+    val thirdPhoto by viewModel.isThirdPhoto.collectAsState()
     val probation by viewModel.probation.collectAsState()
     val active by viewModel.active.collectAsState()
 
@@ -167,6 +151,24 @@ private fun FormSaleStall(viewModel: CreateSaleStallViewModel) {
             error = formErrors.descriptionError != null,
             errorMessage = formErrors.descriptionError
         )
+        Spacer(Modifier.height(16.dp))
+        Text("Imagen principal", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        UploadImage(
+            directory = File(cacheDir, "images"),
+            url = principalPhoto,
+            onSetImage = { viewModel.onPrincipalPhotoChange(it) })
+        Spacer(Modifier.height(16.dp))
+        Text("Imagenes secundarias", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(16.dp))
+        UploadImage(
+            directory = File(cacheDir, "images"),
+            url = secondPhoto,
+            onSetImage = { viewModel.onSecondPhotoChange(it) })
+        Spacer(Modifier.height(16.dp))
+        UploadImage(
+            directory = File(cacheDir, "images"),
+            url = thirdPhoto,
+            onSetImage = { viewModel.onThirdPhotoChange(it) })
         Spacer(Modifier.height(16.dp))
         Text("Tipo", color = MaterialTheme.colorScheme.onSurfaceVariant)
         CustomTextField(
