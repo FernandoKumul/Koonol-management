@@ -33,15 +33,18 @@ import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
 import com.fernandokh.koonol_management.ui.components.shared.CustomTextField
+import com.fernandokh.koonol_management.ui.components.shared.DropdownList
 import com.fernandokh.koonol_management.ui.components.shared.UploadImage
 import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.viewModel.salesstalls.CreateSaleStallViewModel
+import com.fernandokh.koonol_management.viewModel.sellers.SellersViewModel
 import java.io.File
 
 @Composable
 fun CreateSaleStallScreen(
     navController: NavHostController,
-    viewModel: CreateSaleStallViewModel = viewModel()
+    viewModel: CreateSaleStallViewModel = viewModel(),
+    sellerViewModel: SellersViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val isLoadingCreate by viewModel.isLoadingCreate.collectAsState()
@@ -57,6 +60,10 @@ fun CreateSaleStallScreen(
                 }
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        sellerViewModel.getAllSellers()
     }
 
     LaunchedEffect(toastMessage) {
@@ -92,7 +99,7 @@ fun CreateSaleStallScreen(
                     .padding(0.dp, 16.dp, 0.dp, 40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                FormSaleStall(viewModel)
+                FormSaleStall(viewModel, sellerViewModel)
 
                 if (isShowDialog) {
                     AlertDialogC(
@@ -110,12 +117,14 @@ fun CreateSaleStallScreen(
 }
 
 @Composable
-private fun FormSaleStall(viewModel: CreateSaleStallViewModel) {
+private fun FormSaleStall(viewModel: CreateSaleStallViewModel, sellerViewModel: SellersViewModel) {
     val context = LocalContext.current
     val cacheDir: File = context.cacheDir
 
     val formErrors by viewModel.formErrors.collectAsState()
     val name by viewModel.isName.collectAsState()
+    val sellersList by sellerViewModel.sellersList.collectAsState()
+    val sellerId by viewModel.sellerId.collectAsState()
     val description by viewModel.description.collectAsState()
     val type by viewModel.type.collectAsState()
     val principalPhoto by viewModel.isPrincipalPhoto.collectAsState()
@@ -143,6 +152,25 @@ private fun FormSaleStall(viewModel: CreateSaleStallViewModel) {
             errorMessage = formErrors.nameError
         )
         Spacer(Modifier.height(16.dp))
+        Text("Vendedor", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        DropdownList(
+            items = sellersList,
+            selectedItem = sellersList.find { it.id == sellerId },
+            onItemSelected = { selectedSeller ->
+                viewModel.onSellerIdChange(selectedSeller.id)
+            },
+            itemLabel = { it.name }, // Muestra el nombre del vendedor
+            label = "Selecciona un vendedor",
+        )
+        Spacer(Modifier.height(16.dp))
+        Text("SubCategoria", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(16.dp))
+        Text("Tipo", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(16.dp))
+        Text("Periodo de prueba", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(16.dp))
+        Text("Estado", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(16.dp))
         Text("Descripción", color = MaterialTheme.colorScheme.onSurfaceVariant)
         CustomTextField(
             description,
@@ -153,6 +181,7 @@ private fun FormSaleStall(viewModel: CreateSaleStallViewModel) {
         )
         Spacer(Modifier.height(16.dp))
         Text("Imagen principal", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(16.dp))
         UploadImage(
             directory = File(cacheDir, "images"),
             url = principalPhoto,
@@ -169,14 +198,5 @@ private fun FormSaleStall(viewModel: CreateSaleStallViewModel) {
             directory = File(cacheDir, "images"),
             url = thirdPhoto,
             onSetImage = { viewModel.onThirdPhotoChange(it) })
-        Spacer(Modifier.height(16.dp))
-        Text("Tipo", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(
-            type,
-            { viewModel.onTypeChange(it) },
-            "Ingresa el tipo del puesto",
-            error = formErrors.typeError != null,
-            errorMessage = formErrors.typeError
-        )
     }
 }

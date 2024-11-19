@@ -62,6 +62,9 @@ class SellersViewModel : ViewModel() {
     private val _sellerPagingFlow = MutableStateFlow<PagingData<SellerModel>>(PagingData.empty())
     val sellerPagingFlow: StateFlow<PagingData<SellerModel>> = _sellerPagingFlow
 
+    private val _sellersList = MutableStateFlow<List<SellerModel>>(emptyList())
+    val sellersList: StateFlow<List<SellerModel>> = _sellersList
+
     private fun showToast(message: String) {
         _toastMessage.value = message
     }
@@ -134,6 +137,27 @@ class SellersViewModel : ViewModel() {
             pager.collect { pagingData ->
                 _sellerPagingFlow.value = pagingData
                 _isLoadingDelete.value = false
+            }
+        }
+    }
+
+    fun getAllSellers() {
+        viewModelScope.launch {
+            try {
+                val response = apiService.getAllSellers()
+                if (response.success) {
+                    Log.i("dev-debug", "Lista obtenida con éxito")
+                    _sellersList.value = response.data!!
+                } else {
+                    showToast("No se encontraron vendedores")
+                }
+                _isLoading.value = false
+            } catch (e: HttpException) {
+                val errorMessage = evaluateHttpException(e)
+                showToast(errorMessage)
+            } catch (e: Exception) {
+                Log.i("dev-debug", e.message ?: "Ah ocurrido un error")
+                showToast("Ocurrio un error al obtener los vendedores")
             }
         }
     }
