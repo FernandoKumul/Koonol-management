@@ -15,26 +15,25 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
+data class Option(
+    val name: String,
+    val value: Boolean
+)
+
 data class FormErrors(
     val sellerIdError: String? = null,
     val subCategoryIdError: String? = null,
     val nameError: String? = null,
-    val principalPhotoError: String? = null,
     val descriptionError: String? = null,
     val typeError: String? = null,
-    val probationError: String? = null,
-    val activeError: String? = null,
 ) {
     fun allErrors(): List<String?> {
         return listOf(
             sellerIdError,
             subCategoryIdError,
             nameError,
-            principalPhotoError,
             descriptionError,
             typeError,
-            probationError,
-            activeError
         )
     }
 }
@@ -107,6 +106,17 @@ class CreateSaleStallViewModel : ViewModel() {
         }
     }
 
+    val probationOptions = listOf(
+        Option("Sí", true),
+        Option("No", false)
+    )
+
+    val activeOptions = listOf(
+        Option("Activo", true),
+        Option("Inactivo", false)
+    )
+
+
     private fun showToast(message: String) {
         _toastMessage.value = message
     }
@@ -137,9 +147,6 @@ class CreateSaleStallViewModel : ViewModel() {
 
     fun onPrincipalPhotoChange(value: String?) {
         _isPrincipalPhoto.value = value
-        if (_dirtyForm.value) {
-            validatePrincipalPhoto()
-        }
     }
 
     fun onSecondPhotoChange(value: String?) {
@@ -166,16 +173,10 @@ class CreateSaleStallViewModel : ViewModel() {
 
     fun onProbationChange(value: Boolean) {
         _probation.value = value
-        if (_dirtyForm.value) {
-            validateProbation()
-        }
     }
 
     fun onActiveChange(value: Boolean) {
         _active.value = value
-        if (_dirtyForm.value) {
-            validateActive()
-        }
     }
 
     fun dismissDialog() {
@@ -248,16 +249,6 @@ class CreateSaleStallViewModel : ViewModel() {
         }
     }
 
-    private fun validatePrincipalPhoto() {
-        val photo = _isPrincipalPhoto.value
-        if (photo == null) {
-            _formErrors.value =
-                _formErrors.value.copy(principalPhotoError = "La imagen principal es requerida")
-        } else {
-            _formErrors.value = _formErrors.value.copy(principalPhotoError = null)
-        }
-    }
-
     private fun validateDescription() {
         val description = _description.value
         if (description.isBlank()) {
@@ -278,36 +269,13 @@ class CreateSaleStallViewModel : ViewModel() {
         }
     }
 
-    private fun validateProbation() {
-        val probation = _probation.value
-        if (probation) {
-            _formErrors.value =
-                _formErrors.value.copy(probationError = "El periodo de prueba es requerida")
-        } else {
-            _formErrors.value = _formErrors.value.copy(probationError = null)
-        }
-    }
-
-    private fun validateActive() {
-        val active = _active.value
-        if (active) {
-            _formErrors.value =
-                _formErrors.value.copy(activeError = "El estado del puesto es requerido")
-        } else {
-            _formErrors.value = _formErrors.value.copy(activeError = null)
-        }
-    }
-
     fun isFormValid(): Boolean {
         validateSellerId()
         validateSubCategoryId()
         validateName()
-        validatePrincipalPhoto()
         validateDescription()
         validateType()
-        validateProbation()
-        validateActive()
-
+        Log.i("dev-debug", _formErrors.value.allErrors().toString())
         return _formErrors.value.allErrors().all { it == null }
     }
 

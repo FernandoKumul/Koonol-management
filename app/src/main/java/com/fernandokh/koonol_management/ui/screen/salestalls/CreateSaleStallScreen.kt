@@ -33,9 +33,10 @@ import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
 import com.fernandokh.koonol_management.ui.components.shared.CustomTextField
-import com.fernandokh.koonol_management.ui.components.shared.DropdownList
+import com.fernandokh.koonol_management.ui.components.shared.DropdownInputForm
 import com.fernandokh.koonol_management.ui.components.shared.UploadImage
 import com.fernandokh.koonol_management.utils.NavigationEvent
+import com.fernandokh.koonol_management.viewModel.categories.CategoriesViewModel
 import com.fernandokh.koonol_management.viewModel.salesstalls.CreateSaleStallViewModel
 import com.fernandokh.koonol_management.viewModel.sellers.SellersViewModel
 import java.io.File
@@ -44,7 +45,8 @@ import java.io.File
 fun CreateSaleStallScreen(
     navController: NavHostController,
     viewModel: CreateSaleStallViewModel = viewModel(),
-    sellerViewModel: SellersViewModel = viewModel()
+    sellerViewModel: SellersViewModel = viewModel(),
+    categoriesViewModel: CategoriesViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val isLoadingCreate by viewModel.isLoadingCreate.collectAsState()
@@ -64,6 +66,7 @@ fun CreateSaleStallScreen(
 
     LaunchedEffect(Unit) {
         sellerViewModel.getAllSellers()
+        categoriesViewModel.getAllSubcategories()
     }
 
     LaunchedEffect(toastMessage) {
@@ -99,7 +102,7 @@ fun CreateSaleStallScreen(
                     .padding(0.dp, 16.dp, 0.dp, 40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                FormSaleStall(viewModel, sellerViewModel)
+                FormSaleStall(viewModel, sellerViewModel, categoriesViewModel)
 
                 if (isShowDialog) {
                     AlertDialogC(
@@ -117,7 +120,11 @@ fun CreateSaleStallScreen(
 }
 
 @Composable
-private fun FormSaleStall(viewModel: CreateSaleStallViewModel, sellerViewModel: SellersViewModel) {
+private fun FormSaleStall(
+    viewModel: CreateSaleStallViewModel,
+    sellerViewModel: SellersViewModel,
+    categoriesViewModel: CategoriesViewModel
+) {
     val context = LocalContext.current
     val cacheDir: File = context.cacheDir
 
@@ -125,12 +132,16 @@ private fun FormSaleStall(viewModel: CreateSaleStallViewModel, sellerViewModel: 
     val name by viewModel.isName.collectAsState()
     val sellersList by sellerViewModel.sellersList.collectAsState()
     val sellerId by viewModel.sellerId.collectAsState()
+    val subCategoriesList by categoriesViewModel.subCategoriesList.collectAsState()
+    val subCategoryId by viewModel.subCategoryId.collectAsState()
     val description by viewModel.description.collectAsState()
     val type by viewModel.type.collectAsState()
     val principalPhoto by viewModel.isPrincipalPhoto.collectAsState()
     val secondPhoto by viewModel.isSecondPhoto.collectAsState()
     val thirdPhoto by viewModel.isThirdPhoto.collectAsState()
+    val probationList = viewModel.probationOptions
     val probation by viewModel.probation.collectAsState()
+    val activeList = viewModel.activeOptions
     val active by viewModel.active.collectAsState()
 
     Column(
@@ -152,24 +163,54 @@ private fun FormSaleStall(viewModel: CreateSaleStallViewModel, sellerViewModel: 
             errorMessage = formErrors.nameError
         )
         Spacer(Modifier.height(16.dp))
-        Text("Vendedor", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        DropdownList(
+        DropdownInputForm(
             items = sellersList,
             selectedItem = sellersList.find { it.id == sellerId },
             onItemSelected = { selectedSeller ->
                 viewModel.onSellerIdChange(selectedSeller.id)
             },
-            itemLabel = { it.name }, // Muestra el nombre del vendedor
+            itemLabel = { it.name },
             label = "Selecciona un vendedor",
         )
         Spacer(Modifier.height(16.dp))
-        Text("SubCategoria", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        DropdownInputForm(
+            items = subCategoriesList,
+            selectedItem = subCategoriesList.find { it.id == subCategoryId },
+            onItemSelected = { selectedSubCategory ->
+                viewModel.onSubCategoryIdChange(selectedSubCategory.id)
+            },
+            itemLabel = { it.name },
+            label = "Selecciona una subcategoría",
+        )
         Spacer(Modifier.height(16.dp))
         Text("Tipo", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        CustomTextField(
+            type,
+            { viewModel.onTypeChange(it) },
+            "Ingresa el tipo del puesto",
+            error = formErrors.typeError != null,
+            errorMessage = formErrors.typeError
+        )
         Spacer(Modifier.height(16.dp))
-        Text("Periodo de prueba", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        DropdownInputForm(
+            items = probationList,
+            selectedItem = probationList.find { it.value == probation },
+            onItemSelected = { selectedProbation ->
+                viewModel.onProbationChange(selectedProbation.value)
+            },
+            itemLabel = { it.name },
+            label = "Selecciona si el puesto es de prueba",
+        )
         Spacer(Modifier.height(16.dp))
-        Text("Estado", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        DropdownInputForm(
+            items = activeList,
+            selectedItem = activeList.find { it.value == active },
+            onItemSelected = { selectedActive ->
+                viewModel.onActiveChange(selectedActive.value)
+            },
+            itemLabel = { it.name },
+            label = "Selecciona el estado del puesto",
+        )
         Spacer(Modifier.height(16.dp))
         Text("Descripción", color = MaterialTheme.colorScheme.onSurfaceVariant)
         CustomTextField(
