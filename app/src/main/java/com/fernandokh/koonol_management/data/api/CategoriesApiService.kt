@@ -5,12 +5,14 @@ import com.fernandokh.koonol_management.data.models.CategoryModel
 import com.fernandokh.koonol_management.data.models.SearchModel
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface CategoriesApiService {
     @GET("category")
     suspend fun search(
+        @Header("Authorization") authHeader: String,
         @Query("search") search: String,
         @Query("page") page: Int,
         @Query("limit") limit: Int,
@@ -18,5 +20,5 @@ interface CategoriesApiService {
     ): ApiResponse<SearchModel<CategoryModel>>
 
     @DELETE("category/{id}")
-    suspend fun deleteCategoryById(@Path("id") id: String): ApiResponse<CategoryModel>
+    suspend fun deleteCategoryById(@Header("Authorization") authHeader: String, @Path("id") id: String): ApiResponse<CategoryModel>
 }

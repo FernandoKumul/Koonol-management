@@ -10,6 +10,7 @@ import retrofit2.HttpException
 
 class CategoryPagingSource (
     private val apiService: CategoriesApiService,
+    private val token: String,
     private val search: String,
     private val sort: String,
     private val onUpdateTotal: (Int) -> Unit
@@ -19,6 +20,7 @@ class CategoryPagingSource (
             val currentPage = params.key ?: 1
 
             val response = apiService.search(
+                authHeader = "Bearer $token",
                 page = currentPage,
                 limit = params.loadSize,
                 search = search,

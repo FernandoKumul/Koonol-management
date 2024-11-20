@@ -52,6 +52,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.data.models.CategoryModel
+import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.components.router.TopBarMenuTitle
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
 import com.fernandokh.koonol_management.ui.components.shared.CustomSelect
@@ -62,12 +63,16 @@ import com.fernandokh.koonol_management.utils.MenuItem
 import com.fernandokh.koonol_management.utils.MenuItem.Divider
 import com.fernandokh.koonol_management.utils.MenuItem.Option
 import com.fernandokh.koonol_management.viewModel.categories.CategoriesViewModel
+import com.fernandokh.koonol_management.viewModel.categories.CategoriesViewModelFactory
 
 @Composable
 fun CategoriesScreen(
     navController: NavHostController,
     drawerState: DrawerState,
-    viewModel: CategoriesViewModel = viewModel()
+    tokenManager: TokenManager,
+    viewModel: CategoriesViewModel = viewModel(
+        factory = CategoriesViewModelFactory(tokenManager)
+    )
 ) {
     val categories = viewModel.userPagingFlow.collectAsLazyPagingItems()
     val totalRecords by viewModel.isTotalRecords.collectAsState()
@@ -77,7 +82,9 @@ fun CategoriesScreen(
     val toastMessage by viewModel.toastMessage.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.searchCategories()
+        tokenManager.accessToken.collect { token ->
+            viewModel.searchCategories(token)
+        }
     }
 
     LaunchedEffect(toastMessage) {
