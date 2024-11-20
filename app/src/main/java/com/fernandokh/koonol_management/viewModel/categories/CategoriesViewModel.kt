@@ -2,6 +2,7 @@ package com.fernandokh.koonol_management.viewModel.categories
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -11,14 +12,26 @@ import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.CategoriesApiService
 import com.fernandokh.koonol_management.data.models.CategoryModel
 import com.fernandokh.koonol_management.data.pagingSource.CategoryPagingSource
+import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.utils.SelectOption
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
-class CategoriesViewModel : ViewModel() {
+class CategoriesViewModelFactory(private val tokenManager: TokenManager) :
+    ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(CategoriesViewModel::class.java)) {
+            return CategoriesViewModel(tokenManager) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class CategoriesViewModel(private val tokenManager: TokenManager) : ViewModel() {
     val optionsSort = listOf(
         SelectOption("Más nuevos", "newest"),
         SelectOption("Más viejos", "oldest"),
@@ -27,6 +40,9 @@ class CategoriesViewModel : ViewModel() {
     )
 
     private val apiService = RetrofitInstance.create(CategoriesApiService::class.java)
+
+    private val _accessToken = MutableStateFlow("")
+    val accessToken: StateFlow<String> = _accessToken
 
     private val _toastMessage = MutableStateFlow<String?>(null)
     val toastMessage: StateFlow<String?> get() = _toastMessage
@@ -80,6 +96,13 @@ class CategoriesViewModel : ViewModel() {
         _isCategoryToDelete.value = null
     }
 
+    init {
+        viewModelScope.launch {
+            val savedToken = tokenManager.accessToken.first()
+            _accessToken.value = savedToken
+        }
+    }
+
     fun deleteCategory() {
         viewModelScope.launch {
             try {
@@ -89,7 +112,7 @@ class CategoriesViewModel : ViewModel() {
                     return@launch
                 }
 
-                apiService.deleteCategoryById(idCategory)
+                apiService.deleteCategoryById("Bearer ${_accessToken.value}", idCategory)
                 searchCategories()
                 Log.i("dev-debug", "Categoría borrado con el id: $idCategory")
                 showToast("Categoría borrado con éxito")
@@ -108,13 +131,14 @@ class CategoriesViewModel : ViewModel() {
     }
 
 
-    fun searchCategories() {
+    fun searchCategories(token: String = _accessToken.value) {
         _isLoadingDelete.value = true
         viewModelScope.launch {
             val pager =
                 Pager(PagingConfig(pageSize = 20, prefetchDistance = 3, initialLoadSize = 20)) {
                     CategoryPagingSource(
                         apiService,
+                        token,
                         _isValueSearch.value,
                         _isSortOption.value.value,
                     ) {

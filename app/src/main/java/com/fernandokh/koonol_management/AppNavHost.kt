@@ -1,6 +1,5 @@
 package com.fernandokh.koonol_management
 
-import android.util.Log
 import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -122,7 +121,7 @@ fun AppNavHost(
         protectedComposable(Screen.Tianguis.route, navController, tokenManager) { TianguisScreen(navController, drawerState) }
         protectedComposable(Screen.SalesStalls.route, navController, tokenManager) { SalesStallsScreen(navController, drawerState) }
         protectedComposable(Screen.Promotions.route, navController, tokenManager) { PromotionsScreen(navController, drawerState) }
-        protectedComposable(Screen.Categories.route, navController, tokenManager) { CategoriesScreen(navController, drawerState) }
+        protectedComposable(Screen.Categories.route, navController, tokenManager) { CategoriesScreen(navController, drawerState, tokenManager) }
         protectedComposable(Screen.Profile.route, navController, tokenManager) { ProfileScreen(navController, drawerState, tokenManager) }
         protectedComposable(Screen.EditProfile.route, navController, tokenManager) { EditProfileScreen(navController, tokenManager) }
         protectedComposable(Screen.ChangePassword.route, navController, tokenManager) { ChangePasswordScreen(navController, tokenManager) }
@@ -157,7 +156,7 @@ fun AppNavHost(
         protectedComposable(
             Screen.InfoCategory.route, navController, tokenManager,
             arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
-        ) { backStackEntry -> InfoCategoryScreen(navController, backStackEntry.arguments?.getString("categoryId")) }
+        ) { backStackEntry -> InfoCategoryScreen(navController, backStackEntry.arguments?.getString("categoryId"), tokenManager) }
         protectedComposable(Screen.CreateCategory.route, navController, tokenManager) { CreateCategoryScreen(navController) }
     }
 }

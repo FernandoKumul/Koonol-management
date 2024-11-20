@@ -13,8 +13,8 @@ fun evaluateHttpException(e: HttpException): String {
     val gson = Gson()
     return try {
         val error = gson.fromJson(errorBody, ApiResponseError::class.java)
-        if (error.errors.isNotEmpty()) {
-            "${error.message} | ${error.errors[0].message}"
+        if (error.errorMessages.isNotEmpty()) {
+            "${error.message} | ${error.errorMessages[0].message}"
         } else {
             error.message
         }
