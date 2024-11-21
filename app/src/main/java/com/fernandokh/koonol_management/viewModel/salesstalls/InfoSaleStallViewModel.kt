@@ -33,7 +33,7 @@ class InfoSaleStallViewModel : ViewModel() {
                 _isLoading.value = true
                 val response = apiService.getSalesStallsById(saleStallId)
                 _isSaleStall.value = response.data
-                Log.i("dev-debug", "Vendedor obtenido con éxito: $saleStallId")
+                Log.i("dev-debug", "Puesto obtenido con éxito: $saleStallId")
             } catch (e: HttpException) {
                 val messageError = evaluateHttpException(e)
                 Log.e("dev-debug", "Error al obtener el vendedor: $messageError")

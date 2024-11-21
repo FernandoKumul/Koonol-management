@@ -86,10 +86,11 @@ class SalesStallsViewModel : ViewModel() {
                     showToast("ID de vendedor inválido")
                     return@launch
                 }
-                
+                Log.i("dev-debug", "Borrando al puesto antes de la api")
                 apiService.deleteSalesStallsById(idSalesStalls)
+                Log.i("dev-debug", "Borrando al puesto despues de la api")
                 searchSalesStalls()
-                Log.i("dev-debug", "Vendedor borrado con el id: $idSalesStalls")
+                Log.i("dev-debug", "Puesto borrado con el id: $idSalesStalls")
                 showToast("Vendedor borrado con éxito")
             } catch (e: HttpException) {
                 val errorMessage = evaluateHttpException(e)

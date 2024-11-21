@@ -91,20 +91,12 @@ class CreateSaleStallViewModel : ViewModel() {
     private val photosList = ArrayList<String>()
 
     private fun managePhotosList() {
-        if (isSecondPhoto.value == null && isThirdPhoto.value == null) {
-            isPrincipalPhoto.value?.let { photosList.add(it) }
-            isSecondPhoto.value?.let { photosList.add(it) }
-            isThirdPhoto.value?.let { photosList.add(it) }
-        } else if (isSecondPhoto.value == null) {
-            isPrincipalPhoto.value?.let { photosList.add(it) }
-            isSecondPhoto.value?.let { photosList.add(it) }
-        } else if (isThirdPhoto.value == null) {
-            isPrincipalPhoto.value?.let { photosList.add(it) }
-            isThirdPhoto.value?.let { photosList.add(it) }
-        } else {
-            isPrincipalPhoto.value?.let { photosList.add(it) }
-        }
+        photosList.clear()
+        isPrincipalPhoto.value?.let { photosList.add(it) }
+        isSecondPhoto.value?.let { photosList.add(it) }
+        isThirdPhoto.value?.let { photosList.add(it) }
     }
+
 
     val probationOptions = listOf(
         Option("Sí", true),
@@ -275,7 +267,6 @@ class CreateSaleStallViewModel : ViewModel() {
         validateName()
         validateDescription()
         validateType()
-        Log.i("dev-debug", _formErrors.value.allErrors().toString())
         return _formErrors.value.allErrors().all { it == null }
     }
 
