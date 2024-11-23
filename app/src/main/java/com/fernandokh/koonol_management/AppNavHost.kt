@@ -151,7 +151,7 @@ fun AppNavHost(
             Screen.EditCategory.route, navController, tokenManager,
             arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
         ) { backStackEntry ->
-            EditCategoryScreen(navController, backStackEntry.arguments?.getString("categoryId"))
+            EditCategoryScreen(navController, backStackEntry.arguments?.getString("categoryId"), tokenManager)
         }
         protectedComposable(
             Screen.InfoCategory.route, navController, tokenManager,

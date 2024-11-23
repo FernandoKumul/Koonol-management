@@ -6,8 +6,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.CategoriesApiService
+import com.fernandokh.koonol_management.data.models.CategoryWithSubModel
 import com.fernandokh.koonol_management.data.models.CreateCategoryModel
 import com.fernandokh.koonol_management.data.models.CreateSubcategoryModel
+import com.fernandokh.koonol_management.data.models.EditCategoryModel
+import com.fernandokh.koonol_management.data.models.EditSubcategoryModel
 import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.utils.evaluateHttpException
@@ -30,17 +33,17 @@ data class SubCategoryItemList(
     val error: String? = null
 )
 
-class CreateCategoryViewModelFactory(private val tokenManager: TokenManager) :
+class CreateEditCategoryViewModelFactory(private val tokenManager: TokenManager) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(CreateCategoryViewModel::class.java)) {
-            return CreateCategoryViewModel(tokenManager) as T
+        if (modelClass.isAssignableFrom(CreateEditCategoryViewModel::class.java)) {
+            return CreateEditCategoryViewModel(tokenManager) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
 
-class CreateCategoryViewModel(private val tokenManager: TokenManager) : ViewModel() {
+class CreateEditCategoryViewModel(private val tokenManager: TokenManager) : ViewModel() {
     data class FormErrors(
         val name: String? = null,
         val recommendedRate: String? = null,
@@ -71,8 +74,17 @@ class CreateCategoryViewModel(private val tokenManager: TokenManager) : ViewMode
 
     private val _accessToken = MutableStateFlow("")
 
+    private val _isCategory = MutableStateFlow<CategoryWithSubModel?>(null)
+    val isCategory: StateFlow<CategoryWithSubModel?> = _isCategory
+
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
     private val _isLoadingCreate = MutableStateFlow(false)
     val isLoadingCreate: StateFlow<Boolean> = _isLoadingCreate
+
+    private val _isLoadingEdit = MutableStateFlow(false)
+    val isLoadingEdit: StateFlow<Boolean> = _isLoadingEdit
 
     private val _subcategories = MutableStateFlow<List<SubCategoryItemList>>(emptyList())
     val subcategories: StateFlow<List<SubCategoryItemList>> = _subcategories
@@ -128,7 +140,7 @@ class CreateCategoryViewModel(private val tokenManager: TokenManager) : ViewMode
                     "Bearer ${_accessToken.value}",
                     category
                 )
-                showToast("Categoría actualizada con éxito")
+                showToast("Categoría creada con éxito")
                 _navigationEvent.send(NavigationEvent.Navigate)
             } catch (e: HttpException) {
                 val errorMessage = evaluateHttpException(e)
@@ -140,6 +152,85 @@ class CreateCategoryViewModel(private val tokenManager: TokenManager) : ViewMode
             } finally {
                 _isLoadingCreate.value = false
                 dismissDialog()
+            }
+        }
+    }
+
+    fun updateCategory() {
+        val createSubcategories: List<EditSubcategoryModel> =
+            _subcategories.value.map {
+                EditSubcategoryModel(
+                    name = it.name,
+                    id = if (it.newItem) "" else it.id
+                )
+            }
+
+        val category = EditCategoryModel(
+            name = _form.value.name,
+            recommendedRate = _form.value.recommendedRate.toDouble(),
+            subcategories = createSubcategories
+        )
+        Log.i("dev-debug", category.toString())
+
+        viewModelScope.launch {
+            try {
+                _isLoadingEdit.value = true
+                apiService.updateCategory(
+                    "Bearer ${_accessToken.value}",
+                    _isCategory.value?.id ?: "",
+                    category
+                )
+                showToast("Categoría actualizada con éxito")
+                Log.i("dev-debug", "Antes")
+                _navigationEvent.send(NavigationEvent.Navigate)
+                Log.i("dev-debug", "Despues")
+            } catch (e: HttpException) {
+                val errorMessage = evaluateHttpException(e)
+                Log.e("dev-debug", "Error api: $errorMessage")
+                showToast(errorMessage)
+            } catch (e: Exception) {
+                Log.i("dev-debug", e.message ?: "Ha ocurrido un error")
+                showToast("Ocurrio un error al actualizar la categoría")
+            } finally {
+                _isLoadingEdit.value = false
+                dismissDialog()
+            }
+        }
+    }
+
+    fun getCategory(accessToken: String, categoryId: String) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                val response =
+                    apiService.getCategoryById("Bearer $accessToken", categoryId)
+                _isCategory.value = response.data
+                if (_isCategory.value != null) {
+                    _form.value = FormCategory(
+                        name = _isCategory.value!!.name,
+                        recommendedRate = _isCategory.value!!.recommendedRate.toString(),
+                    )
+
+                    _subcategories.value = _isCategory.value!!.subcategories.map {
+                        SubCategoryItemList(
+                            id = it.id,
+                            name = it.name,
+                            creationDate = it.creationDate,
+                            categoryId = it.categoryId,
+                            newItem = false
+                        )
+                    }
+                }
+                Log.i("dev-debug", "Categoría obtenida con éxito")
+            } catch (e: HttpException) {
+                val messageError = evaluateHttpException(e)
+                Log.e("dev-debug", "Error al obtener la categoría: $messageError")
+                _isCategory.value = null
+            } catch (e: Exception) {
+                Log.e("dev-debug", e.message ?: "Ha ocurrido un error")
+                _isCategory.value = null
+            } finally {
+                _isLoading.value = false
             }
         }
     }

@@ -48,15 +48,15 @@ import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
 import com.fernandokh.koonol_management.ui.components.shared.CustomTextField
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 import com.fernandokh.koonol_management.utils.NavigationEvent
-import com.fernandokh.koonol_management.viewModel.categories.CreateCategoryViewModel
-import com.fernandokh.koonol_management.viewModel.categories.CreateCategoryViewModelFactory
+import com.fernandokh.koonol_management.viewModel.categories.CreateEditCategoryViewModel
+import com.fernandokh.koonol_management.viewModel.categories.CreateEditCategoryViewModelFactory
 
 @Composable
 fun CreateCategoryScreen(
     navController: NavHostController,
     tokenManager: TokenManager,
-    viewModel: CreateCategoryViewModel = viewModel(
-        factory = CreateCategoryViewModelFactory(tokenManager)
+    viewModel: CreateEditCategoryViewModel = viewModel(
+        factory = CreateEditCategoryViewModelFactory(tokenManager)
     )
 ) {
 
@@ -128,7 +128,7 @@ fun CreateCategoryScreen(
 }
 
 @Composable
-private fun FormCategory(viewModel: CreateCategoryViewModel) {
+fun FormCategory(viewModel: CreateEditCategoryViewModel) {
 
     val formErrors by viewModel.formErrors.collectAsState()
     val form by viewModel.form.collectAsState()
@@ -177,8 +177,8 @@ private fun FormCategory(viewModel: CreateCategoryViewModel) {
 }
 
 @Composable
-private fun ListSubcategories(
-    viewModel: CreateCategoryViewModel,
+fun ListSubcategories(
+    viewModel: CreateEditCategoryViewModel,
 ) {
     val subcategories by viewModel.subcategories.collectAsState()
 
