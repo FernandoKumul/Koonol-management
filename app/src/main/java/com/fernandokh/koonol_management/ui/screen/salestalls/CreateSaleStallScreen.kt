@@ -55,6 +55,8 @@ fun CreateSaleStallScreen(
     val toastMessage by viewModel.toastMessage.collectAsState()
 
     LaunchedEffect(Unit) {
+        sellerViewModel.getAllSellers()
+        categoriesViewModel.getAllSubcategories()
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is NavigationEvent.Navigate -> {
@@ -62,11 +64,6 @@ fun CreateSaleStallScreen(
                 }
             }
         }
-    }
-
-    LaunchedEffect(Unit) {
-        sellerViewModel.getAllSellers()
-        categoriesViewModel.getAllSubcategories()
     }
 
     LaunchedEffect(toastMessage) {

@@ -32,5 +32,4 @@ interface SalesStallsApiService {
 
     @DELETE("sales-stalls/{id}")
     suspend fun deleteSalesStallsById(@Path("id") id: String): ApiResponse<String>
-
 }
