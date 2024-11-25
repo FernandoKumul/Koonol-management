@@ -29,6 +29,7 @@ import com.fernandokh.koonol_management.ui.screen.categories.InfoCategoryScreen
 import com.fernandokh.koonol_management.ui.screen.profile.ChangePasswordScreen
 import com.fernandokh.koonol_management.ui.screen.profile.EditProfileScreen
 import com.fernandokh.koonol_management.ui.screen.profile.ProfileScreen
+import com.fernandokh.koonol_management.ui.screen.promotion.CreatePromotionScreen
 import com.fernandokh.koonol_management.ui.screen.salestalls.CreateSaleStallScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.CreateSellersScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.EditSellersScreen
@@ -38,6 +39,8 @@ import com.fernandokh.koonol_management.ui.screen.users.CreateUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.EditUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.InfoUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.UsersScreen
+import com.fernandokh.koonol_management.ui.screen.promotion.EditPromotionScreen
+import com.fernandokh.koonol_management.ui.screen.promotion.InfoPromotionScreen
 import com.fernandokh.koonol_management.ui.screen.salestalls.EditSaleStallScreen
 import com.fernandokh.koonol_management.ui.screen.salestalls.InfoSaleStallScreen
 
@@ -84,6 +87,14 @@ sealed class Screen(val route: String) {
         fun createRoute(salesStallId: String) = "sales-stalls/info/$salesStallId"
     }
     object CreateSaleStall : Screen("sales-stalls/create")
+
+    object EditPromotion : Screen("promotions/edit/{promotionId}") {
+        fun createRoute(promotionId: String) = "promotions/edit/$promotionId"
+    }
+    object InfoPromotion : Screen("promotions/info/{promotionId}") {
+        fun createRoute(promotionId: String) = "promotions/info/$promotionId"
+    }
+    object CreatePromotion : Screen("promotions/create")
 }
 
 fun NavGraphBuilder.protectedComposable(
@@ -131,7 +142,7 @@ fun AppNavHost(
         protectedComposable(Screen.Users.route, navController, tokenManager) { UsersScreen(navController, drawerState) }
         protectedComposable(Screen.Tianguis.route, navController, tokenManager) { TianguisScreen(navController, drawerState) }
         protectedComposable(Screen.SalesStalls.route, navController, tokenManager) { SalesStallsScreen(navController, drawerState) }
-        protectedComposable(Screen.Promotions.route, navController, tokenManager) { PromotionsScreen(navController, drawerState) }
+        protectedComposable(Screen.Promotions.route, navController, tokenManager) { PromotionsScreen(navController, drawerState, tokenManager) }
         protectedComposable(Screen.Categories.route, navController, tokenManager) { CategoriesScreen(navController, drawerState, tokenManager) }
         protectedComposable(Screen.Profile.route, navController, tokenManager) { ProfileScreen(navController, drawerState, tokenManager) }
         protectedComposable(Screen.EditProfile.route, navController, tokenManager) { EditProfileScreen(navController, tokenManager) }
@@ -187,5 +198,16 @@ fun AppNavHost(
             InfoSaleStallScreen(navController, backStackEntry.arguments?.getString("salesStallId"))
         }
         protectedComposable(Screen.CreateSaleStall.route, navController, tokenManager) { CreateSaleStallScreen(navController, tokenManager) }
+        protectedComposable(
+            Screen.EditPromotion.route, navController, tokenManager,
+            arguments = listOf(navArgument("promotionId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            EditPromotionScreen(navController, backStackEntry.arguments?.getString("promotionId"), tokenManager)
+        }
+        protectedComposable(
+            Screen.InfoPromotion.route, navController, tokenManager,
+            arguments = listOf(navArgument("promotionId") { type = NavType.StringType })
+        ) { backStackEntry -> InfoPromotionScreen(navController, backStackEntry.arguments?.getString("promotionId"), tokenManager) }
+        protectedComposable(Screen.CreatePromotion.route, navController, tokenManager) { CreatePromotionScreen(navController, tokenManager) }
     }
 }

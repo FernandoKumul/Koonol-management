@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +55,9 @@ fun CustomSelect(
     var selected by remember { mutableStateOf(selectedOption) }
     var buttonWidth by remember { mutableIntStateOf(0) }
 
+    LaunchedEffect (selectedOption) {
+        selected = selectedOption
+    }
 
     Box {
         if (fill) {
