@@ -33,6 +33,7 @@ import androidx.navigation.NavHostController
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
+import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
 import com.fernandokh.koonol_management.ui.components.shared.CustomTextField
 import com.fernandokh.koonol_management.ui.components.shared.DropdownInputForm
 import com.fernandokh.koonol_management.ui.components.shared.UploadImage
@@ -66,7 +67,7 @@ fun EditSaleStallScreen(
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is NavigationEvent.Navigate -> {
-                    navController.navigate(Screen.Sellers.route)
+                    navController.navigate(Screen.SalesStalls.route)
                 }
             }
         }
@@ -135,15 +136,15 @@ fun EditSaleStallScreen(
 
                             FormSaleStall(viewModel, sellerViewModel, categoriesViewModel)
 
-//                            if (isShowDialog) {
-//                                AlertDialogC(
-//                                    dialogTitle = "Editar vendedor",
-//                                    dialogText = "¿Estás seguro de los nuevos datos para el vendedor?",
-//                                    onDismissRequest = { viewModel.dismissDialog() },
-//                                    onConfirmation = { viewModel.updateSeller() },
-//                                    loading = isLoadingUpdate
-//                                )
-//                            }
+                            if (isShowDialog) {
+                                AlertDialogC(
+                                    dialogTitle = "Editar puesto",
+                                    dialogText = "¿Estás seguro de los nuevos datos para el puesto?",
+                                    onDismissRequest = { viewModel.dismissDialog() },
+                                    onConfirmation = { viewModel.updateSaleStall() },
+                                    loading = isLoadingUpdate
+                                )
+                            }
                         }
                     }
                 }
