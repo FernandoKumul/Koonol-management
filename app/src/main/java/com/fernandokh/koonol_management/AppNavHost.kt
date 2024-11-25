@@ -38,8 +38,8 @@ import com.fernandokh.koonol_management.ui.screen.users.CreateUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.EditUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.InfoUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.UsersScreen
-import com.fernandokh.koonol_management.viewModel.promotions.EditPromotionScreen
-import com.fernandokh.koonol_management.viewModel.promotions.InfoPromotionScreen
+import com.fernandokh.koonol_management.ui.screen.promotion.EditPromotionScreen
+import com.fernandokh.koonol_management.ui.screen.promotion.InfoPromotionScreen
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")

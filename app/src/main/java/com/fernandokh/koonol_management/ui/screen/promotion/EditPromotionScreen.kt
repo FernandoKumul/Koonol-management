@@ -1,4 +1,4 @@
-package com.fernandokh.koonol_management.viewModel.promotions
+package com.fernandokh.koonol_management.ui.screen.promotion
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,13 +13,13 @@ import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 
 @Composable
-fun InfoPromotionScreen(
+fun EditPromotionScreen(
     navController: NavHostController,
     promotionId: String?,
     tokenManager: TokenManager
 ) {
     Scaffold(
-        topBar = { TopBarGoBack("Promoción", navController) },
+        topBar = { TopBarGoBack("Editar Promoción", navController) },
     ) { innerPadding ->
         Column(
             modifier = Modifier
