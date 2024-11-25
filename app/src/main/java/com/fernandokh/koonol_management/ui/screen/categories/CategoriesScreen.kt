@@ -279,7 +279,7 @@ private fun CategoryList(
 
         when {
             categories.loadState.append is LoadState.NotLoading && categories.loadState.append.endOfPaginationReached -> {
-                if (categories.itemCount >= 7) {
+                if (categories.itemCount >= 8) {
                     item {
                         Text(
                             text = "Has llegado al final de la lista",

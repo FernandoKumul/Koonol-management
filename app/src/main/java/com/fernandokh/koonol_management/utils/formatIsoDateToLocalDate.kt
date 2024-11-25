@@ -8,6 +8,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
+//Parse Iso 8601 to dd-MM-YYYY
 fun formatIsoDateToLocalDate(isoDate: String): String {
     val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
     inputFormat.timeZone = TimeZone.getTimeZone("UTC")
@@ -24,7 +25,7 @@ fun formatIsoDateToLocalDate(isoDate: String): String {
     }
 }
 
-
+//Usado si se quiere un valor null en lugar un string
 fun formatIsoDateToDate(isoDate: String): String? {
     val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
     inputFormat.timeZone = TimeZone.getTimeZone("UTC")
@@ -41,6 +42,7 @@ fun formatIsoDateToDate(isoDate: String): String? {
     }
 }
 
+//Parse de yyyy-MM-dd to dd-MM-YYYY
 fun formatDateToDayMonthYear(isoDate: String): String {
     return try {
         val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
