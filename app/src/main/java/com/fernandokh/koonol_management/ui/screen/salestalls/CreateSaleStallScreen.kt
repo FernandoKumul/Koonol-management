@@ -30,6 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
+import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
 import com.fernandokh.koonol_management.ui.components.shared.CustomTextField
@@ -37,6 +38,7 @@ import com.fernandokh.koonol_management.ui.components.shared.DropdownInputForm
 import com.fernandokh.koonol_management.ui.components.shared.UploadImage
 import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.viewModel.categories.CategoriesViewModel
+import com.fernandokh.koonol_management.viewModel.categories.CategoriesViewModelFactory
 import com.fernandokh.koonol_management.viewModel.salesstalls.CreateSaleStallViewModel
 import com.fernandokh.koonol_management.viewModel.sellers.SellersViewModel
 import java.io.File
@@ -44,9 +46,12 @@ import java.io.File
 @Composable
 fun CreateSaleStallScreen(
     navController: NavHostController,
+    tokenManager: TokenManager,
     viewModel: CreateSaleStallViewModel = viewModel(),
     sellerViewModel: SellersViewModel = viewModel(),
-    categoriesViewModel: CategoriesViewModel = viewModel()
+    categoriesViewModel: CategoriesViewModel = viewModel(
+        factory = CategoriesViewModelFactory(tokenManager)
+    )
 ) {
     val context = LocalContext.current
     val isLoadingCreate by viewModel.isLoadingCreate.collectAsState()

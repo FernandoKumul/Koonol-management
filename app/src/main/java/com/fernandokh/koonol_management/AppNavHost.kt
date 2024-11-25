@@ -1,6 +1,5 @@
 package com.fernandokh.koonol_management
 
-import android.util.Log
 import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -173,20 +172,20 @@ fun AppNavHost(
         protectedComposable(
             Screen.InfoCategory.route, navController, tokenManager,
             arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
-        ) { backStackEntry -> InfoCategoryScreen(navController, backStackEntry.arguments?.getString("categoryId")) }
-        protectedComposable(Screen.CreateCategory.route, navController, tokenManager) { CreateCategoryScreen(navController) }
+        ) { backStackEntry -> InfoCategoryScreen(navController, backStackEntry.arguments?.getString("categoryId"), tokenManager) }
+        protectedComposable(Screen.CreateCategory.route, navController, tokenManager) { CreateCategoryScreen(navController, tokenManager) }
 
         protectedComposable(Screen.EditSaleStall.route, navController, tokenManager,
             arguments = listOf(navArgument("salesStallId") { type = NavType.StringType })
         ) {
             backStackEntry ->
-            EditSaleStallScreen(navController, backStackEntry.arguments?.getString("salesStallId"))
+            EditSaleStallScreen(navController, backStackEntry.arguments?.getString("salesStallId"), tokenManager)
         }
         protectedComposable(Screen.InfoSaleStall.route, navController, tokenManager,
             arguments = listOf(navArgument("salesStallId") { type = NavType.StringType })
         ) { backStackEntry ->
             InfoSaleStallScreen(navController, backStackEntry.arguments?.getString("salesStallId"))
         }
-        protectedComposable(Screen.CreateSaleStall.route, navController, tokenManager) { CreateSaleStallScreen(navController) }
+        protectedComposable(Screen.CreateSaleStall.route, navController, tokenManager) { CreateSaleStallScreen(navController, tokenManager) }
     }
 }

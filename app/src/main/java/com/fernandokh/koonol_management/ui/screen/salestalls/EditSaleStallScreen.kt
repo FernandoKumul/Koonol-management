@@ -32,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
+import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
 import com.fernandokh.koonol_management.ui.components.shared.CustomTextField
@@ -39,6 +40,7 @@ import com.fernandokh.koonol_management.ui.components.shared.DropdownInputForm
 import com.fernandokh.koonol_management.ui.components.shared.UploadImage
 import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.viewModel.categories.CategoriesViewModel
+import com.fernandokh.koonol_management.viewModel.categories.CategoriesViewModelFactory
 import com.fernandokh.koonol_management.viewModel.salesstalls.EditSaleStallViewModel
 import com.fernandokh.koonol_management.viewModel.sellers.SellersViewModel
 import java.io.File
@@ -47,9 +49,12 @@ import java.io.File
 fun EditSaleStallScreen(
     navController: NavHostController,
     saleStallId: String?,
+    tokenManager: TokenManager,
     viewModel: EditSaleStallViewModel = viewModel(),
     sellerViewModel: SellersViewModel = viewModel(),
-    categoriesViewModel: CategoriesViewModel = viewModel()
+    categoriesViewModel: CategoriesViewModel = viewModel(
+        factory = CategoriesViewModelFactory(tokenManager)
+    )
 ) {
     val isSaleStall by viewModel.isSaleStall.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
