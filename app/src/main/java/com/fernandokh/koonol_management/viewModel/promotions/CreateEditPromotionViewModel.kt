@@ -14,6 +14,7 @@ import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.utils.SelectOption
 import com.fernandokh.koonol_management.utils.evaluateHttpException
+import com.fernandokh.koonol_management.utils.formatIsoDateToDate
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -72,7 +73,7 @@ class CreateEditPromotionViewModel(private val tokenManager: TokenManager) : Vie
         val salesStallIdOption: SelectOption,
         val startDate: String? = null,
         val endDate: String? = null,
-        val pay: String = "0"
+        val pay: String = ""
     )
 
     private val _isSalesStallOptions = MutableStateFlow(optionsSalesStall)
@@ -198,12 +199,15 @@ class CreateEditPromotionViewModel(private val tokenManager: TokenManager) : Vie
                 _isPromotion.value = response.data
 
                 if (_isPromotion.value != null) {
-                    val salesStallMatch = optionsSalesStall.find { it.value == _isPromotion.value?.salesStallId?.id }
+                    var option = _isSalesStallOptions.value[0]
+                    if (_isPromotion.value?.salesStallId?.name != null && _isPromotion.value?.salesStallId?.id != null) {
+                        option = SelectOption(_isPromotion.value?.salesStallId?.name!!, _isPromotion.value?.salesStallId?.id!!)
+                    }
 
                     _form.value = FormPromotion(
-                        salesStallIdOption = salesStallMatch ?: optionsSalesStall[0],
-                        startDate = _isPromotion.value?.startDate,
-                        endDate = _isPromotion.value?.endDate,
+                        salesStallIdOption = option,
+                        startDate = _isPromotion.value?.startDate?.let { formatIsoDateToDate(it) },
+                        endDate = _isPromotion.value?.endDate?.let { formatIsoDateToDate(it) },
                         pay = _isPromotion.value?.pay.toString()
                     )
                 }

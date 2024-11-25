@@ -25,7 +25,7 @@ fun formatIsoDateToLocalDate(isoDate: String): String {
     }
 }
 
-//Usado si se quiere un valor null en lugar un string
+//Usado si se quiere un valor null en caso de ser una fecha invalida
 fun formatIsoDateToDate(isoDate: String): String? {
     val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
     inputFormat.timeZone = TimeZone.getTimeZone("UTC")
