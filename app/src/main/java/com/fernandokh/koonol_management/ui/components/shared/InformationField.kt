@@ -22,10 +22,13 @@ fun InformationField(
     imageVector: ImageVector? = null
 ) {
     Column(modifier) {
-        Text(
-            title,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+
+        if (title != "") {
+            Text(
+                title,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
