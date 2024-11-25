@@ -5,15 +5,9 @@ import com.google.gson.annotations.SerializedName
 data class PromotionAndNameModel(
     @SerializedName("_id")
     val id: String,
-    val salesStallId: SalesStallOnlyName,
+    val salesStallId: SalesStallOnlyNameModel,
     val startDate: String,
     val endDate: String,
     val pay: Double,
     val creationDate: String
-)
-
-data class SalesStallOnlyName(
-    @SerializedName("_id")
-    val id: String,
-    val name: String,
 )

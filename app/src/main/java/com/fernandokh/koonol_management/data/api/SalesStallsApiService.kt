@@ -2,11 +2,13 @@ package com.fernandokh.koonol_management.data.api
 
 import com.fernandokh.koonol_management.data.ApiResponse
 import com.fernandokh.koonol_management.data.models.SaleStallCreateEditModel
+import com.fernandokh.koonol_management.data.models.SalesStallOnlyNameModel
 import com.fernandokh.koonol_management.data.models.SalesStallsModel
 import com.fernandokh.koonol_management.data.models.SearchModel
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -32,4 +34,7 @@ interface SalesStallsApiService {
 
     @DELETE("sales-stalls/{id}")
     suspend fun deleteSalesStallsById(@Path("id") id: String): ApiResponse<String>
+
+    @GET("sales-stalls/only-names")
+    suspend fun getSalesStallOnlyNames(@Header("Authorization") authHeader: String): ApiResponse<List<SalesStallOnlyNameModel>>
 }

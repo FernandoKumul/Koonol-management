@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class PromotionSearchModel (
     @SerializedName("_id")
     val id: String,
-    val salesStall: SalesStallOnlyName,
+    val salesStall: SalesStallOnlyNameModel,
     val startDate: String,
     val endDate: String,
     val pay: Double,
