@@ -11,6 +11,8 @@ import androidx.paging.cachedIn
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.CategoriesApiService
 import com.fernandokh.koonol_management.data.models.CategoryModel
+import com.fernandokh.koonol_management.data.models.SellerModel
+import com.fernandokh.koonol_management.data.models.SubCategoryModel
 import com.fernandokh.koonol_management.data.pagingSource.CategoryPagingSource
 import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.utils.SelectOption
@@ -70,6 +72,8 @@ class CategoriesViewModel(private val tokenManager: TokenManager) : ViewModel() 
     private val _isSortOption = MutableStateFlow(optionsSort[0])
     val isSortOption: StateFlow<SelectOption> = _isSortOption
 
+    private val _subCategoriesList = MutableStateFlow<List<SubCategoryModel>>(emptyList())
+    val subCategoriesList: StateFlow<List<SubCategoryModel>> = _subCategoriesList
 
     private fun showToast(message: String) {
         _toastMessage.value = message
@@ -149,6 +153,27 @@ class CategoriesViewModel(private val tokenManager: TokenManager) : ViewModel() 
             pager.collect { pagingData ->
                 _userPagingFlow.value = pagingData
                 _isLoadingDelete.value = false
+            }
+        }
+    }
+
+    fun getAllSubcategories() {
+        viewModelScope.launch {
+            try {
+                val response = apiService.getAllSubcategories()
+                if (response.success) {
+                    Log.i("dev-debug", "Lista obtenida con éxito")
+                    _subCategoriesList.value = response.data!!
+                } else {
+                    showToast("No se encontraron subcategorías")
+                }
+                _isLoading.value = false
+            } catch (e: HttpException) {
+                val errorMessage = evaluateHttpException(e)
+                showToast(errorMessage)
+            } catch (e: Exception) {
+                Log.i("dev-debug", e.message ?: "Ah ocurrido un error")
+                showToast("Ocurrio un error al obtener las subcategorías")
             }
         }
     }

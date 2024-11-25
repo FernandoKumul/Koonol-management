@@ -49,7 +49,7 @@ class CreateUserViewModel : ViewModel() {
     val optionsGender = listOf(
         SelectOption("Selecciona un género", ""),
         SelectOption("Masculino", "male"),
-        SelectOption("Fenemino", "female"),
+        SelectOption("Femenino", "female"),
         SelectOption("Otro", "other")
     )
 

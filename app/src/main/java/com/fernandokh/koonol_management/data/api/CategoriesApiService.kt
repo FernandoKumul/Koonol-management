@@ -7,6 +7,7 @@ import com.fernandokh.koonol_management.data.models.CreateCategoryModel
 import com.fernandokh.koonol_management.data.models.EditCategoryModel
 import com.fernandokh.koonol_management.data.models.SearchModel
 import retrofit2.http.Body
+import com.fernandokh.koonol_management.data.models.SubCategoryModel
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -36,4 +37,9 @@ interface CategoriesApiService {
 
     @DELETE("category/{id}")
     suspend fun deleteCategoryById(@Header("Authorization") authHeader: String, @Path("id") id: String): ApiResponse<CategoryModel>
+
+    // Subcategorias
+
+    @GET("subcategory")
+    suspend fun getAllSubcategories(): ApiResponse<List<SubCategoryModel>>
 }

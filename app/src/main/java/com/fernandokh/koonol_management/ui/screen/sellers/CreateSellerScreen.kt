@@ -59,7 +59,7 @@ fun CreateSellersScreen(
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is NavigationEvent.Navigate -> {
-                    navController.navigate(Screen.Users.route)
+                    navController.navigate(Screen.Sellers.route)
                 }
             }
         }

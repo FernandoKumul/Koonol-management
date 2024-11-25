@@ -1,4 +1,4 @@
-package com.fernandokh.koonol_management.viewModel.sellers
+package com.fernandokh.koonol_management.viewModel.salesstalls
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -8,9 +8,9 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.fernandokh.koonol_management.data.RetrofitInstance
-import com.fernandokh.koonol_management.data.api.SellerApiService
-import com.fernandokh.koonol_management.data.models.SellerModel
-import com.fernandokh.koonol_management.data.pagingSource.SellerPagingSource
+import com.fernandokh.koonol_management.data.api.SalesStallsApiService
+import com.fernandokh.koonol_management.data.models.SalesStallsModel
+import com.fernandokh.koonol_management.data.pagingSource.SalesStallsPagingSource
 import com.fernandokh.koonol_management.utils.SelectOption
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
-class SellersViewModel : ViewModel() {
+class SalesStallsViewModel : ViewModel() {
     val optionsSort = listOf(
         SelectOption("Más nuevos", "newest"),
         SelectOption("Más viejos", "oldest"),
@@ -26,17 +26,10 @@ class SellersViewModel : ViewModel() {
         SelectOption("Z-A", "z-a"),
     )
 
-    val optionsGender = listOf(
-        SelectOption("Todos", "all"),
-        SelectOption("Masculino", "male"),
-        SelectOption("Femenino", "female"),
-        SelectOption("Otros", "other"),
-    )
-
-    private val apiService = RetrofitInstance.create(SellerApiService::class.java)
+    private val apiService = RetrofitInstance.create(SalesStallsApiService::class.java)
 
     private val _toastMessage = MutableStateFlow<String?>(null)
-    val toastMessage: StateFlow<String?> get() = _toastMessage
+    val toastMessage: StateFlow<String?> = _toastMessage
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -47,8 +40,8 @@ class SellersViewModel : ViewModel() {
     private val _isTotalRecords = MutableStateFlow(0)
     val isTotalRecords: StateFlow<Int> = _isTotalRecords
 
-    private val _isSellerToDelete = MutableStateFlow<SellerModel?>(null)
-    val isSellerToDelete: StateFlow<SellerModel?> = _isSellerToDelete
+    private val _isSalesStallsToDelete = MutableStateFlow<SalesStallsModel?>(null)
+    val isSalesStallsToDelete: StateFlow<SalesStallsModel?> = _isSalesStallsToDelete
 
     private val _isLoadingDelete = MutableStateFlow(false)
     val isLoadingDelete: StateFlow<Boolean> = _isLoadingDelete
@@ -56,14 +49,9 @@ class SellersViewModel : ViewModel() {
     private val _isSortOption = MutableStateFlow(optionsSort[0])
     val isSortOption: StateFlow<SelectOption> = _isSortOption
 
-    private val _isGenderFilterOption = MutableStateFlow(optionsGender[0])
-    val isGenderFilterOption: StateFlow<SelectOption> = _isGenderFilterOption
-
-    private val _sellerPagingFlow = MutableStateFlow<PagingData<SellerModel>>(PagingData.empty())
-    val sellerPagingFlow: StateFlow<PagingData<SellerModel>> = _sellerPagingFlow
-
-    private val _sellersList = MutableStateFlow<List<SellerModel>>(emptyList())
-    val sellersList: StateFlow<List<SellerModel>> = _sellersList
+    private val _salesStallsPagingFlow =
+        MutableStateFlow<PagingData<SalesStallsModel>>(PagingData.empty())
+    val salesStallsPagingFlow: StateFlow<PagingData<SalesStallsModel>> = _salesStallsPagingFlow
 
     private fun showToast(message: String) {
         _toastMessage.value = message
@@ -77,32 +65,32 @@ class SellersViewModel : ViewModel() {
         _isValueSearch.value = newValue
     }
 
-    fun changeFilters(sort: SelectOption, gender: SelectOption) {
+    fun changeFilters(sort: SelectOption) {
         _isSortOption.value = sort
-        _isGenderFilterOption.value = gender
-        searchSellers()
+        searchSalesStalls()
     }
 
-    fun onSellerSelectedForDelete(seller: SellerModel) {
-        _isSellerToDelete.value = seller
+    fun onSalesStallsSelectedForDelete(salesStalls: SalesStallsModel) {
+        _isSalesStallsToDelete.value = salesStalls
     }
 
     fun dismissDialog() {
-        _isSellerToDelete.value = null
+        _isSalesStallsToDelete.value = null
     }
 
-    fun deleteSeller() {
+    fun deleteSalesStalls() {
         viewModelScope.launch {
             try {
                 _isLoadingDelete.value = true
-                val idSeller = _isSellerToDelete.value?.id ?: run {
+                val idSalesStalls = _isSalesStallsToDelete.value?.id ?: run {
                     showToast("ID de vendedor inválido")
                     return@launch
                 }
-
-                apiService.deleteSellerById(idSeller)
-                searchSellers()
-                Log.i("dev-debug", "Vendedor borrado con el id: $idSeller")
+                Log.i("dev-debug", "Borrando al puesto antes de la api")
+                apiService.deleteSalesStallsById(idSalesStalls)
+                Log.i("dev-debug", "Borrando al puesto despues de la api")
+                searchSalesStalls()
+                Log.i("dev-debug", "Puesto borrado con el id: $idSalesStalls")
                 showToast("Vendedor borrado con éxito")
             } catch (e: HttpException) {
                 val errorMessage = evaluateHttpException(e)
@@ -118,46 +106,23 @@ class SellersViewModel : ViewModel() {
         }
     }
 
-
-    fun searchSellers() {
+    fun searchSalesStalls() {
         _isLoadingDelete.value = true
         viewModelScope.launch {
             val pager =
                 Pager(PagingConfig(pageSize = 20, prefetchDistance = 3, initialLoadSize = 20)) {
-                    SellerPagingSource(
+                    SalesStallsPagingSource(
                         apiService,
                         _isValueSearch.value,
-                        _isSortOption.value.value,
-                        if (_isGenderFilterOption.value.value == "all") "" else _isGenderFilterOption.value.value
+                        _isSortOption.value.value
                     ) {
                         _isTotalRecords.value = it
                     }
                 }.flow.cachedIn(viewModelScope)
 
             pager.collect { pagingData ->
-                _sellerPagingFlow.value = pagingData
+                _salesStallsPagingFlow.value = pagingData
                 _isLoadingDelete.value = false
-            }
-        }
-    }
-
-    fun getAllSellers() {
-        viewModelScope.launch {
-            try {
-                val response = apiService.getAllSellers()
-                if (response.success) {
-                    Log.i("dev-debug", "Lista obtenida con éxito")
-                    _sellersList.value = response.data!!
-                } else {
-                    showToast("No se encontraron vendedores")
-                }
-                _isLoading.value = false
-            } catch (e: HttpException) {
-                val errorMessage = evaluateHttpException(e)
-                showToast(errorMessage)
-            } catch (e: Exception) {
-                Log.i("dev-debug", e.message ?: "Ah ocurrido un error")
-                showToast("Ocurrio un error al obtener los vendedores")
             }
         }
     }
