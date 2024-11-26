@@ -307,8 +307,8 @@ private fun PromotionList(
 
     if (isPromotionToDelete != null) {
         AlertDialogC(
-            dialogTitle = "Borrar Usuario",
-            dialogText = "¿Estás seguro de borrar la promoción de ${isPromotionToDelete?.pay} asociado al puesto ${isPromotionToDelete?.salesStall?.name}?",
+            dialogTitle = "Borrar Promoción",
+            dialogText = "¿Estás seguro de borrar la promoción de $${isPromotionToDelete?.pay} asociado al puesto ${isPromotionToDelete?.salesStall?.name}?",
             onDismissRequest = { viewModel.dismissDialog() },
             onConfirmation = { viewModel.deletePromotion() },
             loading = isLoadingDelete
