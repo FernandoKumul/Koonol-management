@@ -10,7 +10,7 @@ data class SalesStallsModel(
     val name: String,
     val photos: ArrayList<String>?,
     val description: String,
-    val type: String,
+    val type: Boolean,
     val probation: Boolean,
     val active: Boolean,
     val creationDate: String,

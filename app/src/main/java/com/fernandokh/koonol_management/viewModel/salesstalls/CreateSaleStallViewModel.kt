@@ -25,7 +25,6 @@ data class FormErrors(
     val subCategoryIdError: String? = null,
     val nameError: String? = null,
     val descriptionError: String? = null,
-    val typeError: String? = null,
 ) {
     fun allErrors(): List<String?> {
         return listOf(
@@ -33,7 +32,6 @@ data class FormErrors(
             subCategoryIdError,
             nameError,
             descriptionError,
-            typeError,
         )
     }
 }
@@ -62,8 +60,8 @@ class CreateSaleStallViewModel : ViewModel() {
     private val _description = MutableStateFlow("")
     val description: StateFlow<String> = _description
 
-    private val _type = MutableStateFlow("")
-    val type: StateFlow<String> = _type
+    private val _type = MutableStateFlow(false)
+    val type: StateFlow<Boolean> = _type
 
     private val _probation = MutableStateFlow(false)
     val probation: StateFlow<Boolean> = _probation
@@ -101,6 +99,10 @@ class CreateSaleStallViewModel : ViewModel() {
     val probationOptions = listOf(
         Option("Sí", true),
         Option("No", false)
+    )
+    val typeOptions = listOf(
+        Option("Permanente", true),
+        Option("Temporal", false)
     )
 
     val activeOptions = listOf(
@@ -156,11 +158,8 @@ class CreateSaleStallViewModel : ViewModel() {
         }
     }
 
-    fun onTypeChange(value: String) {
+    fun onTypeChange(value: Boolean) {
         _type.value = value
-        if (_dirtyForm.value) {
-            validateType()
-        }
     }
 
     fun onProbationChange(value: Boolean) {
@@ -251,22 +250,11 @@ class CreateSaleStallViewModel : ViewModel() {
         }
     }
 
-    private fun validateType() {
-        val type = _type.value
-        if (type.isBlank()) {
-            _formErrors.value =
-                _formErrors.value.copy(typeError = "El tipo de puesto es requerido")
-        } else {
-            _formErrors.value = _formErrors.value.copy(typeError = null)
-        }
-    }
-
     fun isFormValid(): Boolean {
         validateSellerId()
         validateSubCategoryId()
         validateName()
         validateDescription()
-        validateType()
         return _formErrors.value.allErrors().all { it == null }
     }
 
