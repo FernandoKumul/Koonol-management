@@ -24,7 +24,7 @@ class TianguisViewModel : ViewModel() {
         SelectOption("Más nuevos", "newest"),
         SelectOption("Más viejos", "oldest"),
         SelectOption("A-Z", "a-z"),
-        SelectOption("Z-A", "z-a")
+        SelectOption("Z-A", "z-a"),
     )
 
     private val apiService = RetrofitInstance.create(TianguisApiService::class.java)
@@ -33,21 +33,26 @@ class TianguisViewModel : ViewModel() {
     val toastMessage: StateFlow<String?> get() = _toastMessage
 
     private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading
+    val isLoading: StateFlow<Boolean> get() = _isLoading
 
     private val _isValueSearch = MutableStateFlow("")
-    val isValueSearch: StateFlow<String> = _isValueSearch
+    val isValueSearch: StateFlow<String> get() = _isValueSearch
 
     private val _isTotalRecords = MutableStateFlow(0)
     val isTotalRecords: StateFlow<Int> = _isTotalRecords
 
+    private val _isTianguisToDelete = MutableStateFlow<TianguisModel?>(null)
+    val isTianguisToDelete: StateFlow<TianguisModel?> get() = _isTianguisToDelete
+
+    private val _isLoadingDelete = MutableStateFlow(false)
+    val isLoadingDelete: StateFlow<Boolean> get() = _isLoadingDelete
+
     private val _tianguisPagingFlow = MutableStateFlow<PagingData<TianguisModel>>(PagingData.empty())
-    val tianguisPagingFlow: StateFlow<PagingData<TianguisModel>> = _tianguisPagingFlow
+    val tianguisPagingFlow: StateFlow<PagingData<TianguisModel>> get() = _tianguisPagingFlow
 
     private val _isSortOption = MutableStateFlow(optionsSort[0])
-    val isSortOption: StateFlow<SelectOption> = _isSortOption
+    val isSortOption: StateFlow<SelectOption> get() = _isSortOption
 
-    // Mostrar mensaje de toast
     private fun showToast(message: String) {
         _toastMessage.value = message
     }
@@ -56,56 +61,58 @@ class TianguisViewModel : ViewModel() {
         _toastMessage.value = null
     }
 
-    // Cambiar valor de búsqueda
     fun changeValueSearch(newValue: String) {
         _isValueSearch.value = newValue
-        Log.d("TianguisViewModel", "Valor de búsqueda cambiado a: $newValue")
     }
 
-    // Cambiar opción de ordenamiento
-    fun changeFilters(sort: SelectOption) {
-        _isSortOption.value = sort
-        searchTianguis()
+    fun onTianguisSelectedForDelete(tianguis: TianguisModel) {
+        _isTianguisToDelete.value = tianguis
     }
 
-    // Buscar tianguis usando paginación
+    fun dismissDialog() {
+        _isTianguisToDelete.value = null
+    }
+
+    fun deleteTianguis() {
+        viewModelScope.launch {
+            try {
+                _isLoadingDelete.value = true
+                val id = _isTianguisToDelete.value?.id ?: return@launch
+                apiService.deleteTianguisById(id)
+                searchTianguis()
+                showToast("Tianguis eliminado con éxito")
+            } catch (e: HttpException) {
+                showToast(evaluateHttpException(e))
+            } catch (e: Exception) {
+                showToast("Ocurrió un error al eliminar el tianguis")
+            } finally {
+                _isLoadingDelete.value = false
+                dismissDialog()
+            }
+        }
+    }
+
     fun searchTianguis() {
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                Log.d("TianguisViewModel", "Iniciando búsqueda de tianguis")
-                Log.d("TianguisViewModel", "Parámetros de búsqueda: search = '${_isValueSearch.value}', sort = '${_isSortOption.value.value}'")
-
-                val pager = Pager(
-                    PagingConfig(pageSize = 20, prefetchDistance = 3, initialLoadSize = 20)
-                ) {
+                val pager = Pager(PagingConfig(pageSize = 20)) {
                     TianguisPagingSource(
                         apiService,
                         _isValueSearch.value,
                         _isSortOption.value.value
                     ) {
-                        Log.d("TianguisViewModel", "Total de registros recibidos: $it")
                         _isTotalRecords.value = it
                     }
                 }.flow.cachedIn(viewModelScope)
 
-                Log.d("TianguisViewModel", "Iniciando colección de datos")
-                pager.collect { pagingData ->
-                    _tianguisPagingFlow.value = pagingData
-                    Log.d("TianguisViewModel", "Datos de tianguis obtenidos correctamente")
-
-                    _isLoading.value = false
+                pager.collect {
+                    _tianguisPagingFlow.value = it
                 }
-            } catch (e: HttpException) {
-                val errorMessage = evaluateHttpException(e)
-                Log.e("TianguisViewModel", "HttpException: $errorMessage")
-                showToast(errorMessage)
             } catch (e: Exception) {
-                Log.e("TianguisViewModel", "Exception: ${e.localizedMessage}")
-                showToast("Ocurrió un error al buscar los tianguis")
+                Log.e("TianguisViewModel", "Error: ${e.message}")
             } finally {
                 _isLoading.value = false
-                Log.d("TianguisViewModel", "Finalizando búsqueda de tianguis")
             }
         }
     }

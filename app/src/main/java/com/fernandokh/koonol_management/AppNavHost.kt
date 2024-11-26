@@ -23,6 +23,9 @@ import com.fernandokh.koonol_management.ui.screen.MenuScreen
 import com.fernandokh.koonol_management.ui.screen.PromotionsScreen
 import com.fernandokh.koonol_management.ui.screen.SalesStallsScreen
 import com.fernandokh.koonol_management.ui.screen.tianguis.TianguisScreen
+import com.fernandokh.koonol_management.ui.screen.tianguis.CreateTianguisScreen
+import com.fernandokh.koonol_management.ui.screen.tianguis.EditTianguisScreen
+import com.fernandokh.koonol_management.ui.screen.tianguis.InfoTianguisScreen
 import com.fernandokh.koonol_management.ui.screen.categories.CategoriesScreen
 import com.fernandokh.koonol_management.ui.screen.categories.CreateCategoryScreen
 import com.fernandokh.koonol_management.ui.screen.categories.EditCategoryScreen
@@ -74,6 +77,15 @@ sealed class Screen(val route: String) {
         fun createRoute(categoryId: String) = "category/info/$categoryId"
     }
     object CreateCategory : Screen("category/create")
+
+    //Tianguis
+    object EditTianguis : Screen("tianguis/edit/{tianguisId}") {
+        fun createRoute(tianguisId: String) = "tianguis/edit/$tianguisId"
+    }
+    object InfoTianguis : Screen("tianguis/info/{tianguisId}") {
+        fun createRoute(tianguisId: String) = "tianguis/info/$tianguisId"
+    }
+    object CreateTianguis : Screen("tianguis/create")
 }
 
 fun NavGraphBuilder.protectedComposable(
@@ -148,6 +160,25 @@ fun AppNavHost(
             arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry -> InfoUserScreen(navController, backStackEntry.arguments?.getString("userId")) }
         protectedComposable(Screen.CreateUser.route, navController, tokenManager) { CreateUserScreen(navController) }
+
+        protectedComposable(
+            Screen.EditTianguis.route, navController, tokenManager,
+            arguments = listOf(navArgument("tianguisId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            EditTianguisScreen(navController, backStackEntry.arguments?.getString("tianguisId"))
+        }
+
+        protectedComposable(
+            Screen.InfoTianguis.route, navController, tokenManager,
+            arguments = listOf(navArgument("tianguisId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            InfoTianguisScreen(navController, backStackEntry.arguments?.getString("tianguisId"))
+        }
+
+        protectedComposable(Screen.CreateTianguis.route, navController, tokenManager) {
+            CreateTianguisScreen(navController)
+        }
+
         protectedComposable(
             Screen.EditCategory.route, navController, tokenManager,
             arguments = listOf(navArgument("categoryId") { type = NavType.StringType })

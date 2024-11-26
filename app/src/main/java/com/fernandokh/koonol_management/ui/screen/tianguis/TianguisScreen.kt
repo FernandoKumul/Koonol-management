@@ -11,7 +11,11 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import com.fernandokh.koonol_management.R
+import com.fernandokh.koonol_management.ui.components.shared.DropdownMenuC
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,6 +32,9 @@ import com.fernandokh.koonol_management.ui.components.router.TopBarMenuTitle
 import com.fernandokh.koonol_management.ui.components.shared.DialogC
 import com.fernandokh.koonol_management.ui.components.shared.SearchBarC
 import com.fernandokh.koonol_management.viewModel.tianguis.TianguisViewModel
+import com.fernandokh.koonol_management.utils.MenuItem
+import com.fernandokh.koonol_management.utils.MenuItem.Divider
+import com.fernandokh.koonol_management.utils.MenuItem.Option
 
 @Composable
 fun TianguisScreen(
@@ -96,7 +103,7 @@ fun TianguisScreen(
                     }
 
                     else -> {
-                        TianguisList(tianguisItems, navController, totalRecords)
+                        TianguisList(tianguisItems, navController, totalRecords, viewModel)
                     }
                 }
             }
@@ -126,7 +133,8 @@ private fun SearchTopBar(viewModel: TianguisViewModel) {
 private fun TianguisList(
     tianguisItems: LazyPagingItems<TianguisModel>,
     navController: NavHostController,
-    total: Int
+    total: Int,
+    viewModel: TianguisViewModel
 ) {
     Text(
         text = "Resultados: $total",
@@ -137,12 +145,13 @@ private fun TianguisList(
     LazyColumn {
         items(tianguisItems.itemCount) { index ->
             tianguisItems[index]?.let { tianguis ->
-                CardTianguisItem(navController, tianguis)
+                CardTianguisItem(
+                    navController = navController,
+                    tianguis = tianguis,
+                    onSelectedToDelete = { viewModel.onTianguisSelectedForDelete(tianguis) }
+                )
             }
         }
-
-        // Log para capturar el estado de carga
-        Log.d("TianguisScreen", "LoadState: ${tianguisItems.loadState.refresh}")
 
         when {
             tianguisItems.loadState.append is LoadState.NotLoading && tianguisItems.loadState.append.endOfPaginationReached -> {
@@ -181,16 +190,58 @@ private fun TianguisList(
 }
 
 
+
 @Composable
-private fun CardTianguisItem(navController: NavHostController, tianguis: TianguisModel) {
+private fun CardTianguisItem(
+    navController: NavHostController,
+    tianguis: TianguisModel,
+    onSelectedToDelete: () -> Unit
+) {
+    var menuOpen by remember { mutableStateOf(false) }
+    val options = listOf(
+        Option(
+            "Más información",
+            ImageVector.vectorResource(R.drawable.ic_article_line),
+            MaterialTheme.colorScheme.onBackground
+        ),
+        Divider,
+        Option(
+            "Editar",
+            ImageVector.vectorResource(R.drawable.ic_edit_2_line),
+            MaterialTheme.colorScheme.primary
+        ),
+        Divider,
+        Option(
+            "Borrar",
+            ImageVector.vectorResource(R.drawable.ic_delete_bin_line),
+            MaterialTheme.colorScheme.error
+        ),
+    )
+
     Row(Modifier.padding(16.dp)) {
         Column(Modifier.weight(1f)) {
             Text(text = tianguis.name, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Text(text = tianguis.locality ?: "Ubicación no disponible")
         }
-        IconButton(onClick = {}) {
-            Icon(Icons.Default.MoreVert, contentDescription = "Opciones")
+        IconButton(
+            onClick = { menuOpen = true },
+            modifier = Modifier.size(32.dp)
+        ) {
+            Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Opciones")
+            DropdownMenuC(
+                expanded = menuOpen,
+                onDismiss = { menuOpen = false },
+                options = options,
+                onItemClick = { option ->
+                    when (option.name) {
+                        "Más información" -> navController.navigate(Screen.InfoTianguis.createRoute(tianguis.id))
+                        "Editar" -> navController.navigate(Screen.EditTianguis.createRoute(tianguis.id))
+                        "Borrar" -> onSelectedToDelete()
+                    }
+                }
+            )
         }
     }
     Divider()
 }
+
