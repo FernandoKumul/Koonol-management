@@ -174,6 +174,7 @@ private fun FormSaleStall(
     val subCategoriesList by categoriesViewModel.subCategoriesList.collectAsState()
     val subCategoryId by viewModel.subCategoryId.collectAsState()
     val description by viewModel.description.collectAsState()
+    val typeList = viewModel.typeOptions
     val type by viewModel.type.collectAsState()
     val principalPhoto by viewModel.isPrincipalPhoto.collectAsState()
     val secondPhoto by viewModel.isSecondPhoto.collectAsState()
@@ -223,12 +224,14 @@ private fun FormSaleStall(
         )
         Spacer(Modifier.height(16.dp))
         Text("Tipo", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(
-            type,
-            { viewModel.onTypeChange(it) },
-            "Ingresa el tipo del puesto",
-            error = formErrors.typeError != null,
-            errorMessage = formErrors.typeError
+        DropdownInputForm(
+            items = typeList,
+            selectedItem = typeList.find { it.value == type },
+            onItemSelected = { selectedType ->
+                viewModel.onTypeChange(selectedType.value)
+            },
+            itemLabel = { it.name },
+            label = "Selecciona si el puesto es de permanente",
         )
         Spacer(Modifier.height(16.dp))
         DropdownInputForm(
