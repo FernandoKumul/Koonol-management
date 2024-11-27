@@ -29,6 +29,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.data.models.TianguisModel
 import com.fernandokh.koonol_management.ui.components.router.TopBarMenuTitle
+import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
 import com.fernandokh.koonol_management.ui.components.shared.DialogC
 import com.fernandokh.koonol_management.ui.components.shared.SearchBarC
 import com.fernandokh.koonol_management.viewModel.tianguis.TianguisViewModel
@@ -59,11 +60,15 @@ fun TianguisScreen(
         }
     }
 
+    // Debugging: Verificar el total de registros y la cantidad de ítems mostrados
+    Log.d("TianguisScreen", "Total Records: $totalRecords")
+    Log.d("TianguisScreen", "Items Shown: ${tianguisItems.itemCount}")
+
     Scaffold(
         topBar = { TopBarMenuTitle("Tianguis", drawerState) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { Toast.makeText(context, "Aquí se crearía un nuevo registro", Toast.LENGTH_SHORT).show() },
+                onClick = { navController.navigate(Screen.CreateTianguis.route) },
                 shape = CircleShape,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -111,6 +116,7 @@ fun TianguisScreen(
     )
 }
 
+
 @Composable
 private fun SearchTopBar(viewModel: TianguisViewModel) {
     val isValueSearch by viewModel.isValueSearch.collectAsState()
@@ -136,6 +142,19 @@ private fun TianguisList(
     total: Int,
     viewModel: TianguisViewModel
 ) {
+    val isTianguisToDelete by viewModel.isTianguisToDelete.collectAsState()
+    val isLoadingDelete by viewModel.isLoadingDelete.collectAsState()
+
+    if (isTianguisToDelete != null) {
+        AlertDialogC(
+            dialogTitle = "Borrar Tianguis",
+            dialogText = "¿Estás seguro de borrar el tianguis ${isTianguisToDelete?.name}?",
+            onDismissRequest = { viewModel.dismissDialog() },
+            onConfirmation = { viewModel.deleteTianguis() },
+            loading = isLoadingDelete
+        )
+    }
+
     Text(
         text = "Resultados: $total",
         textAlign = TextAlign.End,
@@ -176,7 +195,7 @@ private fun TianguisList(
 
             tianguisItems.loadState.append is LoadState.Error -> {
                 val error = (tianguisItems.loadState.append as LoadState.Error).error
-                Log.e("TianguisScreen", "Error al cargar más datos: ${error.localizedMessage}")
+                Log.e("TianguisList", "Error al cargar más datos: ${error.localizedMessage}")
                 item {
                     Text(
                         text = "Error al cargar más datos: ${error.localizedMessage}",
@@ -188,6 +207,7 @@ private fun TianguisList(
         }
     }
 }
+
 
 
 

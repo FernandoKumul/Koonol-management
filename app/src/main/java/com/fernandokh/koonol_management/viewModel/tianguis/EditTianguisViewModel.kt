@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import android.util.Log
 
 class EditTianguisViewModel : ViewModel() {
     private val apiService = RetrofitInstance.create(TianguisApiService::class.java)
@@ -67,65 +68,81 @@ class EditTianguisViewModel : ViewModel() {
     private val _dirtyForm = MutableStateFlow(false)
 
     private fun showToast(message: String) {
+        Log.d("EditTianguisViewModel", "Showing toast message: $message")
         _toastMessage.value = message
     }
 
     fun resetToastMessage() {
+        Log.d("EditTianguisViewModel", "Resetting toast message")
         _toastMessage.value = null
     }
 
     fun onNameChange(value: String) {
+        Log.d("EditTianguisViewModel", "Name changed: $value")
         _name.value = value
     }
 
     fun onColorChange(value: String) {
+        Log.d("EditTianguisViewModel", "Color changed: $value")
         _color.value = value
     }
 
     fun onDayWeekChange(value: String) {
+        Log.d("EditTianguisViewModel", "Day of the week changed: $value")
         _dayWeek.value = value
     }
 
     fun onPhotoChange(value: String?) {
+        Log.d("EditTianguisViewModel", "Photo changed: $value")
         _photo.value = value
     }
 
     fun onIndicationsChange(value: String) {
+        Log.d("EditTianguisViewModel", "Indications changed: $value")
         _indications.value = value
     }
 
     fun onStartTimeChange(value: String) {
+        Log.d("EditTianguisViewModel", "Start time changed: $value")
         _startTime.value = value
     }
 
     fun onEndTimeChange(value: String) {
+        Log.d("EditTianguisViewModel", "End time changed: $value")
         _endTime.value = value
     }
 
     fun onLocalityChange(value: String) {
+        Log.d("EditTianguisViewModel", "Locality changed: $value")
         _locality.value = value
         if (_dirtyForm.value) validateLocality()
     }
 
     fun dismissDialog() {
+        Log.d("EditTianguisViewModel", "Dismissing dialog")
         _isShowDialog.value = false
     }
 
     fun showDialog() {
+        Log.d("EditTianguisViewModel", "Showing dialog")
         _isShowDialog.value = true
     }
 
     fun getTianguis(tianguisId: String?) {
         if (tianguisId == null) {
+            Log.w("EditTianguisViewModel", "Tianguis ID is null")
             _tianguis.value = null
             return
         }
 
         viewModelScope.launch {
             try {
+                Log.d("EditTianguisViewModel", "Fetching Tianguis with ID: $tianguisId")
                 _isLoading.value = true
                 val response = apiService.getTianguisById(tianguisId)
                 _tianguis.value = response.data
+
+                Log.d("EditTianguisViewModel", "Tianguis fetched successfully: ${response.data}")
 
                 // Cargar los valores en los campos
                 _name.value = response.data?.name ?: ""
@@ -138,8 +155,10 @@ class EditTianguisViewModel : ViewModel() {
                 _locality.value = response.data?.locality ?: ""
             } catch (e: HttpException) {
                 val errorMessage = evaluateHttpException(e)
+                Log.e("EditTianguisViewModel", "HTTP error: $errorMessage", e)
                 showToast(errorMessage)
             } catch (e: Exception) {
+                Log.e("EditTianguisViewModel", "Error fetching Tianguis: ${e.message}", e)
                 showToast("Error al obtener el tianguis: ${e.message}")
             } finally {
                 _isLoading.value = false
@@ -147,9 +166,10 @@ class EditTianguisViewModel : ViewModel() {
         }
     }
 
+
     fun updateTianguis(tianguisId: String) {
         val updatedTianguis = TianguisCreateEditModel(
-            userId = "static_user_id", // Cambia esto según la lógica de usuario
+            userId = "67031a4999c53ba23d62a542", // Cambia esto según la lógica de usuario
             name = _name.value.trim(),
             color = _color.value.trim(),
             dayWeek = _dayWeek.value.trim(),
@@ -167,14 +187,19 @@ class EditTianguisViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
+                Log.d("EditTianguisViewModel", "Updating Tianguis with ID: $tianguisId")
                 _isLoadingUpdate.value = true
                 apiService.updateTianguis(tianguisId, updatedTianguis)
+                Log.d("EditTianguisViewModel", "Tianguis updated successfully")
                 showToast("Tianguis actualizado con éxito")
                 _navigationEvent.send(NavigationEvent.TianguisCreated)
             } catch (e: HttpException) {
+                val errorBody = e.response()?.errorBody()?.string()
+                Log.e("EditTianguisViewModel", "HTTP error during update: ${e.message()}. Error body: $errorBody", e)
                 val errorMessage = evaluateHttpException(e)
                 showToast(errorMessage)
             } catch (e: Exception) {
+                Log.e("EditTianguisViewModel", "Error updating Tianguis: ${e.message}", e)
                 showToast("Error al actualizar el tianguis: ${e.message}")
             } finally {
                 _isLoadingUpdate.value = false
@@ -186,6 +211,7 @@ class EditTianguisViewModel : ViewModel() {
     // Validaciones individuales
     private fun validateName() {
         val name = _name.value
+        Log.d("EditTianguisViewModel", "Validating name: $name")
         _formErrors.value = _formErrors.value.copy(
             nameError = if (name.isBlank()) "El nombre es requerido" else null
         )
@@ -241,6 +267,7 @@ class EditTianguisViewModel : ViewModel() {
 
     // Método para verificar si el formulario es válido
     fun isFormValid(): Boolean {
+        Log.d("EditTianguisViewModel", "Validating form")
         _dirtyForm.value = true
         validateName()
         validateColor()
@@ -251,6 +278,8 @@ class EditTianguisViewModel : ViewModel() {
         validateEndTime()
         validateLocality()
 
-        return _formErrors.value.allErrors().all { it == null }
+        val isValid = _formErrors.value.allErrors().all { it == null }
+        Log.d("EditTianguisViewModel", "Form validation result: $isValid")
+        return isValid
     }
 }

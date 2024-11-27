@@ -42,6 +42,7 @@ import com.fernandokh.koonol_management.ui.components.shared.MyUploadImage
 import com.fernandokh.koonol_management.viewModel.tianguis.EditTianguisViewModel
 import com.fernandokh.koonol_management.viewModel.tianguis.NavigationEvent
 import java.io.File
+import android.util.Log
 
 @Composable
 fun EditTianguisScreen(
@@ -61,11 +62,16 @@ fun EditTianguisScreen(
 
     val toastMessage by viewModel.toastMessage.collectAsState()
 
+    // Log initial parameters
+    Log.d("EditTianguisScreen", "Initializing with tianguisId: $tianguisId")
+
     LaunchedEffect(Unit) {
+        Log.d("EditTianguisScreen", "LaunchedEffect triggered")
         viewModel.getTianguis(tianguisId)
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is NavigationEvent.TianguisCreated -> {
+                    Log.i("NavigationEvent", "Navigating to Tianguis screen")
                     navController.navigate(Screen.Tianguis.route)
                 }
             }
@@ -74,18 +80,25 @@ fun EditTianguisScreen(
 
     LaunchedEffect(toastMessage) {
         toastMessage?.let {
+            Log.d("ToastMessage", "Displaying toast: $it")
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             viewModel.resetToastMessage()
         }
     }
 
     Scaffold(
-        topBar = { TopBarGoBack("Editar Tianguis", navController) },
+        topBar = {
+            Log.d("EditTianguisScreen", "TopBar rendered")
+            TopBarGoBack("Editar Tianguis", navController)
+        },
         floatingActionButton = {
+            Log.d("EditTianguisScreen", "FloatingActionButton rendered")
             FloatingActionButton(
                 onClick = {
                     val isValid = viewModel.isFormValid()
+                    Log.d("FormValidation", "Form validation result: $isValid")
                     if (isValid) {
+                        Log.d("Dialog", "Showing confirmation dialog")
                         viewModel.showDialog()
                     }
                 },
@@ -97,6 +110,7 @@ fun EditTianguisScreen(
             }
         },
         content = { innerPadding ->
+            Log.d("EditTianguisScreen", "Content rendered")
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
@@ -105,6 +119,7 @@ fun EditTianguisScreen(
             ) {
                 when {
                     isLoading -> {
+                        Log.d("EditTianguisScreen", "Loading state")
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -114,6 +129,7 @@ fun EditTianguisScreen(
                     }
 
                     isTianguis == null -> {
+                        Log.w("EditTianguisScreen", "No Tianguis found")
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -126,6 +142,7 @@ fun EditTianguisScreen(
                     }
 
                     else -> {
+                        Log.d("EditTianguisScreen", "Rendering Tianguis form")
                         Column(
                             modifier = Modifier
                                 .verticalScroll(rememberScrollState())
@@ -135,17 +152,26 @@ fun EditTianguisScreen(
                             MyUploadImage(
                                 directory = File(cacheDir, "images"),
                                 url = imageUrl,
-                                onSetImage = { viewModel.onPhotoChange(it) })
+                                onSetImage = {
+                                    Log.d("MyUploadImage", "Image updated: $it")
+                                    viewModel.onPhotoChange(it)
+                                })
                             Spacer(modifier = Modifier.height(20.dp))
                             FormTianguis(viewModel)
 
                             if (isShowDialog) {
+                                Log.d("Dialog", "Confirmation dialog visible")
                                 AlertDialogC(
                                     dialogTitle = "Editar Tianguis",
                                     dialogText = "¿Estás seguro de los nuevos datos para el tianguis?",
-                                    onDismissRequest = { viewModel.dismissDialog() },
+                                    onDismissRequest = {
+                                        Log.d("Dialog", "Dialog dismissed")
+                                        viewModel.dismissDialog()
+                                    },
                                     onConfirmation = {
+                                        Log.d("Dialog", "Confirmation dialog accepted")
                                         if (tianguisId != null) {
+                                            Log.d("UpdateTianguis", "Updating Tianguis with ID: $tianguisId")
                                             viewModel.updateTianguis(tianguisId)
                                         }
                                     },

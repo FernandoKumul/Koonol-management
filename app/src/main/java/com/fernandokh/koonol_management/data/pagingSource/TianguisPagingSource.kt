@@ -15,14 +15,15 @@ class TianguisPagingSource(
     private val onUpdateTotal: (Int) -> Unit
 ) : PagingSource<Int, TianguisModel>() {
 
+    // Set para almacenar IDs únicos cargados previamente
+    private val loadedIds = mutableSetOf<String>()
+
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, TianguisModel> {
         return try {
             val currentPage = params.key ?: 1
 
-            // Log de parámetros de la solicitud
             Log.d("TianguisPagingSource", "Realizando solicitud al API: page = $currentPage, limit = ${params.loadSize}, search = '$search', sort = '$sort'")
 
-            // Realizamos la solicitud al API para obtener la lista de tianguis
             val response = apiService.search(
                 page = currentPage,
                 limit = params.loadSize,
@@ -30,28 +31,29 @@ class TianguisPagingSource(
                 sort = sort,
             )
 
-            // Log de la respuesta completa
             Log.d("TianguisPagingSource", "Respuesta de la API: $response")
 
-            // Extraemos los datos de la respuesta
             val tianguisList = response.data ?: emptyList()
 
-            // Actualizamos el total de registros con el tamaño de la lista
-            onUpdateTotal(tianguisList.size)
+            // Filtrar duplicados globales
+            val filteredTianguisList = tianguisList.filter { it.id !in loadedIds }
+            loadedIds.addAll(filteredTianguisList.map { it.id })
 
-            // Log de los datos obtenidos
-            Log.d("TianguisPagingSource", "Cantidad de tianguis en la lista: ${tianguisList.size}")
+            Log.d("TianguisPagingSource", "Cantidad de tianguis después de filtrar duplicados globales: ${filteredTianguisList.size}")
 
-            // Log de cada elemento en la lista
-            tianguisList.forEachIndexed { index, tianguis ->
-                Log.d("TianguisPagingSource", "Tianguis $index: ${tianguis.name}, Localidad: ${tianguis.locality}")
+            // Actualizar el total de elementos al cargar la primera página
+            if (currentPage == 1) {
+                onUpdateTotal(tianguisList.size)
             }
 
-            // Devolvemos los datos para la paginación
+            filteredTianguisList.forEachIndexed { index, tianguis ->
+                Log.d("TianguisPagingSource", "Tianguis $index: ${tianguis.name}, ID: ${tianguis.id}")
+            }
+
             LoadResult.Page(
-                data = tianguisList,
+                data = filteredTianguisList,
                 prevKey = if (currentPage == 1) null else currentPage - 1,
-                nextKey = if (tianguisList.isEmpty()) null else currentPage + 1
+                nextKey = if (filteredTianguisList.isEmpty()) null else currentPage + 1
             )
         } catch (e: HttpException) {
             val errorMessage = evaluateHttpException(e)
@@ -64,6 +66,10 @@ class TianguisPagingSource(
     }
 
     override fun getRefreshKey(state: PagingState<Int, TianguisModel>): Int? {
-        return state.anchorPosition
+        val anchorPosition = state.anchorPosition
+        return anchorPosition?.let { position ->
+            state.closestPageToPosition(position)?.prevKey?.plus(1)
+                ?: state.closestPageToPosition(position)?.nextKey?.minus(1)
+        }
     }
 }
