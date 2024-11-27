@@ -29,6 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.data.models.TianguisModel
+import com.fernandokh.koonol_management.ui.components.maps.MapComponent
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.InformationField
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
@@ -139,6 +140,32 @@ private fun InfoTianguis(tianguis: TianguisModel) {
             Spacer(Modifier.height(24.dp))
             InformationField("Localidad", tianguis.locality ?: "No especificada")
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        tianguis.markerMap?.coordinates?.let { coordinates ->
+            if (coordinates.size == 2) {
+                val longitude = coordinates[0]
+                val latitude = coordinates[1]
+
+                MapComponent(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp),
+                    latitude = latitude,
+                    longitude = longitude,
+                    markerTitle = tianguis.name
+                )
+            } else {
+                Text(
+                    text = "Ubicación no disponible",
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        } ?: Text(
+            text = "Ubicación no especificada",
+            color = MaterialTheme.colorScheme.error
+        )
     }
 }
 
