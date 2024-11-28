@@ -169,7 +169,7 @@ class EditTianguisViewModel : ViewModel() {
 
     fun updateTianguis(tianguisId: String) {
         val updatedTianguis = TianguisCreateEditModel(
-            userId = "67031a4999c53ba23d62a542", // Cambia esto según la lógica de usuario
+            userId = "67228bf327efdad6491ea5f0", // Cambia esto según la lógica de usuario
             name = _name.value.trim(),
             color = _color.value.trim(),
             dayWeek = _dayWeek.value.trim(),

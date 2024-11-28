@@ -6,7 +6,6 @@ import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.TianguisApiService
 import com.fernandokh.koonol_management.data.models.TianguisCreateEditModel
 import com.fernandokh.koonol_management.data.models.MarkerMap
-import com.fernandokh.koonol_management.utils.SelectOption
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,6 +68,12 @@ class CreateTianguisViewModel : ViewModel() {
     private val _locality = MutableStateFlow("")
     val locality: StateFlow<String> = _locality
 
+    private val _latitude = MutableStateFlow(19.4326) // Coordenada inicial (CDMX)
+    val latitude: StateFlow<Double> = _latitude
+
+    private val _longitude = MutableStateFlow(-99.1332) // Coordenada inicial (CDMX)
+    val longitude: StateFlow<Double> = _longitude
+
     private val _toastMessage = MutableStateFlow<String?>(null)
     val toastMessage: StateFlow<String?> = _toastMessage
 
@@ -89,6 +94,11 @@ class CreateTianguisViewModel : ViewModel() {
 
     fun resetToastMessage() {
         _toastMessage.value = null
+    }
+
+    fun updateCoordinates(lat: Double, lng: Double) {
+        _latitude.value = lat
+        _longitude.value = lng
     }
 
     fun onNameChange(value: String) {
@@ -141,7 +151,7 @@ class CreateTianguisViewModel : ViewModel() {
 
     fun createTianguis() {
         val tianguis = TianguisCreateEditModel(
-            userId = "static_user_id", // Cambia esto a tu lógica de usuario
+            userId = "67228bf327efdad6491ea5f0", // Cambia esto a tu lógica de usuario
             name = _name.value.trim(),
             color = _color.value.trim(),
             dayWeek = _dayWeek.value.trim(),
@@ -153,7 +163,7 @@ class CreateTianguisViewModel : ViewModel() {
             active = true,
             markerMap = MarkerMap(
                 type = "Point",
-                coordinates = listOf(-99.1332, 19.4326) // Cambia por la lógica del mapa
+                coordinates = listOf(_longitude.value, _latitude.value) // Coordenadas seleccionadas
             )
         )
 
@@ -181,6 +191,7 @@ class CreateTianguisViewModel : ViewModel() {
             nameError = if (name.isBlank()) "El nombre es requerido" else null
         )
     }
+
     private fun validateColor() {
         val color = _color.value
         _formErrors.value = _formErrors.value.copy(
@@ -229,6 +240,7 @@ class CreateTianguisViewModel : ViewModel() {
             photoError = if (photo != null && !photo.startsWith("http")) "Debe ser una URL válida" else null
         )
     }
+
     fun isFormValid(): Boolean {
         _dirtyForm.value = true
         validateName()
@@ -247,4 +259,3 @@ class CreateTianguisViewModel : ViewModel() {
 sealed class NavigationEvent {
     object TianguisCreated : NavigationEvent()
 }
-

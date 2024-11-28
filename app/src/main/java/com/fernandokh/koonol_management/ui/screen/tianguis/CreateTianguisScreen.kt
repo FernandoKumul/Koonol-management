@@ -23,6 +23,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
+import com.fernandokh.koonol_management.ui.components.maps.MapComponent
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
 import com.fernandokh.koonol_management.ui.components.shared.CustomTextField
@@ -30,6 +31,7 @@ import com.fernandokh.koonol_management.ui.components.shared.MyUploadImage
 import com.fernandokh.koonol_management.viewModel.tianguis.CreateTianguisViewModel
 import com.fernandokh.koonol_management.viewModel.tianguis.NavigationEvent
 import java.io.File
+import android.util.Log
 
 @Composable
 fun CreateTianguisScreen(
@@ -43,6 +45,8 @@ fun CreateTianguisScreen(
     val isLoadingCreate by viewModel.isLoadingCreate.collectAsState()
     val isShowDialog by viewModel.isShowDialog.collectAsState()
     val toastMessage by viewModel.toastMessage.collectAsState()
+    val latitude by viewModel.latitude.collectAsState()
+    val longitude by viewModel.longitude.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
@@ -67,7 +71,10 @@ fun CreateTianguisScreen(
             FloatingActionButton(
                 onClick = {
                     val isValid = viewModel.isFormValid()
-                    if (isValid) {
+                    if (viewModel.photo.value == null) {
+                        Toast.makeText(context, "Por favor, agrega una imagen.", Toast.LENGTH_SHORT)
+                            .show()
+                    }else if (isValid) {
                         viewModel.showDialog()
                     }
                 },
@@ -90,17 +97,47 @@ fun CreateTianguisScreen(
                 MyUploadImage(
                     directory = File(cacheDir, "images"),
                     url = imageUrl,
-                    onSetImage = { viewModel.onPhotoChange(it) }
+                    onSetImage = {
+                        Log.d("CreateTianguisScreen", "Imagen seleccionada: $it")
+                        viewModel.onPhotoChange(it)
+                    }
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 FormTianguis(viewModel)
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "Ubicación del Tianguis",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Componente del mapa
+                MapComponent(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp),
+                    initialLatitude = latitude,
+                    initialLongitude = longitude,
+                    markerTitle = "Selecciona la ubicación",
+                    isDraggable = true, // Permitir arrastre del marcador
+                    onMarkerDragEnd = { newPosition ->
+                        Log.d("CreateTianguisScreen", "Marcador movido: Lat: ${newPosition.latitude}, Lng: ${newPosition.longitude}")
+                        viewModel.updateCoordinates(newPosition.latitude, newPosition.longitude)
+                    }
+                )
+
 
                 if (isShowDialog) {
                     AlertDialogC(
                         dialogTitle = "Crear Tianguis",
                         dialogText = "¿Estás seguro de los datos para el nuevo tianguis?",
                         onDismissRequest = { viewModel.dismissDialog() },
-                        onConfirmation = { viewModel.createTianguis() },
+                        onConfirmation = {
+                            Log.d("CreateTianguisScreen", "Confirmación de guardado...")
+                            viewModel.createTianguis()
+                        },
                         loading = isLoadingCreate
                     )
                 }
@@ -108,6 +145,7 @@ fun CreateTianguisScreen(
         }
     )
 }
+
 
 @Composable
 private fun FormTianguis(viewModel: CreateTianguisViewModel) {

@@ -155,9 +155,10 @@ private fun InfoTianguis(tianguis: TianguisModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(300.dp),
-                    latitude = latitude,
-                    longitude = longitude,
-                    markerTitle = tianguis.name
+                    initialLatitude = latitude,
+                    initialLongitude = longitude,
+                    markerTitle = tianguis.name,
+                    isDraggable = false // El marcador no se puede arrastrar
                 )
             } else {
                 Log.e("MapDebug", "Invalid coordinates size: ${coordinates.size}")
