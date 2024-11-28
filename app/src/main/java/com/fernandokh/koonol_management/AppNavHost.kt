@@ -43,6 +43,7 @@ import com.fernandokh.koonol_management.ui.screen.promotion.EditPromotionScreen
 import com.fernandokh.koonol_management.ui.screen.promotion.InfoPromotionScreen
 import com.fernandokh.koonol_management.ui.screen.salestalls.EditSaleStallScreen
 import com.fernandokh.koonol_management.ui.screen.salestalls.InfoSaleStallScreen
+import com.fernandokh.koonol_management.ui.screen.scheduleTianguis.CreateScheduleTianguisScreen
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
@@ -95,6 +96,7 @@ sealed class Screen(val route: String) {
         fun createRoute(promotionId: String) = "promotions/info/$promotionId"
     }
     object CreatePromotion : Screen("promotions/create")
+    object CreateScheduleTianguis : Screen("schedule-tianguis/create")
 }
 
 fun NavGraphBuilder.protectedComposable(
@@ -147,6 +149,7 @@ fun AppNavHost(
         protectedComposable(Screen.Profile.route, navController, tokenManager) { ProfileScreen(navController, drawerState, tokenManager) }
         protectedComposable(Screen.EditProfile.route, navController, tokenManager) { EditProfileScreen(navController, tokenManager) }
         protectedComposable(Screen.ChangePassword.route, navController, tokenManager) { ChangePasswordScreen(navController, tokenManager) }
+        protectedComposable(Screen.CreateScheduleTianguis.route, navController, tokenManager) { CreateScheduleTianguisScreen(navController) }
         protectedComposable(
             Screen.EditSeller.route, navController, tokenManager,
             arguments = listOf(navArgument("sellerId") { type = NavType.StringType })
