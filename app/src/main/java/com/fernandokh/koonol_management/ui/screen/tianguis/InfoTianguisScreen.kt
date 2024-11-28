@@ -34,6 +34,7 @@ import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.InformationField
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 import com.fernandokh.koonol_management.viewModel.tianguis.InfoTianguisViewModel
+import android.util.Log
 
 @Composable
 fun InfoTianguisScreen(
@@ -148,6 +149,8 @@ private fun InfoTianguis(tianguis: TianguisModel) {
                 val longitude = coordinates[0]
                 val latitude = coordinates[1]
 
+                Log.d("MapDebug", "Latitude: $latitude, Longitude: $longitude")
+
                 MapComponent(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -157,15 +160,13 @@ private fun InfoTianguis(tianguis: TianguisModel) {
                     markerTitle = tianguis.name
                 )
             } else {
+                Log.e("MapDebug", "Invalid coordinates size: ${coordinates.size}")
                 Text(
                     text = "Ubicación no disponible",
                     color = MaterialTheme.colorScheme.error
                 )
             }
-        } ?: Text(
-            text = "Ubicación no especificada",
-            color = MaterialTheme.colorScheme.error
-        )
+        } ?:  Log.e("MapDebug", "No coordinates found")
     }
 }
 

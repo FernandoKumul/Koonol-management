@@ -18,7 +18,7 @@ fun MapComponent(
     markerTitle: String = "Ubicación"
 ) {
     // Coordenadas del marcador
-    val markerPosition = LatLng(latitude, longitude)
+    val markerPosition = LatLng(longitude, latitude)
 
     // Configuración de la posición de la cámara
     val cameraPositionState = rememberCameraPositionState {
