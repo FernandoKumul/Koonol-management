@@ -44,34 +44,61 @@ import com.fernandokh.koonol_management.viewModel.tianguis.NavigationEvent
 import java.io.File
 import android.util.Log
 import com.fernandokh.koonol_management.ui.components.maps.MapComponent
+import com.fernandokh.koonol_management.viewModel.AuthViewModel
+import kotlinx.coroutines.flow.firstOrNull
 
 @Composable
 fun EditTianguisScreen(
     navController: NavHostController,
     tianguisId: String?,
-    viewModel: EditTianguisViewModel = viewModel()
+    authViewModel: AuthViewModel,
+    editTianguisViewModel: EditTianguisViewModel // Cambiar de viewModel a editTianguisViewModel
 ) {
-    val isTianguis by viewModel.tianguis.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+    val isTianguis by editTianguisViewModel.tianguis.collectAsState()
+    val isLoading by editTianguisViewModel.isLoading.collectAsState()
+    val userId by authViewModel.userId.collectAsState()
+    Log.d("EditTianguisScreen", "UserId (AuthViewModel): $userId")
+
+    LaunchedEffect(Unit) {
+        if (userId == null) {
+            // Intentamos obtener el token directamente desde DataStore
+            val token = authViewModel.tokenManager.accessToken.firstOrNull()
+            if (!token.isNullOrEmpty()) {
+                val decodedJwt = authViewModel.decodeJwt(token)
+                val decodedUserId = decodedJwt?.optString("userId")
+                if (!decodedUserId.isNullOrEmpty()) {
+                    authViewModel.setUserId(decodedUserId)
+                    Log.d("EditTianguisScreen", "UserId recuperado de token: $decodedUserId")
+                } else {
+                    Log.e("EditTianguisScreen", "No se pudo decodificar el token")
+                }
+            } else {
+                Log.e("EditTianguisScreen", "Token no encontrado, redirigiendo a login...")
+                navController.navigate(Screen.Login.route)
+            }
+        } else {
+            Log.d("EditTianguisScreen", "UserId ya disponible: $userId")
+        }
+    }
 
     val context = LocalContext.current
     val cacheDir: File = context.cacheDir
 
-    val imageUrl by viewModel.photo.collectAsState()
-    val isLoadingUpdate by viewModel.isLoadingUpdate.collectAsState()
-    val isShowDialog by viewModel.isShowDialog.collectAsState()
-    val toastMessage by viewModel.toastMessage.collectAsState()
+    val imageUrl by editTianguisViewModel.photo.collectAsState()
+    val isLoadingUpdate by editTianguisViewModel.isLoadingUpdate.collectAsState()
+    val isShowDialog by editTianguisViewModel.isShowDialog.collectAsState()
+    val toastMessage by editTianguisViewModel.toastMessage.collectAsState()
 
-    // Obtener coordenadas iniciales o valores por defecto
-    val latitude = isTianguis?.markerMap?.coordinates?.get(1) ?: 19.4326 // CDMX por defecto
-    val longitude = isTianguis?.markerMap?.coordinates?.get(0) ?: -99.1332 // CDMX por defecto
-
+    // Logs para verificar el estado inicial
     Log.d("EditTianguisScreen", "Tianguis ID: $tianguisId")
-    Log.d("EditTianguisScreen", "Inicial Latitude: $latitude, Longitude: $longitude")
+    Log.d("EditTianguisScreen", "UserId (AuthViewModel): $userId")
 
     LaunchedEffect(Unit) {
-        viewModel.getTianguis(tianguisId)
-        viewModel.navigationEvent.collect { event ->
+        // Verificar si userId es null en este punto
+        Log.d("EditTianguisScreen", "LaunchedEffect -> userId: $userId")
+
+        editTianguisViewModel.getTianguis(tianguisId)
+        editTianguisViewModel.navigationEvent.collect { event ->
             when (event) {
                 is NavigationEvent.TianguisCreated -> {
                     Log.d("EditTianguisScreen", "Navegando a la pantalla de Tianguis")
@@ -84,7 +111,8 @@ fun EditTianguisScreen(
     LaunchedEffect(toastMessage) {
         toastMessage?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-            viewModel.resetToastMessage()
+            Log.d("EditTianguisScreen", "Toast Message: $it")
+            editTianguisViewModel.resetToastMessage()
         }
     }
 
@@ -93,11 +121,11 @@ fun EditTianguisScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    val isValid = viewModel.isFormValid()
+                    val isValid = editTianguisViewModel.isFormValid()
                     Log.d("EditTianguisScreen", "Formulario válido: $isValid")
                     if (isValid) {
                         Log.d("EditTianguisScreen", "Mostrando diálogo de confirmación")
-                        viewModel.showDialog()
+                        editTianguisViewModel.showDialog()
                     }
                 },
                 shape = CircleShape,
@@ -151,11 +179,11 @@ fun EditTianguisScreen(
                                 url = imageUrl,
                                 onSetImage = {
                                     Log.d("EditTianguisScreen", "Imagen seleccionada: $it")
-                                    viewModel.onPhotoChange(it)
+                                    editTianguisViewModel.onPhotoChange(it)
                                 }
                             )
                             Spacer(modifier = Modifier.height(20.dp))
-                            FormTianguis(viewModel)
+                            FormTianguis(editTianguisViewModel)
 
                             Spacer(modifier = Modifier.height(20.dp))
 
@@ -171,15 +199,15 @@ fun EditTianguisScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(300.dp),
-                                initialLatitude = latitude,
-                                initialLongitude = longitude,
+                                initialLatitude = isTianguis?.markerMap?.coordinates?.get(1) ?: 19.4326,
+                                initialLongitude = isTianguis?.markerMap?.coordinates?.get(0) ?: -99.1332,
                                 enableFullScreen = true,
                                 onLocationSelected = { newPosition ->
                                     Log.d(
                                         "EditTianguisScreen",
                                         "Nueva posición seleccionada: Lat: ${newPosition.latitude}, Lng: ${newPosition.longitude}"
                                     )
-                                    viewModel.updateCoordinates(
+                                    editTianguisViewModel.updateCoordinates(
                                         newPosition.latitude,
                                         newPosition.longitude
                                     )
@@ -192,14 +220,17 @@ fun EditTianguisScreen(
                                     dialogText = "¿Estás seguro de los nuevos datos para el tianguis?",
                                     onDismissRequest = {
                                         Log.d("EditTianguisScreen", "Diálogo cancelado")
-                                        viewModel.dismissDialog()
+                                        editTianguisViewModel.dismissDialog()
                                     },
                                     onConfirmation = {
-                                        Log.d(
-                                            "EditTianguisScreen",
-                                            "Confirmación de edición iniciada"
-                                        )
-                                        tianguisId?.let { viewModel.updateTianguis(it) }
+                                        Log.d("EditTianguisScreen", "Confirmación de edición iniciada")
+                                        if (userId != null) {
+                                            Log.d("EditTianguisScreen", "Llamando a updateTianguis con userId: $userId y tianguisId: $tianguisId")
+                                            tianguisId?.let { editTianguisViewModel.updateTianguis(it, userId ?: "") }
+                                        } else {
+                                            Log.e("EditTianguisScreen", "Usuario no autenticado")
+                                            Toast.makeText(context, "Usuario no autenticado", Toast.LENGTH_SHORT).show()
+                                        }
                                     },
                                     loading = isLoadingUpdate
                                 )
@@ -305,9 +336,3 @@ private fun FormTianguis(viewModel: EditTianguisViewModel) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PrevEditTianguisScreen() {
-    val navController = rememberNavController()
-    EditTianguisScreen(navController, "tianguisId")
-}

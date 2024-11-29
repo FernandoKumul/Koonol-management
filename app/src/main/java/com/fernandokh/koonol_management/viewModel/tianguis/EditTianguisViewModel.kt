@@ -18,6 +18,7 @@ import retrofit2.HttpException
 import android.util.Log
 
 class EditTianguisViewModel : ViewModel() {
+
     private val apiService = RetrofitInstance.create(TianguisApiService::class.java)
 
     private val _isLoading = MutableStateFlow(false)
@@ -177,10 +178,9 @@ class EditTianguisViewModel : ViewModel() {
         }
     }
 
-
-    fun updateTianguis(tianguisId: String) {
+    fun updateTianguis(tianguisId: String, userId: String) {
         val updatedTianguis = TianguisCreateEditModel(
-            userId = "67228bf327efdad6491ea5f0", // Cambia esto según la lógica de usuario
+            userId = userId, // Cambia esto según la lógica de usuario
             name = _name.value.trim(),
             color = _color.value.trim(),
             dayWeek = _dayWeek.value.trim(),
@@ -204,15 +204,12 @@ class EditTianguisViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                Log.d("EditTianguisViewModel", "Updating Tianguis with ID: $tianguisId")
                 _isLoadingUpdate.value = true
                 apiService.updateTianguis(tianguisId, updatedTianguis)
-                Log.d("EditTianguisViewModel", "Tianguis updated successfully")
                 showToast("Tianguis actualizado con éxito")
                 _navigationEvent.send(NavigationEvent.TianguisCreated)
             } catch (e: HttpException) {
                 val errorBody = e.response()?.errorBody()?.string()
-                Log.e("EditTianguisViewModel", "HTTP error during update: ${e.message()}. Error body: $errorBody", e)
                 val errorMessage = evaluateHttpException(e)
                 showToast(errorMessage)
             } catch (e: Exception) {

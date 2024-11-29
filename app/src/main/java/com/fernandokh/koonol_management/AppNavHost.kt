@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
@@ -41,6 +42,9 @@ import com.fernandokh.koonol_management.ui.screen.users.CreateUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.EditUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.InfoUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.UsersScreen
+import com.fernandokh.koonol_management.viewModel.AuthViewModel
+import com.fernandokh.koonol_management.viewModel.AuthViewModelFactory
+import com.fernandokh.koonol_management.viewModel.tianguis.EditTianguisViewModel
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
@@ -127,6 +131,11 @@ fun NavGraphBuilder.protectedComposable(
 fun AppNavHost(
     modifier: Modifier = Modifier, navController: NavHostController, drawerState: DrawerState, tokenManager: TokenManager
 ) {
+    val authViewModel: AuthViewModel = viewModel(
+        factory = AuthViewModelFactory(tokenManager)
+    )
+    val editTianguisViewModel: EditTianguisViewModel = viewModel() // Crear instancia del ViewModel
+
     NavHost(navController, startDestination = Screen.Login.route, modifier = modifier) {
         composable(Screen.Login.route) { LoginScreen(navController, tokenManager) }
         protectedComposable(Screen.Menu.route, navController, tokenManager) { MenuScreen(navController) }
@@ -165,7 +174,8 @@ fun AppNavHost(
             Screen.EditTianguis.route, navController, tokenManager,
             arguments = listOf(navArgument("tianguisId") { type = NavType.StringType })
         ) { backStackEntry ->
-            EditTianguisScreen(navController, backStackEntry.arguments?.getString("tianguisId"))
+            val tianguisId = backStackEntry.arguments?.getString("tianguisId")
+            EditTianguisScreen(navController, tianguisId, authViewModel, editTianguisViewModel)
         }
 
         protectedComposable(
