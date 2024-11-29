@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
@@ -20,8 +21,6 @@ import com.fernandokh.koonol_management.data.repository.TokenManager
 import com.fernandokh.koonol_management.ui.screen.LoginScreen
 import com.fernandokh.koonol_management.ui.screen.MenuScreen
 import com.fernandokh.koonol_management.ui.screen.PromotionsScreen
-import com.fernandokh.koonol_management.ui.screen.salestalls.SalesStallsScreen
-import com.fernandokh.koonol_management.ui.screen.TianguisScreen
 import com.fernandokh.koonol_management.ui.screen.categories.CategoriesScreen
 import com.fernandokh.koonol_management.ui.screen.categories.CreateCategoryScreen
 import com.fernandokh.koonol_management.ui.screen.categories.EditCategoryScreen
@@ -30,15 +29,27 @@ import com.fernandokh.koonol_management.ui.screen.profile.ChangePasswordScreen
 import com.fernandokh.koonol_management.ui.screen.profile.EditProfileScreen
 import com.fernandokh.koonol_management.ui.screen.profile.ProfileScreen
 import com.fernandokh.koonol_management.ui.screen.promotion.CreatePromotionScreen
+import com.fernandokh.koonol_management.ui.screen.promotion.EditPromotionScreen
+import com.fernandokh.koonol_management.ui.screen.promotion.InfoPromotionScreen
 import com.fernandokh.koonol_management.ui.screen.salestalls.CreateSaleStallScreen
+import com.fernandokh.koonol_management.ui.screen.salestalls.EditSaleStallScreen
+import com.fernandokh.koonol_management.ui.screen.salestalls.InfoSaleStallScreen
+import com.fernandokh.koonol_management.ui.screen.salestalls.SalesStallsScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.CreateSellersScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.EditSellersScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.InfoSellersScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.SellersScreen
+import com.fernandokh.koonol_management.ui.screen.tianguis.CreateTianguisScreen
+import com.fernandokh.koonol_management.ui.screen.tianguis.EditTianguisScreen
+import com.fernandokh.koonol_management.ui.screen.tianguis.InfoTianguisScreen
+import com.fernandokh.koonol_management.ui.screen.tianguis.TianguisScreen
 import com.fernandokh.koonol_management.ui.screen.users.CreateUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.EditUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.InfoUserScreen
 import com.fernandokh.koonol_management.ui.screen.users.UsersScreen
+import com.fernandokh.koonol_management.viewModel.AuthViewModel
+import com.fernandokh.koonol_management.viewModel.AuthViewModelFactory
+import com.fernandokh.koonol_management.viewModel.tianguis.EditTianguisViewModel
 import com.fernandokh.koonol_management.ui.screen.promotion.EditPromotionScreen
 import com.fernandokh.koonol_management.ui.screen.promotion.InfoPromotionScreen
 import com.fernandokh.koonol_management.ui.screen.salestalls.EditSaleStallScreen
@@ -96,7 +107,18 @@ sealed class Screen(val route: String) {
         fun createRoute(promotionId: String) = "promotions/info/$promotionId"
     }
     object CreatePromotion : Screen("promotions/create")
+
+    //Tianguis
+    object EditTianguis : Screen("tianguis/edit/{tianguisId}") {
+        fun createRoute(tianguisId: String) = "tianguis/edit/$tianguisId"
+    }
+    object InfoTianguis : Screen("tianguis/info/{tianguisId}") {
+        fun createRoute(tianguisId: String) = "tianguis/info/$tianguisId"
+    }
+    object CreateTianguis : Screen("tianguis/create")
+
     object CreateScheduleTianguis : Screen("schedule-tianguis/create")
+
 }
 
 fun NavGraphBuilder.protectedComposable(
@@ -138,6 +160,11 @@ fun NavGraphBuilder.protectedComposable(
 fun AppNavHost(
     modifier: Modifier = Modifier, navController: NavHostController, drawerState: DrawerState, tokenManager: TokenManager
 ) {
+    val authViewModel: AuthViewModel = viewModel(
+        factory = AuthViewModelFactory(tokenManager)
+    )
+    val editTianguisViewModel: EditTianguisViewModel = viewModel() // Crear instancia del ViewModel
+
     NavHost(navController, startDestination = Screen.Login.route, modifier = modifier) {
         composable(Screen.Login.route) { LoginScreen(navController, tokenManager) }
         protectedComposable(Screen.Menu.route, navController, tokenManager) { MenuScreen(navController) }
@@ -176,6 +203,26 @@ fun AppNavHost(
             arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry -> InfoUserScreen(navController, backStackEntry.arguments?.getString("userId")) }
         protectedComposable(Screen.CreateUser.route, navController, tokenManager) { CreateUserScreen(navController) }
+
+
+        protectedComposable(
+            Screen.EditTianguis.route, navController, tokenManager,
+            arguments = listOf(navArgument("tianguisId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val tianguisId = backStackEntry.arguments?.getString("tianguisId")
+            EditTianguisScreen(navController, tianguisId, authViewModel, editTianguisViewModel)
+        }
+
+        protectedComposable(
+            Screen.InfoTianguis.route, navController, tokenManager,
+            arguments = listOf(navArgument("tianguisId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            InfoTianguisScreen(navController, backStackEntry.arguments?.getString("tianguisId"))
+        }
+
+        protectedComposable(Screen.CreateTianguis.route, navController, tokenManager) {
+            CreateTianguisScreen(navController, authViewModel)
+        }
 
         protectedComposable(
             Screen.EditCategory.route, navController, tokenManager,

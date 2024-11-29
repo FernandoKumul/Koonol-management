@@ -18,7 +18,7 @@ class InfoPromotionViewModel: ViewModel() {
     private val _isPromotion = MutableStateFlow<PromotionAndNameModel?>(null)
     val isPromotion: StateFlow<PromotionAndNameModel?> = _isPromotion
 
-    private val _isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     fun getPromotion(accessToken: String, promotionId: String) {
