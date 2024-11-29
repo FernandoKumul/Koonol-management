@@ -32,33 +32,48 @@ import com.fernandokh.koonol_management.viewModel.tianguis.CreateTianguisViewMod
 import com.fernandokh.koonol_management.viewModel.tianguis.NavigationEvent
 import java.io.File
 import android.util.Log
+import com.fernandokh.koonol_management.viewModel.AuthViewModel
+import kotlinx.coroutines.flow.firstOrNull
 
 @Composable
 fun CreateTianguisScreen(
     navController: NavHostController,
+    authViewModel: AuthViewModel,
     viewModel: CreateTianguisViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val cacheDir: File = context.cacheDir
 
+    // Variables de estado
     val imageUrl by viewModel.photo.collectAsState()
     val isLoadingCreate by viewModel.isLoadingCreate.collectAsState()
     val isShowDialog by viewModel.isShowDialog.collectAsState()
     val toastMessage by viewModel.toastMessage.collectAsState()
     val latitude by viewModel.latitude.collectAsState()
     val longitude by viewModel.longitude.collectAsState()
+    val userId by authViewModel.userId.collectAsState()
 
-    Log.d("CreateTianguisScreen", "Coordenadas iniciales: Lat: $latitude, Lng: $longitude")
+    Log.d("CreateTianguisScreen", "UserId (AuthViewModel): $userId")
 
-
+    // Recuperar el userId desde el token si es necesario
     LaunchedEffect(Unit) {
-        viewModel.navigationEvent.collect { event ->
-            when (event) {
-                is NavigationEvent.TianguisCreated -> {
-                    Log.d("CreateTianguisScreen", "Navegando a la pantalla de Tianguis")
-                    navController.navigate(Screen.Tianguis.route)
+        if (userId == null) {
+            val token = authViewModel.tokenManager.accessToken.firstOrNull()
+            if (!token.isNullOrEmpty()) {
+                val decodedJwt = authViewModel.decodeJwt(token)
+                val decodedUserId = decodedJwt?.optString("userId")
+                if (!decodedUserId.isNullOrEmpty()) {
+                    authViewModel.setUserId(decodedUserId)
+                    Log.d("CreateTianguisScreen", "UserId recuperado de token: $decodedUserId")
+                } else {
+                    Log.e("CreateTianguisScreen", "No se pudo decodificar el token")
                 }
+            } else {
+                Log.e("CreateTianguisScreen", "Token no encontrado, redirigiendo a login...")
+                navController.navigate(Screen.Login.route)
             }
+        } else {
+            Log.d("CreateTianguisScreen", "UserId ya disponible: $userId")
         }
     }
 
@@ -70,6 +85,19 @@ fun CreateTianguisScreen(
         }
     }
 
+    // Lógica de navegación al crear el tianguis
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                is NavigationEvent.TianguisCreated -> {
+                    Log.d("CreateTianguisScreen", "Navegando a la pantalla de Tianguis")
+                    navController.navigate(Screen.Tianguis.route)
+                }
+            }
+        }
+    }
+
+    // Contenido de la pantalla
     Scaffold(
         topBar = { TopBarGoBack("Crear Tianguis", navController) },
         floatingActionButton = {
@@ -77,12 +105,9 @@ fun CreateTianguisScreen(
                 onClick = {
                     val isValid = viewModel.isFormValid()
                     Log.d("CreateTianguisScreen", "Validación del formulario: $isValid")
-                    if (viewModel.photo.value == null) {
-                        Log.d("CreateTianguisScreen", "Imagen no seleccionada")
-                        Toast.makeText(context, "Por favor, agrega una imagen.", Toast.LENGTH_SHORT)
-                            .show()
+                    if (imageUrl == null) {
+                        Toast.makeText(context, "Por favor, agrega una imagen.", Toast.LENGTH_SHORT).show()
                     } else if (isValid) {
-                        Log.d("CreateTianguisScreen", "Mostrando diálogo de confirmación")
                         viewModel.showDialog()
                     }
                 },
@@ -106,7 +131,6 @@ fun CreateTianguisScreen(
                     directory = File(cacheDir, "images"),
                     url = imageUrl,
                     onSetImage = {
-                        Log.d("CreateTianguisScreen", "Imagen seleccionada: $it")
                         viewModel.onPhotoChange(it)
                     }
                 )
@@ -121,7 +145,6 @@ fun CreateTianguisScreen(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Componente del mapa
                 MapComponent(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -130,11 +153,9 @@ fun CreateTianguisScreen(
                     initialLongitude = longitude,
                     enableFullScreen = true,
                     onLocationSelected = { newPosition ->
-                        Log.d("CreateTianguisScreen", "Nueva ubicación seleccionada: Lat: ${newPosition.latitude}, Lng: ${newPosition.longitude}")
                         viewModel.updateCoordinates(newPosition.latitude, newPosition.longitude)
                     }
                 )
-
 
                 if (isShowDialog) {
                     AlertDialogC(
@@ -142,8 +163,12 @@ fun CreateTianguisScreen(
                         dialogText = "¿Estás seguro de los datos para el nuevo tianguis?",
                         onDismissRequest = { viewModel.dismissDialog() },
                         onConfirmation = {
-                            Log.d("CreateTianguisScreen", "Confirmación de guardado...")
-                            viewModel.createTianguis()
+                            Log.d("CreateTianguisScreen", "Confirmación de creación con userId: $userId")
+                            if (userId != null) {
+                                viewModel.createTianguis(userId ?: "")
+                            } else {
+                                Toast.makeText(context, "Usuario no autenticado", Toast.LENGTH_SHORT).show()
+                            }
                         },
                         loading = isLoadingCreate
                     )
@@ -244,11 +269,4 @@ private fun FormTianguis(viewModel: CreateTianguisViewModel) {
             errorMessage = formErrors.localityError
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PrevCreateTianguisScreen() {
-    val navController = rememberNavController()
-    CreateTianguisScreen(navController)
 }

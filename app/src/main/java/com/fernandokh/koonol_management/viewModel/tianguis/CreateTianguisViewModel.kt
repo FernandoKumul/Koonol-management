@@ -149,9 +149,10 @@ class CreateTianguisViewModel : ViewModel() {
         _isShowDialog.value = true
     }
 
-    fun createTianguis() {
+
+    fun createTianguis(userId: String) {
         val tianguis = TianguisCreateEditModel(
-            userId = "67228bf327efdad6491ea5f0", // Cambia esto a tu lógica de usuario
+            userId = userId, // Cambia esto a tu lógica de usuario
             name = _name.value.trim(),
             color = _color.value.trim(),
             dayWeek = _dayWeek.value.trim(),

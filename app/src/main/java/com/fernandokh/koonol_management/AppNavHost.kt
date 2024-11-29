@@ -186,7 +186,7 @@ fun AppNavHost(
         }
 
         protectedComposable(Screen.CreateTianguis.route, navController, tokenManager) {
-            CreateTianguisScreen(navController)
+            CreateTianguisScreen(navController, authViewModel)
         }
 
         protectedComposable(
