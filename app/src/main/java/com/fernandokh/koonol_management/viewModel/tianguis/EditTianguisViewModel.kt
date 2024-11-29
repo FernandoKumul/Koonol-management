@@ -65,6 +65,12 @@ class EditTianguisViewModel : ViewModel() {
     private val _formErrors = MutableStateFlow(TianguisFormErrors())
     val formErrors: StateFlow<TianguisFormErrors> = _formErrors
 
+    private val _latitude = MutableStateFlow(19.4326) // Coordenada inicial (CDMX)
+    val latitude: StateFlow<Double> = _latitude
+
+    private val _longitude = MutableStateFlow(-99.1332) // Coordenada inicial (CDMX)
+    val longitude: StateFlow<Double> = _longitude
+
     private val _dirtyForm = MutableStateFlow(false)
 
     private fun showToast(message: String) {
@@ -116,6 +122,11 @@ class EditTianguisViewModel : ViewModel() {
         Log.d("EditTianguisViewModel", "Locality changed: $value")
         _locality.value = value
         if (_dirtyForm.value) validateLocality()
+    }
+
+    fun updateCoordinates(lat: Double, lng: Double) {
+        _latitude.value = lat
+        _longitude.value = lng
     }
 
     fun dismissDialog() {
@@ -181,9 +192,15 @@ class EditTianguisViewModel : ViewModel() {
             active = true,
             markerMap = MarkerMap(
                 type = "Point",
-                coordinates = listOf(-99.1332, 19.4326) // Cambia por la lógica del mapa
+                coordinates = listOf(
+                    _longitude.value ?: -99.1332, // Longitude (requerido)
+                    _latitude.value ?: 19.4326   // Latitude (requerido)
+                )
             )
         )
+
+        Log.d("EditTianguisViewModel", "Payload enviado para actualizar Tianguis: $updatedTianguis")
+
 
         viewModelScope.launch {
             try {

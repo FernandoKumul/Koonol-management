@@ -48,10 +48,14 @@ fun CreateTianguisScreen(
     val latitude by viewModel.latitude.collectAsState()
     val longitude by viewModel.longitude.collectAsState()
 
+    Log.d("CreateTianguisScreen", "Coordenadas iniciales: Lat: $latitude, Lng: $longitude")
+
+
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is NavigationEvent.TianguisCreated -> {
+                    Log.d("CreateTianguisScreen", "Navegando a la pantalla de Tianguis")
                     navController.navigate(Screen.Tianguis.route)
                 }
             }
@@ -60,6 +64,7 @@ fun CreateTianguisScreen(
 
     LaunchedEffect(toastMessage) {
         toastMessage?.let {
+            Log.d("CreateTianguisScreen", "Mostrando Toast: $it")
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             viewModel.resetToastMessage()
         }
@@ -71,10 +76,13 @@ fun CreateTianguisScreen(
             FloatingActionButton(
                 onClick = {
                     val isValid = viewModel.isFormValid()
+                    Log.d("CreateTianguisScreen", "Validación del formulario: $isValid")
                     if (viewModel.photo.value == null) {
+                        Log.d("CreateTianguisScreen", "Imagen no seleccionada")
                         Toast.makeText(context, "Por favor, agrega una imagen.", Toast.LENGTH_SHORT)
                             .show()
-                    }else if (isValid) {
+                    } else if (isValid) {
+                        Log.d("CreateTianguisScreen", "Mostrando diálogo de confirmación")
                         viewModel.showDialog()
                     }
                 },
@@ -120,10 +128,9 @@ fun CreateTianguisScreen(
                         .height(300.dp),
                     initialLatitude = latitude,
                     initialLongitude = longitude,
-                    markerTitle = "Selecciona la ubicación",
-                    isDraggable = true, // Permitir arrastre del marcador
-                    onMarkerDragEnd = { newPosition ->
-                        Log.d("CreateTianguisScreen", "Marcador movido: Lat: ${newPosition.latitude}, Lng: ${newPosition.longitude}")
+                    enableFullScreen = true,
+                    onLocationSelected = { newPosition ->
+                        Log.d("CreateTianguisScreen", "Nueva ubicación seleccionada: Lat: ${newPosition.latitude}, Lng: ${newPosition.longitude}")
                         viewModel.updateCoordinates(newPosition.latitude, newPosition.longitude)
                     }
                 )

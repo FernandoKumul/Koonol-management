@@ -66,11 +66,15 @@ fun EditTianguisScreen(
     val latitude = isTianguis?.markerMap?.coordinates?.get(1) ?: 19.4326 // CDMX por defecto
     val longitude = isTianguis?.markerMap?.coordinates?.get(0) ?: -99.1332 // CDMX por defecto
 
+    Log.d("EditTianguisScreen", "Tianguis ID: $tianguisId")
+    Log.d("EditTianguisScreen", "Inicial Latitude: $latitude, Longitude: $longitude")
+
     LaunchedEffect(Unit) {
         viewModel.getTianguis(tianguisId)
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is NavigationEvent.TianguisCreated -> {
+                    Log.d("EditTianguisScreen", "Navegando a la pantalla de Tianguis")
                     navController.navigate(Screen.Tianguis.route)
                 }
             }
@@ -90,7 +94,9 @@ fun EditTianguisScreen(
             FloatingActionButton(
                 onClick = {
                     val isValid = viewModel.isFormValid()
+                    Log.d("EditTianguisScreen", "Formulario válido: $isValid")
                     if (isValid) {
+                        Log.d("EditTianguisScreen", "Mostrando diálogo de confirmación")
                         viewModel.showDialog()
                     }
                 },
@@ -98,7 +104,10 @@ fun EditTianguisScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(painter = painterResource(R.drawable.ic_save_line), contentDescription = "Guardar")
+                Icon(
+                    painter = painterResource(R.drawable.ic_save_line),
+                    contentDescription = "Guardar"
+                )
             }
         },
         content = { innerPadding ->
@@ -140,7 +149,10 @@ fun EditTianguisScreen(
                             MyUploadImage(
                                 directory = File(cacheDir, "images"),
                                 url = imageUrl,
-                                onSetImage = { viewModel.onPhotoChange(it) }
+                                onSetImage = {
+                                    Log.d("EditTianguisScreen", "Imagen seleccionada: $it")
+                                    viewModel.onPhotoChange(it)
+                                }
                             )
                             Spacer(modifier = Modifier.height(20.dp))
                             FormTianguis(viewModel)
@@ -161,10 +173,16 @@ fun EditTianguisScreen(
                                     .height(300.dp),
                                 initialLatitude = latitude,
                                 initialLongitude = longitude,
-                                markerTitle = "Selecciona la ubicación",
-                                isDraggable = true, // Permitir mover el marcador
-                                onMarkerDragEnd = { newPosition ->
-                                    viewModel.onLocalityChange("${newPosition.latitude}, ${newPosition.longitude}")
+                                enableFullScreen = true,
+                                onLocationSelected = { newPosition ->
+                                    Log.d(
+                                        "EditTianguisScreen",
+                                        "Nueva posición seleccionada: Lat: ${newPosition.latitude}, Lng: ${newPosition.longitude}"
+                                    )
+                                    viewModel.updateCoordinates(
+                                        newPosition.latitude,
+                                        newPosition.longitude
+                                    )
                                 }
                             )
 
@@ -172,8 +190,17 @@ fun EditTianguisScreen(
                                 AlertDialogC(
                                     dialogTitle = "Editar Tianguis",
                                     dialogText = "¿Estás seguro de los nuevos datos para el tianguis?",
-                                    onDismissRequest = { viewModel.dismissDialog() },
-                                    onConfirmation = { tianguisId?.let { viewModel.updateTianguis(it) } },
+                                    onDismissRequest = {
+                                        Log.d("EditTianguisScreen", "Diálogo cancelado")
+                                        viewModel.dismissDialog()
+                                    },
+                                    onConfirmation = {
+                                        Log.d(
+                                            "EditTianguisScreen",
+                                            "Confirmación de edición iniciada"
+                                        )
+                                        tianguisId?.let { viewModel.updateTianguis(it) }
+                                    },
                                     loading = isLoadingUpdate
                                 )
                             }

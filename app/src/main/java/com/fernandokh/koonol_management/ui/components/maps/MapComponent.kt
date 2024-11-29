@@ -1,13 +1,21 @@
 package com.fernandokh.koonol_management.ui.components.maps
 
+import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberMarkerState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.fernandokh.koonol_management.R
 
 @Composable
 fun MapComponent(
@@ -15,44 +23,86 @@ fun MapComponent(
     initialLatitude: Double,
     initialLongitude: Double,
     zoom: Float = 15f, // Nivel de zoom inicial
-    markerTitle: String = "Ubicación",
-    isDraggable: Boolean = false, // Determina si el marcador es arrastrable
-    onMarkerDragEnd: ((LatLng) -> Unit)? = null // Callback opcional para manejar cambios de posición
+    enableFullScreen: Boolean = true, // Bandera para habilitar pantalla completa
+    onLocationSelected: (LatLng) -> Unit // Callback para enviar la nueva posición
 ) {
-    // Estado del marcador inicial
-    var markerPosition by remember { mutableStateOf(LatLng(initialLatitude, initialLongitude)) }
+    // Estado para manejar el modo de pantalla completa
+    var isFullScreen by remember { mutableStateOf(false) }
 
-    // Configuración de la posición de la cámara
+    // Estado para la posición de la cámara
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(markerPosition, zoom)
+        position = CameraPosition.fromLatLngZoom(LatLng(initialLatitude, initialLongitude), zoom)
     }
 
-    // Estado del marcador
-    val markerState = rememberMarkerState(position = markerPosition)
-
-    // Renderizar el mapa
-    GoogleMap(
-        modifier = modifier,
-        cameraPositionState = cameraPositionState
-    ) {
-        // Agregar marcador
-        Marker(
-            state = markerState,
-            title = markerTitle,
-            snippet = "Arrastra el marcador para cambiar la ubicación",
-            draggable = isDraggable, // Permitir arrastre si está habilitado
-            onClick = {
-                // Opcional: Manejo de clic en el marcador
-                false
-            }
+    // Detectar cambios en la posición de la cámara y enviar la nueva posición
+    LaunchedEffect(cameraPositionState.position.target) {
+        onLocationSelected(cameraPositionState.position.target)
+        Log.d(
+            "MapComponent",
+            "Cámara movida a Lat: ${cameraPositionState.position.target.latitude}, Lng: ${cameraPositionState.position.target.longitude}"
         )
     }
 
-    // Detectar arrastre y ejecutar el callback al finalizar
-    LaunchedEffect(markerState.dragState) {
-        if (markerState.dragState == com.google.maps.android.compose.DragState.END) {
-            markerPosition = markerState.position // Actualizar la posición del marcador
-            onMarkerDragEnd?.invoke(markerState.position) // Llamar al callback con la nueva posición
+    if (isFullScreen) {
+        // Mapa en pantalla completa
+        Dialog(onDismissRequest = { isFullScreen = false }) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                GoogleMap(
+                    modifier = Modifier.fillMaxSize(),
+                    cameraPositionState = cameraPositionState
+                )
+
+                // Marcador centrado
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.pin_google), // Icono personalizado
+                        contentDescription = "Marcador centrado",
+                        modifier = Modifier.size(48.dp) // Ajustar tamaño del marcador
+                    )
+                }
+            }
+        }
+    } else {
+        // Mapa en modo normal
+        Box(
+            modifier = modifier
+        ) {
+            GoogleMap(
+                modifier = Modifier.fillMaxSize(),
+                cameraPositionState = cameraPositionState
+            )
+
+            // Marcador centrado
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.pin_google),
+                    contentDescription = "Marcador centrado",
+                    modifier = Modifier.size(32.dp) // Ajustar tamaño del marcador en modo normal
+                )
+            }
+
+            // Capa interactiva opcional para pantalla completa
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(enableFullScreen) {
+                        if (enableFullScreen) {
+                            detectTapGestures(
+                                onTap = {
+                                    isFullScreen = true // Activar pantalla completa
+                                }
+                            )
+                        }
+                    }
+            )
         }
     }
 }

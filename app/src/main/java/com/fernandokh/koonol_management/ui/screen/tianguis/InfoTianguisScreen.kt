@@ -157,8 +157,8 @@ private fun InfoTianguis(tianguis: TianguisModel) {
                         .height(300.dp),
                     initialLatitude = latitude,
                     initialLongitude = longitude,
-                    markerTitle = tianguis.name,
-                    isDraggable = false // El marcador no se puede arrastrar
+                    enableFullScreen = false,
+                    onLocationSelected = {} // El marcador no es interactivo
                 )
             } else {
                 Log.e("MapDebug", "Invalid coordinates size: ${coordinates.size}")
