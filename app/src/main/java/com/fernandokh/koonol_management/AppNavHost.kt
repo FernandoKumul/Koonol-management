@@ -35,6 +35,7 @@ import com.fernandokh.koonol_management.ui.screen.salestalls.CreateSaleStallScre
 import com.fernandokh.koonol_management.ui.screen.salestalls.EditSaleStallScreen
 import com.fernandokh.koonol_management.ui.screen.salestalls.InfoSaleStallScreen
 import com.fernandokh.koonol_management.ui.screen.salestalls.SalesStallsScreen
+import com.fernandokh.koonol_management.ui.screen.scheduleTianguis.CreateScheduleTianguisScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.CreateSellersScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.EditSellersScreen
 import com.fernandokh.koonol_management.ui.screen.sellers.InfoSellersScreen
@@ -50,11 +51,6 @@ import com.fernandokh.koonol_management.ui.screen.users.UsersScreen
 import com.fernandokh.koonol_management.viewModel.AuthViewModel
 import com.fernandokh.koonol_management.viewModel.AuthViewModelFactory
 import com.fernandokh.koonol_management.viewModel.tianguis.EditTianguisViewModel
-import com.fernandokh.koonol_management.ui.screen.promotion.EditPromotionScreen
-import com.fernandokh.koonol_management.ui.screen.promotion.InfoPromotionScreen
-import com.fernandokh.koonol_management.ui.screen.salestalls.EditSaleStallScreen
-import com.fernandokh.koonol_management.ui.screen.salestalls.InfoSaleStallScreen
-import com.fernandokh.koonol_management.ui.screen.scheduleTianguis.CreateScheduleTianguisScreen
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
