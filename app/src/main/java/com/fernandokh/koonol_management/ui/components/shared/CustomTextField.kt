@@ -1,17 +1,25 @@
 package com.fernandokh.koonol_management.ui.components.shared
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -25,7 +33,9 @@ fun CustomTextField(
     keyboardType: KeyboardType = KeyboardType.Text,
     error: Boolean = false,
     errorMessage: String? = null,
-    noteMessage: String? = null
+    noteMessage: String? = null,
+    icon: ImageVector? = null,
+    iconAction: () -> Unit = { }
 ) {
     val borderColor = MaterialTheme.colorScheme.outlineVariant
     BasicTextField(
@@ -54,16 +64,35 @@ fun CustomTextField(
         ),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         decorationBox = { innerTextField ->
-            if (text.isEmpty()) {
-                Text(
-                    text = placeholder,
-                    style = TextStyle(
-                        color = Color.Gray,
-                        fontSize = 16.sp
-                    )
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    if (text.isEmpty()) {
+                        Text(
+                            text = placeholder,
+                            style = TextStyle(
+                                color = Color.Gray,
+                                fontSize = 16.sp
+                            )
+                        )
+                    }
+                    innerTextField()
+                }
+
+                if (icon != null) {
+                    IconButton(onClick = iconAction, Modifier.size(24.dp)) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = "password_icon",
+                            tint = MaterialTheme.colorScheme.outlineVariant
+                        )
+                    }
+                }
+
             }
-            innerTextField()
         }
     )
 

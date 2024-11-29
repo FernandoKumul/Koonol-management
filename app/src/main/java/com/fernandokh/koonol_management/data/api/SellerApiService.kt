@@ -22,6 +22,9 @@ interface SellerApiService {
         @Query("gender") gender: String,
     ): ApiResponse<SearchModel<SellerModel>>
 
+    @GET("sellers/all")
+    suspend fun getAllSellers(): ApiResponse<List<SellerModel>>
+
     @GET("sellers/{id}")
     suspend fun getSellerById(@Path("id") id: String): ApiResponse<SellerModel>
 
