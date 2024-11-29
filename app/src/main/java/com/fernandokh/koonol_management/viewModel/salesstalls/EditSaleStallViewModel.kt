@@ -46,8 +46,8 @@ class EditSaleStallViewModel : ViewModel() {
     private val _description = MutableStateFlow("")
     val description: StateFlow<String> = _description
 
-    private val _type = MutableStateFlow("")
-    val type: StateFlow<String> = _type
+    private val _type = MutableStateFlow(false)
+    val type: StateFlow<Boolean> = _type
 
     private val _probation = MutableStateFlow(false)
     val probation: StateFlow<Boolean> = _probation
@@ -85,6 +85,11 @@ class EditSaleStallViewModel : ViewModel() {
     val probationOptions = listOf(
         Option("Sí", true),
         Option("No", false)
+    )
+
+    val typeOptions = listOf(
+        Option("Permanente", true),
+        Option("Temporal", false)
     )
 
     val activeOptions = listOf(
@@ -140,11 +145,8 @@ class EditSaleStallViewModel : ViewModel() {
         }
     }
 
-    fun onTypeChange(value: String) {
+    fun onTypeChange(value: Boolean) {
         _type.value = value
-        if (_dirtyForm.value) {
-            validateType()
-        }
     }
 
     fun onProbationChange(value: Boolean) {
@@ -178,7 +180,7 @@ class EditSaleStallViewModel : ViewModel() {
                 _isSaleStall.value = response.data
                 _isName.value = response.data?.name ?: ""
                 _description.value = response.data?.description ?: ""
-                _type.value = response.data?.type ?: ""
+                _type.value = response.data?.type ?: false
                 _probation.value = response.data?.probation ?: false
                 _active.value = response.data?.active ?: false
                 _sellerId.value = response.data?.sellerId?.id ?: ""
@@ -204,7 +206,7 @@ class EditSaleStallViewModel : ViewModel() {
         val saleStall = SaleStallCreateEditModel(
             name = _isName.value.trim(),
             description = _description.value.trim(),
-            type = _type.value.trim(),
+            type = _type.value,
             probation = _probation.value,
             active = _active.value,
             sellerId = _sellerId.value.trim(),
@@ -272,22 +274,12 @@ class EditSaleStallViewModel : ViewModel() {
         }
     }
 
-    private fun validateType() {
-        val type = _type.value
-        if (type.isBlank()) {
-            _formErrors.value =
-                _formErrors.value.copy(typeError = "El tipo de puesto es requerido")
-        } else {
-            _formErrors.value = _formErrors.value.copy(typeError = null)
-        }
-    }
 
     fun isFormValid(): Boolean {
         validateSellerId()
         validateSubCategoryId()
         validateName()
         validateDescription()
-        validateType()
         return _formErrors.value.allErrors().all { it == null }
     }
 }
