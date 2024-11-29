@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.ScheduleTianguisApiService
+import com.fernandokh.koonol_management.data.api.TianguisApiService
 import com.fernandokh.koonol_management.data.models.ScheduleTianguisCreateEditModel
+import com.fernandokh.koonol_management.data.models.TianguisModel
 import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.channels.Channel
@@ -15,10 +17,14 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
+data class Option(
+    val name: String,
+    val value: String
+)
+
 data class FormErrors(
     val tianguisIdError: String? = null,
     val dayWeekError: String? = null,
-    val indicationsError: String? = null,
     val startTimeError: String? = null,
     val endTimeError: String? = null,
 ) {
@@ -26,7 +32,6 @@ data class FormErrors(
         return listOf(
             tianguisIdError,
             dayWeekError,
-            indicationsError,
             startTimeError,
             endTimeError
         )
@@ -35,6 +40,10 @@ data class FormErrors(
 
 class CreateScheduleTianguisViewModel : ViewModel() {
     private val apiService = RetrofitInstance.create(ScheduleTianguisApiService::class.java)
+    private val tianguisApiService = RetrofitInstance.create(TianguisApiService::class.java)
+
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _isShowDialog = MutableStateFlow(false)
     val isShowDialog: StateFlow<Boolean> = _isShowDialog
@@ -45,15 +54,11 @@ class CreateScheduleTianguisViewModel : ViewModel() {
     private val _toastMessage = MutableStateFlow<String?>(null)
     val toastMessage: StateFlow<String?> get() = _toastMessage
 
-
     private val _tianguisId = MutableStateFlow("")
     val tianguisId: StateFlow<String> = _tianguisId
 
     private val _dayWeek = MutableStateFlow<String?>(null)
     val dayWeek: StateFlow<String?> = _dayWeek
-
-    private val _indications = MutableStateFlow("")
-    val indications: StateFlow<String> = _indications
 
     private val _startTime = MutableStateFlow("")
     val startTime: StateFlow<String> = _startTime
@@ -68,6 +73,19 @@ class CreateScheduleTianguisViewModel : ViewModel() {
 
     private val _navigationEvent = Channel<NavigationEvent>()
     val navigationEvent = _navigationEvent.receiveAsFlow()
+
+    private val _tianguisList = MutableStateFlow<List<TianguisModel>>(emptyList())
+    val tianguisList: StateFlow<List<TianguisModel>> = _tianguisList
+
+    val daysOfWeek = listOf(
+        Option("Lunes", "Lunes"),
+        Option("Martes", "Martes"),
+        Option("Miércoles", "Miércoles"),
+        Option("Jueves", "Jueves"),
+        Option("Viernes", "Viernes"),
+        Option("Sábado", "Sábado"),
+        Option("Domingo", "Domingo")
+    )
 
     private fun showToast(message: String) {
         _toastMessage.value = message
@@ -99,13 +117,6 @@ class CreateScheduleTianguisViewModel : ViewModel() {
         }
     }
 
-    fun onIndicationsChange(value: String) {
-        _indications.value = value
-        if (_dirtyForm.value) {
-            validateIndications()
-        }
-    }
-
     fun onStartTimeChange(value: String) {
         _startTime.value = value
         if (_dirtyForm.value) {
@@ -127,7 +138,6 @@ class CreateScheduleTianguisViewModel : ViewModel() {
         val scheduleTianguis = ScheduleTianguisCreateEditModel(
             tianguisId = _tianguisId.value.trim(),
             dayWeek = _dayWeek.value!!,
-            indications = _indications.value.trim(),
             startTime = _startTime.value.trim(),
             endTime = _endTime.value.trim()
         )
@@ -151,6 +161,27 @@ class CreateScheduleTianguisViewModel : ViewModel() {
         }
     }
 
+    fun getAllTianguis() {
+        viewModelScope.launch {
+            try {
+                val response = tianguisApiService.getAllTianguis()
+                if (response.success) {
+                    Log.i("dev-debug", "Lista obtenida con éxito")
+                    _tianguisList.value = response.data!!
+                } else {
+                    showToast("No se encontraron vendedores")
+                }
+                _isLoading.value = false
+            } catch (e: HttpException) {
+                val errorMessage = evaluateHttpException(e)
+                showToast(errorMessage)
+            } catch (e: Exception) {
+                Log.i("dev-debug", e.message ?: "Ah ocurrido un error")
+                showToast("Ocurrio un error al obtener los tianguis")
+            }
+        }
+    }
+
     private fun validateTianguisId() {
         val tianguisId = _tianguisId.value
         if (tianguisId.isBlank()) {
@@ -167,19 +198,16 @@ class CreateScheduleTianguisViewModel : ViewModel() {
         }
     }
 
-    private fun validateIndications() {
-        val indications = _indications.value
-        if (indications.isBlank()) {
-            _formErrors.value =
-                _formErrors.value.copy(indicationsError = "Las indicaciones son requeridas")
-        }
-    }
-
     private fun validateStartTime() {
         val startTime = _startTime.value
         if (startTime.isBlank()) {
             _formErrors.value =
                 _formErrors.value.copy(startTimeError = "La hora de inicio es requerida")
+        } else if (!isValidTimeFormat(startTime)) {
+            _formErrors.value =
+                _formErrors.value.copy(startTimeError = "La hora de inicio debe ser un formato valido (24:59)")
+        } else {
+            _formErrors.value = _formErrors.value.copy(startTimeError = null)
         }
     }
 
@@ -188,14 +216,23 @@ class CreateScheduleTianguisViewModel : ViewModel() {
         if (endTime.isBlank()) {
             _formErrors.value =
                 _formErrors.value.copy(endTimeError = "La hora de finalización es requerida")
+        } else if (!isValidTimeFormat(endTime)) {
+            _formErrors.value =
+                _formErrors.value.copy(endTimeError = "La hora de finalización debe ser un formato valido (24:59)")
+        } else {
+            _formErrors.value = _formErrors.value.copy(endTimeError = null)
         }
+    }
+
+    private fun isValidTimeFormat(time: String): Boolean {
+        val regex = Regex("^([01]?\\d|2[0-3]):([0-5]\\d)\$")
+        return regex.matches(time)
     }
 
     fun isFormValid(): Boolean {
         _dirtyForm.value = true
         validateTianguisId()
         validateDayWeek()
-        validateIndications()
         validateStartTime()
         validateEndTime()
 

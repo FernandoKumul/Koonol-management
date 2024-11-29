@@ -13,18 +13,7 @@ data class TianguisModel(
     val indications: String,
     val locality: String,
     val active: Boolean,
-    val schedule: List<ScheduleModel>,
-    val creationDate: String,
-    val updateDate: String,
-)
-
-data class ScheduleModel(
-    @SerializedName("_id")
-    val id: String,
-    val tianguisId: String,
-    val dayWeek: String,
-    val startTime: String,
-    val endTime: String,
+    val schedule: List<ScheduleTianguisModel>?,
     val creationDate: String,
     val updateDate: String,
 )

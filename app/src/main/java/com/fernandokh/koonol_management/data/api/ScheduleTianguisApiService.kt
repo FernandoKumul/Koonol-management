@@ -15,4 +15,7 @@ interface ScheduleTianguisApiService {
 
     @POST("schedule-tianguis")
     suspend fun createScheduleTianguis(@Body scheduleTianguis: ScheduleTianguisCreateEditModel): ApiResponse<ScheduleTianguisCreateEditModel>
+
+    @GET("schedule-tianguis/tianguis/{id}")
+    suspend fun getScheduleTianguisByTianguisId(@Path("id") id: String): ApiResponse<List<ScheduleTianguisModel>>
 }

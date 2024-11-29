@@ -35,6 +35,7 @@ import com.fernandokh.koonol_management.ui.components.shared.InformationField
 import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 import com.fernandokh.koonol_management.viewModel.tianguis.InfoTianguisViewModel
 import android.util.Log
+import com.fernandokh.koonol_management.data.models.ScheduleTianguisModel
 
 @Composable
 fun InfoTianguisScreen(
@@ -103,17 +104,19 @@ private fun InfoTianguis(tianguis: TianguisModel) {
                 contentDescription = "img_tianguis",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .clip(CircleShape)
-                    .size(96.dp),
-                placeholder = painterResource(R.drawable.default_user)
+                    .height(200.dp)
+                    .width(300.dp)
+                    .clip(RoundedCornerShape(10.dp)),
+                placeholder = painterResource(R.drawable.default_image)
             )
         } else {
             Image(
-                painter = painterResource(R.drawable.default_user),
+                painter = painterResource(R.drawable.default_image),
                 contentDescription = "img_tianguis",
                 modifier = Modifier
-                    .clip(CircleShape)
-                    .size(96.dp)
+                    .height(200.dp)
+                    .width(300.dp)
+                    .clip(RoundedCornerShape(10.dp))
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -131,15 +134,22 @@ private fun InfoTianguis(tianguis: TianguisModel) {
             Spacer(Modifier.height(24.dp))
             InformationField("Color", tianguis.color.ifBlank { "No especificado" })
             Spacer(Modifier.height(24.dp))
-            InformationField("Día de la semana", if (tianguis.schedule.isNotEmpty()) tianguis.schedule[0].dayWeek else "No especificado")
-            Spacer(Modifier.height(24.dp))
             InformationField("Indicaciones", tianguis.indications.ifBlank { "No especificadas" })
             Spacer(Modifier.height(24.dp))
-            InformationField("Hora de inicio", if (tianguis.schedule.isNotEmpty()) tianguis.schedule[0].startTime else "No especificado")
-            Spacer(Modifier.height(24.dp))
-            InformationField("Hora de fin", if (tianguis.schedule.isNotEmpty()) tianguis.schedule[0].startTime else "No especificada")
-            Spacer(Modifier.height(24.dp))
             InformationField("Localidad", tianguis.locality)
+            Spacer(Modifier.height(24.dp))
+            if (tianguis.schedule?.isNotEmpty() == true) {
+                Text("Horarios", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                tianguis.schedule.forEach { schedule ->
+                    Row {
+                        Text(schedule.dayWeek, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(Modifier.width(10.dp))
+                        Text("De: ${schedule.startTime} a ${schedule.endTime}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            } else {
+                Text("No hay horarios definidos", color = MaterialTheme.colorScheme.error)
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))

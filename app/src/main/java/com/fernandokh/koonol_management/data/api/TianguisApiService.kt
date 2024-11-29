@@ -4,7 +4,6 @@ import com.fernandokh.koonol_management.data.ApiResponse
 import com.fernandokh.koonol_management.data.ApiResponseList
 import com.fernandokh.koonol_management.data.models.SearchModel
 import com.fernandokh.koonol_management.data.models.TianguisCreateEditModel
-import com.fernandokh.koonol_management.data.models.TianguisEditModel
 import com.fernandokh.koonol_management.data.models.TianguisModel
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -24,7 +23,6 @@ interface TianguisApiService {
         @Query("sort") sort: String
     ): ApiResponse<SearchModel<TianguisModel>>
 
-
     @GET("tianguis/{id}")
     suspend fun getTianguisById(@Path("id") id: String): ApiResponse<TianguisModel>
 
@@ -34,9 +32,12 @@ interface TianguisApiService {
     @PUT("tianguis/{id}")
     suspend fun updateTianguis(
         @Path("id") id: String,
-        @Body tianguis: TianguisEditModel
+        @Body tianguis: TianguisCreateEditModel
     ): ApiResponse<TianguisModel>
 
     @DELETE("tianguis/{id}")
     suspend fun deleteTianguisById(@Path("id") id: String): ApiResponse<TianguisModel>
+
+    @GET("tianguis/all")
+    suspend fun getAllTianguis(): ApiResponseList<TianguisModel>
 }

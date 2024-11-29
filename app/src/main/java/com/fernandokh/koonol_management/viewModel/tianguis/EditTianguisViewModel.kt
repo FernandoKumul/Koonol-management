@@ -1,5 +1,6 @@
 package com.fernandokh.koonol_management.viewModel.tianguis
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fernandokh.koonol_management.data.RetrofitInstance
@@ -8,16 +9,12 @@ import com.fernandokh.koonol_management.data.models.MarkerMap
 import com.fernandokh.koonol_management.data.models.TianguisCreateEditModel
 import com.fernandokh.koonol_management.data.models.TianguisModel
 import com.fernandokh.koonol_management.utils.evaluateHttpException
-import com.fernandokh.koonol_management.viewModel.users.FormErrors
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
-import android.util.Log
-import com.fernandokh.koonol_management.data.models.ScheduleEditModel
-import com.fernandokh.koonol_management.data.models.TianguisEditModel
 
 class EditTianguisViewModel : ViewModel() {
 
@@ -38,20 +35,11 @@ class EditTianguisViewModel : ViewModel() {
     private val _color = MutableStateFlow("")
     val color: StateFlow<String> = _color
 
-    private val _dayWeek = MutableStateFlow("")
-    val dayWeek: StateFlow<String> = _dayWeek
-
     private val _photo = MutableStateFlow<String?>(null)
     val photo: StateFlow<String?> = _photo
 
     private val _indications = MutableStateFlow("")
     val indications: StateFlow<String> = _indications
-
-    private val _startTime = MutableStateFlow("")
-    val startTime: StateFlow<String> = _startTime
-
-    private val _endTime = MutableStateFlow("")
-    val endTime: StateFlow<String> = _endTime
 
     private val _locality = MutableStateFlow("")
     val locality: StateFlow<String> = _locality
@@ -96,11 +84,6 @@ class EditTianguisViewModel : ViewModel() {
         _color.value = value
     }
 
-    fun onDayWeekChange(value: String) {
-        Log.d("EditTianguisViewModel", "Day of the week changed: $value")
-        _dayWeek.value = value
-    }
-
     fun onPhotoChange(value: String?) {
         Log.d("EditTianguisViewModel", "Photo changed: $value")
         _photo.value = value
@@ -109,16 +92,6 @@ class EditTianguisViewModel : ViewModel() {
     fun onIndicationsChange(value: String) {
         Log.d("EditTianguisViewModel", "Indications changed: $value")
         _indications.value = value
-    }
-
-    fun onStartTimeChange(value: String) {
-        Log.d("EditTianguisViewModel", "Start time changed: $value")
-        _startTime.value = value
-    }
-
-    fun onEndTimeChange(value: String) {
-        Log.d("EditTianguisViewModel", "End time changed: $value")
-        _endTime.value = value
     }
 
     fun onLocalityChange(value: String) {
@@ -161,11 +134,8 @@ class EditTianguisViewModel : ViewModel() {
                 // Cargar los valores en los campos
                 _name.value = response.data?.name ?: ""
                 _color.value = response.data?.color ?: ""
-                _dayWeek.value = response.data?.schedule?.get(0)?.dayWeek ?: ""
                 _photo.value = response.data?.photo
                 _indications.value = response.data?.indications ?: ""
-                _startTime.value = response.data?.schedule?.get(0)?.startTime ?: ""
-                _endTime.value = response.data?.schedule?.get(0)?.endTime ?: ""
                 _locality.value = response.data?.locality ?: ""
             } catch (e: HttpException) {
                 val errorMessage = evaluateHttpException(e)
@@ -181,16 +151,10 @@ class EditTianguisViewModel : ViewModel() {
     }
 
     fun updateTianguis(tianguisId: String, userId: String) {
-        val updatedTianguis = TianguisEditModel(
+        val updatedTianguis = TianguisCreateEditModel(
             userId = userId, // Cambia esto según la lógica de usuario
             name = _name.value.trim(),
             color = _color.value.trim(),
-            schedule = ScheduleEditModel(
-                id = _tianguis.value?.schedule?.get(0)?.id ?: "",
-                dayWeek = _dayWeek.value.trim(),
-                startTime = _startTime.value.trim(),
-                endTime = _endTime.value.trim(),
-            ),
             photo = _photo.value,
             indications = _indications.value.trim(),
             locality = _locality.value.trim(),
@@ -243,12 +207,6 @@ class EditTianguisViewModel : ViewModel() {
         )
     }
 
-    private fun validateDayWeek() {
-        val dayWeek = _dayWeek.value
-        _formErrors.value = _formErrors.value.copy(dayWeekError = if (dayWeek.isBlank()) "El día de la semana es requerido" else null
-        )
-    }
-
     private fun validatePhoto() {
         val photo = _photo.value
         _formErrors.value = _formErrors.value.copy(
@@ -263,20 +221,6 @@ class EditTianguisViewModel : ViewModel() {
         )
     }
 
-    private fun validateStartTime() {
-        val startTime = _startTime.value
-        _formErrors.value = _formErrors.value.copy(
-            startTimeError = if (startTime.isBlank()) "La hora de inicio es requerida" else null
-        )
-    }
-
-    private fun validateEndTime() {
-        val endTime = _endTime.value
-        _formErrors.value = _formErrors.value.copy(
-            endTimeError = if (endTime.isBlank()) "La hora de finalización es requerida" else null
-        )
-    }
-
     private fun validateLocality() {
         val locality = _locality.value
         _formErrors.value = _formErrors.value.copy(
@@ -284,17 +228,13 @@ class EditTianguisViewModel : ViewModel() {
         )
     }
 
-    // Método para verificar si el formulario es válido
     fun isFormValid(): Boolean {
         Log.d("EditTianguisViewModel", "Validating form")
         _dirtyForm.value = true
         validateName()
         validateColor()
-        validateDayWeek()
         validatePhoto()
         validateIndications()
-        validateStartTime()
-        validateEndTime()
         validateLocality()
 
         val isValid = _formErrors.value.allErrors().all { it == null }

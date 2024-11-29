@@ -1,5 +1,6 @@
-package com.fernandokh.koonol_management.ui.screen.scheduleTianguis
+package com.fernandokh.koonol_management.ui.screen.locationSalesStalls
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -30,57 +31,65 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
+import com.fernandokh.koonol_management.ui.components.maps.MapComponent
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
-import com.fernandokh.koonol_management.ui.components.shared.CustomTimeField
 import com.fernandokh.koonol_management.ui.components.shared.DropdownInputForm
-import com.fernandokh.koonol_management.utils.NavigationEvent
-import com.fernandokh.koonol_management.viewModel.scheduleTianguis.CreateScheduleTianguisViewModel
+import com.fernandokh.koonol_management.viewModel.locationSalesStalls.CreateLocationSalesStallsViewModel
+import com.fernandokh.koonol_management.viewModel.tianguis.NavigationEvent
 
 @Composable
-fun CreateScheduleTianguisScreen(
+fun CreateLocationSalesStallsScreen(
     navController: NavHostController,
-    viewModel: CreateScheduleTianguisViewModel = viewModel()
+    salesStallId: String?,
+    viewModel: CreateLocationSalesStallsViewModel = viewModel()
 ) {
     val context = LocalContext.current
+
     val isLoadingCreate by viewModel.isLoadingCreate.collectAsState()
     val isShowDialog by viewModel.isShowDialog.collectAsState()
-
     val toastMessage by viewModel.toastMessage.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.getAllTianguis()
-        viewModel.navigationEvent.collect { event ->
-            when (event) {
-                is NavigationEvent.Navigate -> {
-                    navController.navigate(Screen.Tianguis.route)
-                }
-            }
-        }
-    }
+    val latitude by viewModel.latitude.collectAsState()
+    val longitude by viewModel.longitude.collectAsState()
 
     LaunchedEffect(toastMessage) {
         toastMessage?.let {
+            Log.d("CreateTianguisScreen", "Mostrando Toast: $it")
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             viewModel.resetToastMessage()
         }
     }
 
+    LaunchedEffect(Unit) {
+        if (salesStallId != null) {
+            viewModel.onSalesStallsIdChange(salesStallId)
+        } else {
+            Log.e("CreateLocationSalesStallsScreen", "salesStallId es nulo")
+        }
+        viewModel.getAllTianguis()
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                is NavigationEvent.TianguisCreated -> {
+                    Log.d("CreateTianguisScreen", "Navegando a la pantalla de Tianguis")
+                    navController.navigate(Screen.SalesStalls.route)
+                }
+            }
+        }
+    }
+
     Scaffold(
-        topBar = { TopBarGoBack("Crear Horario", navController) },
+        topBar = { TopBarGoBack("Crear Ubicación", navController) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-                    val isValid = viewModel.isFormValid()
-                    if (isValid) {
-                        viewModel.showDialog()
-                    }
-                },
+                onClick = { viewModel.showDialog() },
                 shape = CircleShape,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(painter = painterResource(R.drawable.ic_save_line), contentDescription = "Add")
+                Icon(
+                    painter = painterResource(R.drawable.ic_save_line),
+                    contentDescription = "Guardar"
+                )
             }
         },
         content = { innerPadding ->
@@ -90,35 +99,50 @@ fun CreateScheduleTianguisScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(0.dp, 16.dp, 0.dp, 40.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                FormScheduleTianguis(viewModel)
+                FormLocationSalesStalls(viewModel)
+                Text(
+                    text = "Ubicación del Tianguis",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                MapComponent(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp),
+                    initialLatitude = latitude,
+                    initialLongitude = longitude,
+                    enableFullScreen = true,
+                    onLocationSelected = { newPosition ->
+                        viewModel.updateCoordinates(newPosition.latitude, newPosition.longitude)
+                    }
+                )
 
                 if (isShowDialog) {
                     AlertDialogC(
-                        dialogTitle = "Crear Horario",
-                        dialogText = "¿Estás seguro de los datos para el nuevo horario?",
+                        dialogTitle = "Crear ubicación",
+                        dialogText = "¿Estás seguro de los datos para la nueva ubicación?",
                         onDismissRequest = { viewModel.dismissDialog() },
-                        onConfirmation = { viewModel.createScheduleTianguis() },
+                        onConfirmation = { viewModel.createLocationSalesStalls() },
                         loading = isLoadingCreate
                     )
                 }
-
             }
-        },
+        }
     )
 }
 
 @Composable
-private fun FormScheduleTianguis(viewModel: CreateScheduleTianguisViewModel) {
+private fun FormLocationSalesStalls(
+    viewModel: CreateLocationSalesStallsViewModel,
+) {
 
-    val formErrors by viewModel.formErrors.collectAsState()
-    val tianguisId by viewModel.tianguisId.collectAsState()
     val tianguisList by viewModel.tianguisList.collectAsState()
-    val dayWeek by viewModel.dayWeek.collectAsState()
-    val dayWeekOptions = viewModel.daysOfWeek
-    val startTime by viewModel.startTime.collectAsState()
-    val endTime by viewModel.endTime.collectAsState()
+    val tianguisId by viewModel.tianguisId.collectAsState()
+    val scheduleTianguisList by viewModel.scheduleTianguisList.collectAsState()
+    val scheduleTianguisId by viewModel.scheduleTianguisId.collectAsState()
 
     Column(
         modifier = Modifier
@@ -130,7 +154,6 @@ private fun FormScheduleTianguis(viewModel: CreateScheduleTianguisViewModel) {
             .padding(16.dp, 24.dp)
             .fillMaxWidth(0.8f)
     ) {
-        Text("Tianguis", color = MaterialTheme.colorScheme.onSurfaceVariant)
         DropdownInputForm(
             items = tianguisList,
             selectedItem = tianguisList.find { it.id == tianguisId },
@@ -141,33 +164,15 @@ private fun FormScheduleTianguis(viewModel: CreateScheduleTianguisViewModel) {
             label = "Selecciona un Tianguis",
         )
         Spacer(Modifier.height(16.dp))
-        Text("Día de la semana", color = MaterialTheme.colorScheme.onSurfaceVariant)
         DropdownInputForm(
-            items = dayWeekOptions,
-            selectedItem = dayWeekOptions.find { it.value == dayWeek },
-            onItemSelected = { selectedDayWeek ->
-                viewModel.onDayWeekChange(selectedDayWeek.value)
+            items = scheduleTianguisList,
+            selectedItem = scheduleTianguisList.find { it.id == scheduleTianguisId },
+            onItemSelected = { selectedScheduleTianguis ->
+                viewModel.onScheduleTianguisIdChange(selectedScheduleTianguis.id)
             },
-            itemLabel = { it.name },
-            label = "Selecciona un dia de la semana",
+            itemLabel = { "${it.dayWeek}, De: ${it.startTime} a ${it.endTime}" },
+            label = "Selecciona un Horario",
         )
         Spacer(Modifier.height(16.dp))
-
-        Text("Hora de inicio", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTimeField(
-            text = startTime,
-            onTextChange = { viewModel.onStartTimeChange(it) },
-            error = formErrors.startTimeError != null,
-            errorMessage = formErrors.startTimeError
-        )
-        Spacer(Modifier.height(16.dp))
-
-        Text("Hora de finalización", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTimeField(
-            text = endTime,
-            onTextChange = { viewModel.onEndTimeChange(it) },
-            error = formErrors.endTimeError != null,
-            errorMessage = formErrors.endTimeError
-        )
     }
 }
