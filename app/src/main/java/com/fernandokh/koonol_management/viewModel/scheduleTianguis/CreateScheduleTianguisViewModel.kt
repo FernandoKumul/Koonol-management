@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.ScheduleTianguisApiService
+import com.fernandokh.koonol_management.data.api.TianguisApiService
 import com.fernandokh.koonol_management.data.models.ScheduleTianguisCreateEditModel
+import com.fernandokh.koonol_management.data.models.TianguisModel
 import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.channels.Channel
@@ -38,6 +40,10 @@ data class FormErrors(
 
 class CreateScheduleTianguisViewModel : ViewModel() {
     private val apiService = RetrofitInstance.create(ScheduleTianguisApiService::class.java)
+    private val tianguisApiService = RetrofitInstance.create(TianguisApiService::class.java)
+
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _isShowDialog = MutableStateFlow(false)
     val isShowDialog: StateFlow<Boolean> = _isShowDialog
@@ -67,6 +73,9 @@ class CreateScheduleTianguisViewModel : ViewModel() {
 
     private val _navigationEvent = Channel<NavigationEvent>()
     val navigationEvent = _navigationEvent.receiveAsFlow()
+
+    private val _tianguisList = MutableStateFlow<List<TianguisModel>>(emptyList())
+    val tianguisList: StateFlow<List<TianguisModel>> = _tianguisList
 
     val daysOfWeek = listOf(
         Option("Lunes", "Lunes"),
@@ -150,6 +159,27 @@ class CreateScheduleTianguisViewModel : ViewModel() {
         }
     }
 
+    fun getAllTianguis() {
+        viewModelScope.launch {
+            try {
+                val response = tianguisApiService.getAllTianguis()
+                if (response.success) {
+                    Log.i("dev-debug", "Lista obtenida con éxito")
+                    _tianguisList.value = response.data!!
+                } else {
+                    showToast("No se encontraron vendedores")
+                }
+                _isLoading.value = false
+            } catch (e: HttpException) {
+                val errorMessage = evaluateHttpException(e)
+                showToast(errorMessage)
+            } catch (e: Exception) {
+                Log.i("dev-debug", e.message ?: "Ah ocurrido un error")
+                showToast("Ocurrio un error al obtener los tianguis")
+            }
+        }
+    }
+
     private fun validateTianguisId() {
         val tianguisId = _tianguisId.value
         if (tianguisId.isBlank()) {
@@ -169,9 +199,11 @@ class CreateScheduleTianguisViewModel : ViewModel() {
     private fun validateStartTime() {
         val startTime = _startTime.value
         if (startTime.isBlank()) {
-            _formErrors.value = _formErrors.value.copy(startTimeError = "La hora de inicio es requerida")
+            _formErrors.value =
+                _formErrors.value.copy(startTimeError = "La hora de inicio es requerida")
         } else if (!isValidTimeFormat(startTime)) {
-            _formErrors.value = _formErrors.value.copy(startTimeError = "La hora de inicio debe ser un formato valido (24:59)")
+            _formErrors.value =
+                _formErrors.value.copy(startTimeError = "La hora de inicio debe ser un formato valido (24:59)")
         } else {
             _formErrors.value = _formErrors.value.copy(startTimeError = null)
         }
@@ -180,9 +212,11 @@ class CreateScheduleTianguisViewModel : ViewModel() {
     private fun validateEndTime() {
         val endTime = _endTime.value
         if (endTime.isBlank()) {
-            _formErrors.value = _formErrors.value.copy(endTimeError = "La hora de finalización es requerida")
+            _formErrors.value =
+                _formErrors.value.copy(endTimeError = "La hora de finalización es requerida")
         } else if (!isValidTimeFormat(endTime)) {
-            _formErrors.value = _formErrors.value.copy(endTimeError = "La hora de finalización debe ser un formato valido (24:59)")
+            _formErrors.value =
+                _formErrors.value.copy(endTimeError = "La hora de finalización debe ser un formato valido (24:59)")
         } else {
             _formErrors.value = _formErrors.value.copy(endTimeError = null)
         }

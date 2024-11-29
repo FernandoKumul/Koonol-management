@@ -32,7 +32,6 @@ import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
-import com.fernandokh.koonol_management.ui.components.shared.CustomTextField
 import com.fernandokh.koonol_management.ui.components.shared.CustomTimeField
 import com.fernandokh.koonol_management.ui.components.shared.DropdownInputForm
 import com.fernandokh.koonol_management.utils.NavigationEvent
@@ -50,10 +49,11 @@ fun CreateScheduleTianguisScreen(
     val toastMessage by viewModel.toastMessage.collectAsState()
 
     LaunchedEffect(Unit) {
+        viewModel.getAllTianguis()
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is NavigationEvent.Navigate -> {
-                    navController.navigate(Screen.SalesStalls.route)
+                    navController.navigate(Screen.Tianguis.route)
                 }
             }
         }
@@ -114,6 +114,7 @@ private fun FormScheduleTianguis(viewModel: CreateScheduleTianguisViewModel) {
 
     val formErrors by viewModel.formErrors.collectAsState()
     val tianguisId by viewModel.tianguisId.collectAsState()
+    val tianguisList by viewModel.tianguisList.collectAsState()
     val dayWeek by viewModel.dayWeek.collectAsState()
     val dayWeekOptions = viewModel.daysOfWeek
     val startTime by viewModel.startTime.collectAsState()
@@ -130,12 +131,14 @@ private fun FormScheduleTianguis(viewModel: CreateScheduleTianguisViewModel) {
             .fillMaxWidth(0.8f)
     ) {
         Text("Tianguis", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(
-            tianguisId,
-            { viewModel.onTianguisIdChange(it) },
-            "Ingresa tu nombre",
-            error = formErrors.tianguisIdError != null,
-            errorMessage = formErrors.tianguisIdError
+        DropdownInputForm(
+            items = tianguisList,
+            selectedItem = tianguisList.find { it.id == tianguisId },
+            onItemSelected = { selectedTianguis ->
+                viewModel.onTianguisIdChange(selectedTianguis.id)
+            },
+            itemLabel = { it.name },
+            label = "Selecciona un Tianguis",
         )
         Spacer(Modifier.height(16.dp))
         Text("Día de la semana", color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -146,7 +149,7 @@ private fun FormScheduleTianguis(viewModel: CreateScheduleTianguisViewModel) {
                 viewModel.onDayWeekChange(selectedDayWeek.value)
             },
             itemLabel = { it.name },
-            label = "Selecciona una subcategoría",
+            label = "Selecciona un dia de la semana",
         )
         Spacer(Modifier.height(16.dp))
 

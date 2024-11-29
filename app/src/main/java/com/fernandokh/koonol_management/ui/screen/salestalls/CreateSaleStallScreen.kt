@@ -95,15 +95,6 @@ fun CreateSaleStallScreen(
             ) {
                 Icon(painter = painterResource(R.drawable.ic_save_line), contentDescription = "Add")
             }
-            Spacer(Modifier.width(14.dp))
-            FloatingActionButton(
-                onClick = { navController.navigate(Screen.CreateScheduleTianguis.route) },
-                shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
-                Icon(painter = painterResource(R.drawable.ic_save_line), contentDescription = "Add")
-            }
         },
         content = { innerPadding ->
             Column(

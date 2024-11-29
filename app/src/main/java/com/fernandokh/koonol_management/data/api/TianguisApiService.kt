@@ -24,7 +24,6 @@ interface TianguisApiService {
         @Query("sort") sort: String
     ): ApiResponse<SearchModel<TianguisModel>>
 
-
     @GET("tianguis/{id}")
     suspend fun getTianguisById(@Path("id") id: String): ApiResponse<TianguisModel>
 
@@ -39,4 +38,7 @@ interface TianguisApiService {
 
     @DELETE("tianguis/{id}")
     suspend fun deleteTianguisById(@Path("id") id: String): ApiResponse<TianguisModel>
+
+    @GET("tianguis/all")
+    suspend fun getAllTianguis(): ApiResponseList<TianguisModel>
 }

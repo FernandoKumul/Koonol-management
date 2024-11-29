@@ -17,6 +17,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -67,13 +68,24 @@ fun TianguisScreen(
     Scaffold(
         topBar = { TopBarMenuTitle("Tianguis", drawerState) },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate(Screen.CreateTianguis.route) },
-                shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar Tianguis")
+            Row {
+                FloatingActionButton(
+                    onClick = { navController.navigate(Screen.CreateTianguis.route) },
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar Tianguis")
+                }
+                Spacer(Modifier.width(14.dp))
+                FloatingActionButton(
+                    onClick = { navController.navigate(Screen.CreateScheduleTianguis.route) },
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(painter = painterResource(R.drawable.baseline_edit_calendar_24), contentDescription = "Agregar Horario")
+                }
             }
         },
         content = { innerPadding ->
