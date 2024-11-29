@@ -20,14 +20,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import kotlinx.coroutines.launch
 
 @Composable
 fun RouteListMenu(routes: List<RouteItem>, navController: NavHostController, drawerState: DrawerState) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
+    val currentBackStackEntry = navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry.value?.destination?.route
 
+    Column(modifier = Modifier.fillMaxWidth()) {
         routes.forEach { route ->
+            val isSelected = currentRoute == route.routeName
             Row(
                 modifier = Modifier
                     .clickable {
@@ -47,10 +51,13 @@ fun RouteListMenu(routes: List<RouteItem>, navController: NavHostController, dra
                     painter = painterResource(route.icon),
                     contentDescription = route.routeName,
                     modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = route.text, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    text = route.text,
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             HorizontalDivider(Modifier.padding(16.dp, 0.dp) ,thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
         }

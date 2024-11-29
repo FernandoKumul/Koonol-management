@@ -55,8 +55,11 @@ dependencies {
     implementation (libs.converter.gson)
     //Coroutines
     implementation(libs.kotlinx.coroutines.android)
+
     //Load images of Internet
     implementation(libs.coil.compose)
+
+    //Pagination
     implementation(libs.pagingCompose)
 
     //Maps
@@ -65,7 +68,13 @@ dependencies {
     //Datastore
     implementation(libs.androidx.datastore.preferences)
 
+    //Slider
+    implementation(libs.accompanist.pager)
+    implementation(libs.accompanist.pager.indicators)
+
+    //Navigation
     implementation(libs.androidx.navigation.compose)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -74,6 +83,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    //Splash
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
 

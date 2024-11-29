@@ -85,13 +85,13 @@ class MainActivity : ComponentActivity() {
                     )
                     {
                         KoonolmanagementTheme(dynamicColor = false) {
-                Surface (color = MaterialTheme.colorScheme.background) {
-                    MyApp(
-                        tokenManager = tokenManager
-                    )
+                            Surface(color = MaterialTheme.colorScheme.background) {
+                                MyApp(
+                                    tokenManager = tokenManager
+                                )
+                            }
+                        }
                     }
-                }
-            }
                 }
             }
         }
@@ -115,19 +115,31 @@ fun MyApp(
         },
         gesturesEnabled = enabledMenu(navBackStackEntry?.destination?.route)
     ) {
-        AppNavHost(navController = navController, drawerState = drawerState, tokenManager = tokenManager)
+        AppNavHost(
+            navController = navController,
+            drawerState = drawerState,
+            tokenManager = tokenManager
+        )
     }
 }
 
 fun enabledMenu(route: String?): Boolean {
     return when (route) {
-        Screen.Menu.route -> { false }
+        Screen.Menu.route -> {
+            false
+        }
 
-        Screen.Login.route -> { false }
+        Screen.Login.route -> {
+            false
+        }
 
-        null -> { false }
+        null -> {
+            false
+        }
 
-        else -> { true }
+        else -> {
+            true
+        }
     }
 }
 
@@ -193,7 +205,11 @@ fun SideMenu(
 }
 
 @Composable
-fun BtnLogout(navController: NavHostController, drawerState: DrawerState, tokenManager: TokenManager) {
+fun BtnLogout(
+    navController: NavHostController,
+    drawerState: DrawerState,
+    tokenManager: TokenManager
+) {
     val scope = rememberCoroutineScope()
     val viewModel: AuthViewModel = viewModel(
         factory = AuthViewModelFactory(tokenManager)
@@ -238,7 +254,7 @@ fun BtnLogout(navController: NavHostController, drawerState: DrawerState, tokenM
 fun UserDetails(user: UserPreviewModel) {
     Row(
         Modifier.padding(16.dp, 12.dp, 16.dp, 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (user.photo != null) {
             AsyncImage(
@@ -264,6 +280,7 @@ fun UserDetails(user: UserPreviewModel) {
             Text(
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.padding(top = 10.dp),
                 text = user.name,
             )
             Text(
