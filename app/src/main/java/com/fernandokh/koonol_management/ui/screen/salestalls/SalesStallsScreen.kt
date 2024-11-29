@@ -360,7 +360,7 @@ private fun CardSalesStallItem(
                 fontSize = 17.sp
             )
             Text(
-                text = salesStall.type,
+                text = if (salesStall.type) "Permanente" else "Temporal",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 15.sp
             )

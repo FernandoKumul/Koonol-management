@@ -196,7 +196,7 @@ private fun InfoSaleStall(saleStall: SalesStallsModel) {
             Spacer(Modifier.height(24.dp))
             InformationField("SubCategoría", saleStall.subCategoryId.name)
             Spacer(Modifier.height(24.dp))
-            InformationField("Tipo de puesto", saleStall.type)
+            InformationField("Tipo de puesto", if (saleStall.type) "Permanente" else "Temporal")
             Spacer(Modifier.height(24.dp))
             InformationField("Periodo de prueba", if (saleStall.probation) "Sí" else "No")
             Spacer(Modifier.height(24.dp))
