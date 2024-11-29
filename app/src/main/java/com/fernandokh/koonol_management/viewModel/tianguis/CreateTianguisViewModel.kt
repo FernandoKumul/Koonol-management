@@ -7,7 +7,6 @@ import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.TianguisApiService
 import com.fernandokh.koonol_management.data.models.TianguisCreateEditModel
 import com.fernandokh.koonol_management.data.models.MarkerMap
-import com.fernandokh.koonol_management.data.models.ScheduleCreateModel
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,10 +18,7 @@ import retrofit2.HttpException
 data class TianguisFormErrors(
     val nameError: String? = null,
     val colorError: String? = null,
-    val dayWeekError: String? = null,
     val indicationsError: String? = null,
-    val startTimeError: String? = null,
-    val endTimeError: String? = null,
     val localityError: String? = null,
     val photoError: String? = null
 ) {
@@ -30,10 +26,7 @@ data class TianguisFormErrors(
         return listOf(
             nameError,
             colorError,
-            dayWeekError,
             indicationsError,
-            startTimeError,
-            endTimeError,
             localityError,
             photoError
         )
@@ -55,17 +48,8 @@ class CreateTianguisViewModel : ViewModel() {
     private val _color = MutableStateFlow("")
     val color: StateFlow<String> = _color
 
-    private val _dayWeek = MutableStateFlow("")
-    val dayWeek: StateFlow<String> = _dayWeek
-
     private val _indications = MutableStateFlow("")
     val indications: StateFlow<String> = _indications
-
-    private val _startTime = MutableStateFlow("")
-    val startTime: StateFlow<String> = _startTime
-
-    private val _endTime = MutableStateFlow("")
-    val endTime: StateFlow<String> = _endTime
 
     private val _locality = MutableStateFlow("")
     val locality: StateFlow<String> = _locality
@@ -113,24 +97,9 @@ class CreateTianguisViewModel : ViewModel() {
         if (_dirtyForm.value) validateColor()
     }
 
-    fun onDayWeekChange(value: String) {
-        _dayWeek.value = value
-        if (_dirtyForm.value) validateDayWeek()
-    }
-
     fun onIndicationsChange(value: String) {
         _indications.value = value
         if (_dirtyForm.value) validateIndications()
-    }
-
-    fun onStartTimeChange(value: String) {
-        _startTime.value = value
-        if (_dirtyForm.value) validateStartTime()
-    }
-
-    fun onEndTimeChange(value: String) {
-        _endTime.value = value
-        if (_dirtyForm.value) validateEndTime()
     }
 
     fun onLocalityChange(value: String) {
@@ -154,14 +123,9 @@ class CreateTianguisViewModel : ViewModel() {
 
     fun createTianguis(userId: String) {
         val tianguis = TianguisCreateEditModel(
-            userId = userId, // Cambia esto a tu lógica de usuario
+            userId = userId,
             name = _name.value.trim(),
             color = _color.value.trim(),
-            schedule = ScheduleCreateModel(
-                dayWeek = _dayWeek.value.trim(),
-                startTime = _startTime.value.trim(),
-                endTime = _endTime.value.trim(),
-            ),
             photo = _photo.value,
             indications = _indications.value.trim(),
             locality = _locality.value.trim(),
@@ -205,31 +169,10 @@ class CreateTianguisViewModel : ViewModel() {
         )
     }
 
-    private fun validateDayWeek() {
-        val dayWeek = _dayWeek.value
-        _formErrors.value = _formErrors.value.copy(
-            dayWeekError = if (dayWeek.isBlank()) "El día de la semana es requerido" else null
-        )
-    }
-
     private fun validateIndications() {
         val indications = _indications.value
         _formErrors.value = _formErrors.value.copy(
             indicationsError = if (indications.isBlank()) "Las indicaciones son requeridas" else null
-        )
-    }
-
-    private fun validateStartTime() {
-        val startTime = _startTime.value
-        _formErrors.value = _formErrors.value.copy(
-            startTimeError = if (startTime.isBlank()) "La hora de inicio es requerida" else null
-        )
-    }
-
-    private fun validateEndTime() {
-        val endTime = _endTime.value
-        _formErrors.value = _formErrors.value.copy(
-            endTimeError = if (endTime.isBlank()) "La hora de finalización es requerida" else null
         )
     }
 
@@ -251,10 +194,7 @@ class CreateTianguisViewModel : ViewModel() {
         _dirtyForm.value = true
         validateName()
         validateColor()
-        validateDayWeek()
         validateIndications()
-        validateStartTime()
-        validateEndTime()
         validateLocality()
         validatePhoto()
 

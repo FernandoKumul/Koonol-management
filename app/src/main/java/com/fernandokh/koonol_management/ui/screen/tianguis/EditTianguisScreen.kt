@@ -44,6 +44,7 @@ import com.fernandokh.koonol_management.viewModel.tianguis.NavigationEvent
 import java.io.File
 import android.util.Log
 import com.fernandokh.koonol_management.ui.components.maps.MapComponent
+import com.fernandokh.koonol_management.ui.components.shared.UploadImage
 import com.fernandokh.koonol_management.viewModel.AuthViewModel
 import kotlinx.coroutines.flow.firstOrNull
 
@@ -174,7 +175,7 @@ fun EditTianguisScreen(
                                 .padding(0.dp, 16.dp, 0.dp, 40.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            MyUploadImage(
+                            UploadImage(
                                 directory = File(cacheDir, "images"),
                                 url = imageUrl,
                                 onSetImage = {
@@ -191,7 +192,7 @@ fun EditTianguisScreen(
                             Text(
                                 text = "Ubicación del Tianguis",
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(10.dp))
 
@@ -249,10 +250,7 @@ private fun FormTianguis(viewModel: EditTianguisViewModel) {
     val formErrors by viewModel.formErrors.collectAsState()
     val name by viewModel.name.collectAsState()
     val color by viewModel.color.collectAsState()
-    val dayWeek by viewModel.dayWeek.collectAsState()
     val indications by viewModel.indications.collectAsState()
-    val startTime by viewModel.startTime.collectAsState()
-    val endTime by viewModel.endTime.collectAsState()
     val locality by viewModel.locality.collectAsState()
 
     Column(
@@ -285,43 +283,13 @@ private fun FormTianguis(viewModel: EditTianguisViewModel) {
         )
         Spacer(Modifier.height(16.dp))
 
-        Text("Día de la Semana", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(
-            dayWeek,
-            { viewModel.onDayWeekChange(it) },
-            "Día (ej. Lunes)",
-            error = formErrors.dayWeekError != null,
-            errorMessage = formErrors.dayWeekError
-        )
-        Spacer(Modifier.height(16.dp))
-
         Text("Indicaciones", color = MaterialTheme.colorScheme.onSurfaceVariant)
         CustomTextField(
             indications,
             { viewModel.onIndicationsChange(it) },
-            "Indicaciones del Tianguis",
+            "Indicaciones de la ubicación",
             error = formErrors.indicationsError != null,
             errorMessage = formErrors.indicationsError
-        )
-        Spacer(Modifier.height(16.dp))
-
-        Text("Hora de Inicio", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(
-            startTime,
-            { viewModel.onStartTimeChange(it) },
-            "HH:MM",
-            error = formErrors.startTimeError != null,
-            errorMessage = formErrors.startTimeError
-        )
-        Spacer(Modifier.height(16.dp))
-
-        Text("Hora de Fin", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(
-            endTime,
-            { viewModel.onEndTimeChange(it) },
-            "HH:MM",
-            error = formErrors.endTimeError != null,
-            errorMessage = formErrors.endTimeError
         )
         Spacer(Modifier.height(16.dp))
 
