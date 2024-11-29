@@ -31,29 +31,13 @@ class TianguisPagingSource(
                 sort = sort,
             )
 
-            Log.d("TianguisPagingSource", "Respuesta de la API: $response")
-
-            val tianguisList = response.data ?: emptyList()
-
-            // Filtrar duplicados globales
-            val filteredTianguisList = tianguisList.filter { it.id !in loadedIds }
-            loadedIds.addAll(filteredTianguisList.map { it.id })
-
-            Log.d("TianguisPagingSource", "Cantidad de tianguis después de filtrar duplicados globales: ${filteredTianguisList.size}")
-
-            // Actualizar el total de elementos al cargar la primera página
-            if (currentPage == 1) {
-                onUpdateTotal(tianguisList.size)
-            }
-
-            filteredTianguisList.forEachIndexed { index, tianguis ->
-                Log.d("TianguisPagingSource", "Tianguis $index: ${tianguis.name}, ID: ${tianguis.id}")
-            }
+            val tianguis = response.data?.results ?: emptyList()
+            onUpdateTotal(response.data?.count ?: 0)
 
             LoadResult.Page(
-                data = filteredTianguisList,
+                data = tianguis,
                 prevKey = if (currentPage == 1) null else currentPage - 1,
-                nextKey = if (filteredTianguisList.isEmpty()) null else currentPage + 1
+                nextKey = if (tianguis.isEmpty()) null else currentPage + 1
             )
         } catch (e: HttpException) {
             val errorMessage = evaluateHttpException(e)

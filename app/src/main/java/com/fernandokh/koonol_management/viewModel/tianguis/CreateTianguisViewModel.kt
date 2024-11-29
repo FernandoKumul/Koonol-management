@@ -1,11 +1,13 @@
 package com.fernandokh.koonol_management.viewModel.tianguis
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fernandokh.koonol_management.data.RetrofitInstance
 import com.fernandokh.koonol_management.data.api.TianguisApiService
 import com.fernandokh.koonol_management.data.models.TianguisCreateEditModel
 import com.fernandokh.koonol_management.data.models.MarkerMap
+import com.fernandokh.koonol_management.data.models.ScheduleCreateModel
 import com.fernandokh.koonol_management.utils.evaluateHttpException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -155,11 +157,13 @@ class CreateTianguisViewModel : ViewModel() {
             userId = userId, // Cambia esto a tu lógica de usuario
             name = _name.value.trim(),
             color = _color.value.trim(),
-            dayWeek = _dayWeek.value.trim(),
+            schedule = ScheduleCreateModel(
+                dayWeek = _dayWeek.value.trim(),
+                startTime = _startTime.value.trim(),
+                endTime = _endTime.value.trim(),
+            ),
             photo = _photo.value,
             indications = _indications.value.trim(),
-            startTime = _startTime.value.trim(),
-            endTime = _endTime.value.trim(),
             locality = _locality.value.trim(),
             active = true,
             markerMap = MarkerMap(
@@ -179,6 +183,7 @@ class CreateTianguisViewModel : ViewModel() {
                 showToast(errorMessage)
             } catch (e: Exception) {
                 showToast("Error al crear el tianguis: ${e.message}")
+                Log.e("dev-debug", "${e.message}")
             } finally {
                 _isLoadingCreate.value = false
                 dismissDialog()

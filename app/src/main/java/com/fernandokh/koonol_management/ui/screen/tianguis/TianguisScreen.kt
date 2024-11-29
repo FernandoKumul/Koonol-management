@@ -173,7 +173,7 @@ private fun TianguisList(
         }
 
         when {
-            tianguisItems.loadState.append is LoadState.NotLoading && tianguisItems.loadState.append.endOfPaginationReached -> {
+            tianguisItems.loadState.append is LoadState.NotLoading && tianguisItems.loadState.append.endOfPaginationReached && tianguisItems.itemCount > 7 -> {
                 item {
                     Text(
                         text = "Has llegado al final de la lista",
@@ -189,6 +189,7 @@ private fun TianguisList(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
+                            .wrapContentWidth(Alignment.CenterHorizontally)
                     )
                 }
             }

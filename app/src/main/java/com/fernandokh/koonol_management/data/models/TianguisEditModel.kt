@@ -1,10 +1,12 @@
 package com.fernandokh.koonol_management.data.models
 
-data class TianguisCreateEditModel(
+import com.google.gson.annotations.SerializedName
+
+data class TianguisEditModel(
     val userId: String,
     val name: String,
     val color: String,
-    val schedule: ScheduleCreateModel,
+    val schedule: ScheduleEditModel,
     val photo: String?,
     val indications: String,
     val locality: String?,
@@ -12,7 +14,9 @@ data class TianguisCreateEditModel(
     val markerMap: MarkerMap
 )
 
-data class ScheduleCreateModel(
+data class ScheduleEditModel(
+    @SerializedName("_id")
+    val id: String,
     val dayWeek: String?,
     val startTime: String,
     val endTime: String?,

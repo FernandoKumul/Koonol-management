@@ -16,12 +16,14 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import android.util.Log
+import com.fernandokh.koonol_management.data.models.ScheduleEditModel
+import com.fernandokh.koonol_management.data.models.TianguisEditModel
 
 class EditTianguisViewModel : ViewModel() {
 
     private val apiService = RetrofitInstance.create(TianguisApiService::class.java)
 
-    private val _isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _isLoadingUpdate = MutableStateFlow(false)
@@ -159,11 +161,11 @@ class EditTianguisViewModel : ViewModel() {
                 // Cargar los valores en los campos
                 _name.value = response.data?.name ?: ""
                 _color.value = response.data?.color ?: ""
-                _dayWeek.value = response.data?.dayWeek ?: ""
+                _dayWeek.value = response.data?.schedule?.get(0)?.dayWeek ?: ""
                 _photo.value = response.data?.photo
                 _indications.value = response.data?.indications ?: ""
-                _startTime.value = response.data?.startTime ?: ""
-                _endTime.value = response.data?.endTime ?: ""
+                _startTime.value = response.data?.schedule?.get(0)?.startTime ?: ""
+                _endTime.value = response.data?.schedule?.get(0)?.endTime ?: ""
                 _locality.value = response.data?.locality ?: ""
             } catch (e: HttpException) {
                 val errorMessage = evaluateHttpException(e)
@@ -179,22 +181,25 @@ class EditTianguisViewModel : ViewModel() {
     }
 
     fun updateTianguis(tianguisId: String, userId: String) {
-        val updatedTianguis = TianguisCreateEditModel(
+        val updatedTianguis = TianguisEditModel(
             userId = userId, // Cambia esto según la lógica de usuario
             name = _name.value.trim(),
             color = _color.value.trim(),
-            dayWeek = _dayWeek.value.trim(),
+            schedule = ScheduleEditModel(
+                id = _tianguis.value?.schedule?.get(0)?.id ?: "",
+                dayWeek = _dayWeek.value.trim(),
+                startTime = _startTime.value.trim(),
+                endTime = _endTime.value.trim(),
+            ),
             photo = _photo.value,
             indications = _indications.value.trim(),
-            startTime = _startTime.value.trim(),
-            endTime = _endTime.value.trim(),
             locality = _locality.value.trim(),
             active = true,
             markerMap = MarkerMap(
                 type = "Point",
                 coordinates = listOf(
                     _longitude.value ?: -99.1332, // Longitude (requerido)
-                    _latitude.value ?: 19.4326   // Latitude (requerido)
+                    _latitude.value ?: 19.4326,   // Latitude (requerido)
                 )
             )
         )
