@@ -15,6 +15,11 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
+data class Option(
+    val name: String,
+    val value: String
+)
+
 data class FormErrors(
     val tianguisIdError: String? = null,
     val dayWeekError: String? = null,
@@ -45,7 +50,6 @@ class CreateScheduleTianguisViewModel : ViewModel() {
     private val _toastMessage = MutableStateFlow<String?>(null)
     val toastMessage: StateFlow<String?> get() = _toastMessage
 
-
     private val _tianguisId = MutableStateFlow("")
     val tianguisId: StateFlow<String> = _tianguisId
 
@@ -68,6 +72,14 @@ class CreateScheduleTianguisViewModel : ViewModel() {
 
     private val _navigationEvent = Channel<NavigationEvent>()
     val navigationEvent = _navigationEvent.receiveAsFlow()
+
+    val daysOfWeek = listOf(
+        Option("Lunes", "Lunes"),
+        Option("Martes", "Martes"),
+        Option("Miércoles", "Miércoles"),
+        Option("Jueves", "Jueves"),
+        Option("Viernes", "Viernes"),
+    )
 
     private fun showToast(message: String) {
         _toastMessage.value = message

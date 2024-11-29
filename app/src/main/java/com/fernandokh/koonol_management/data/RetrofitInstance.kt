@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitInstance {
     private val retrofit = Retrofit.Builder()
 //        .baseUrl("https://koonol-api.onrender.com/api/")
-        .baseUrl("http://192.168.0.5:3000/api/")
+        .baseUrl("http://192.168.1.75:3000/api/")
         .addConverterFactory(GsonConverterFactory.create(GsonBuilder().serializeNulls().create()))
         .build()
 

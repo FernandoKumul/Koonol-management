@@ -32,8 +32,9 @@ import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
-import com.fernandokh.koonol_management.ui.components.shared.CustomDateField
 import com.fernandokh.koonol_management.ui.components.shared.CustomTextField
+import com.fernandokh.koonol_management.ui.components.shared.CustomTimeField
+import com.fernandokh.koonol_management.ui.components.shared.DropdownInputForm
 import com.fernandokh.koonol_management.utils.NavigationEvent
 import com.fernandokh.koonol_management.viewModel.scheduleTianguis.CreateScheduleTianguisViewModel
 
@@ -114,6 +115,7 @@ private fun FormScheduleTianguis(viewModel: CreateScheduleTianguisViewModel) {
     val formErrors by viewModel.formErrors.collectAsState()
     val tianguisId by viewModel.tianguisId.collectAsState()
     val dayWeek by viewModel.dayWeek.collectAsState()
+    val dayWeekOptions = viewModel.daysOfWeek
     val indications by viewModel.indications.collectAsState()
     val startTime by viewModel.startTime.collectAsState()
     val endTime by viewModel.endTime.collectAsState()
@@ -138,11 +140,14 @@ private fun FormScheduleTianguis(viewModel: CreateScheduleTianguisViewModel) {
         )
         Spacer(Modifier.height(16.dp))
         Text("Día de la semana", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomDateField(
-            { viewModel.onDayWeekChange(it) },
-            dayWeek,
-            error = formErrors.dayWeekError != null,
-            errorMessage = formErrors.dayWeekError
+        DropdownInputForm(
+            items = dayWeekOptions,
+            selectedItem = dayWeekOptions.find { it.value == dayWeek },
+            onItemSelected = { selectedDayWeek ->
+                viewModel.onDayWeekChange(selectedDayWeek.value)
+            },
+            itemLabel = { it.name },
+            label = "Selecciona una subcategoría",
         )
         Spacer(Modifier.height(16.dp))
 
@@ -150,27 +155,25 @@ private fun FormScheduleTianguis(viewModel: CreateScheduleTianguisViewModel) {
         CustomTextField(
             indications,
             { viewModel.onIndicationsChange(it) },
-            "Ingresa tu nombre",
+            "Ingresa las indicaciones",
             error = formErrors.indicationsError != null,
             errorMessage = formErrors.indicationsError
         )
         Spacer(Modifier.height(16.dp))
 
         Text("Hora de inicio", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(
-            startTime,
-            { viewModel.onStartTimeChange(it) },
-            "Ingresa tu nombre",
+        CustomTimeField(
+            text = startTime,
+            onTextChange = { viewModel.onStartTimeChange(it) },
             error = formErrors.startTimeError != null,
             errorMessage = formErrors.startTimeError
         )
         Spacer(Modifier.height(16.dp))
 
         Text("Hora de finalización", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(
-            endTime,
-            { viewModel.onEndTimeChange(it) },
-            "Ingresa tu nombre",
+        CustomTimeField(
+            text = endTime,
+            onTextChange = { viewModel.onEndTimeChange(it) },
             error = formErrors.endTimeError != null,
             errorMessage = formErrors.endTimeError
         )
