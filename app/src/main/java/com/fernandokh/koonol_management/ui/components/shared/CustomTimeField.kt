@@ -34,9 +34,7 @@ fun CustomTimeField(
     BasicTextField(
         value = text,
         onValueChange = { value ->
-            // Validar que solo acepte formato de hora (HH:mm)
             if (value.length <= 5 && value.matches(Regex("^\\d{0,2}:?\\d{0,2}\$"))) {
-                // Agregar automáticamente el separador ":" al escribir
                 if (value.length == 2 && !value.contains(":")) {
                     onTextChange("$value:")
                 } else {

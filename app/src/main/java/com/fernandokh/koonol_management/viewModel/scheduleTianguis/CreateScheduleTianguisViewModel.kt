@@ -23,7 +23,6 @@ data class Option(
 data class FormErrors(
     val tianguisIdError: String? = null,
     val dayWeekError: String? = null,
-    val indicationsError: String? = null,
     val startTimeError: String? = null,
     val endTimeError: String? = null,
 ) {
@@ -31,7 +30,6 @@ data class FormErrors(
         return listOf(
             tianguisIdError,
             dayWeekError,
-            indicationsError,
             startTimeError,
             endTimeError
         )
@@ -55,9 +53,6 @@ class CreateScheduleTianguisViewModel : ViewModel() {
 
     private val _dayWeek = MutableStateFlow<String?>(null)
     val dayWeek: StateFlow<String?> = _dayWeek
-
-    private val _indications = MutableStateFlow("")
-    val indications: StateFlow<String> = _indications
 
     private val _startTime = MutableStateFlow("")
     val startTime: StateFlow<String> = _startTime
@@ -111,13 +106,6 @@ class CreateScheduleTianguisViewModel : ViewModel() {
         }
     }
 
-    fun onIndicationsChange(value: String) {
-        _indications.value = value
-        if (_dirtyForm.value) {
-            validateIndications()
-        }
-    }
-
     fun onStartTimeChange(value: String) {
         _startTime.value = value
         if (_dirtyForm.value) {
@@ -139,7 +127,6 @@ class CreateScheduleTianguisViewModel : ViewModel() {
         val scheduleTianguis = ScheduleTianguisCreateEditModel(
             tianguisId = _tianguisId.value.trim(),
             dayWeek = _dayWeek.value!!,
-            indications = _indications.value.trim(),
             startTime = _startTime.value.trim(),
             endTime = _endTime.value.trim()
         )
@@ -179,35 +166,37 @@ class CreateScheduleTianguisViewModel : ViewModel() {
         }
     }
 
-    private fun validateIndications() {
-        val indications = _indications.value
-        if (indications.isBlank()) {
-            _formErrors.value =
-                _formErrors.value.copy(indicationsError = "Las indicaciones son requeridas")
-        }
-    }
-
     private fun validateStartTime() {
         val startTime = _startTime.value
         if (startTime.isBlank()) {
-            _formErrors.value =
-                _formErrors.value.copy(startTimeError = "La hora de inicio es requerida")
+            _formErrors.value = _formErrors.value.copy(startTimeError = "La hora de inicio es requerida")
+        } else if (!isValidTimeFormat(startTime)) {
+            _formErrors.value = _formErrors.value.copy(startTimeError = "La hora de inicio debe ser un formato valido (24:59)")
+        } else {
+            _formErrors.value = _formErrors.value.copy(startTimeError = null)
         }
     }
 
     private fun validateEndTime() {
         val endTime = _endTime.value
         if (endTime.isBlank()) {
-            _formErrors.value =
-                _formErrors.value.copy(endTimeError = "La hora de finalización es requerida")
+            _formErrors.value = _formErrors.value.copy(endTimeError = "La hora de finalización es requerida")
+        } else if (!isValidTimeFormat(endTime)) {
+            _formErrors.value = _formErrors.value.copy(endTimeError = "La hora de finalización debe ser un formato valido (24:59)")
+        } else {
+            _formErrors.value = _formErrors.value.copy(endTimeError = null)
         }
+    }
+
+    private fun isValidTimeFormat(time: String): Boolean {
+        val regex = Regex("^([01]?\\d|2[0-3]):([0-5]\\d)\$")
+        return regex.matches(time)
     }
 
     fun isFormValid(): Boolean {
         _dirtyForm.value = true
         validateTianguisId()
         validateDayWeek()
-        validateIndications()
         validateStartTime()
         validateEndTime()
 

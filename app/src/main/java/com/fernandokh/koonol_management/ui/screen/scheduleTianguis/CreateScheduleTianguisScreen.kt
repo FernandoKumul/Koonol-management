@@ -116,7 +116,6 @@ private fun FormScheduleTianguis(viewModel: CreateScheduleTianguisViewModel) {
     val tianguisId by viewModel.tianguisId.collectAsState()
     val dayWeek by viewModel.dayWeek.collectAsState()
     val dayWeekOptions = viewModel.daysOfWeek
-    val indications by viewModel.indications.collectAsState()
     val startTime by viewModel.startTime.collectAsState()
     val endTime by viewModel.endTime.collectAsState()
 
@@ -148,16 +147,6 @@ private fun FormScheduleTianguis(viewModel: CreateScheduleTianguisViewModel) {
             },
             itemLabel = { it.name },
             label = "Selecciona una subcategoría",
-        )
-        Spacer(Modifier.height(16.dp))
-
-        Text("Indicaciones", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        CustomTextField(
-            indications,
-            { viewModel.onIndicationsChange(it) },
-            "Ingresa las indicaciones",
-            error = formErrors.indicationsError != null,
-            errorMessage = formErrors.indicationsError
         )
         Spacer(Modifier.height(16.dp))
 
