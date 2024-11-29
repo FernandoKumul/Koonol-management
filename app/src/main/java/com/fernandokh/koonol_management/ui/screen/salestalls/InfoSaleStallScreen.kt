@@ -12,10 +12,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -28,18 +33,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.fernandokh.koonol_management.R
+import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.data.models.SalesStallsModel
 import com.fernandokh.koonol_management.ui.components.router.TopBarGoBack
 import com.fernandokh.koonol_management.ui.components.shared.InformationField
-import com.fernandokh.koonol_management.ui.theme.KoonolmanagementTheme
 import com.fernandokh.koonol_management.viewModel.salesstalls.InfoSaleStallViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -65,6 +68,22 @@ fun InfoSaleStallScreen(
 
     Scaffold(
         topBar = { TopBarGoBack("Puesto", navController) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    navController.navigate(
+                        Screen.CreateLocationSalesStalls.createRoute(
+                            saleStallId.toString()
+                        )
+                    )
+                },
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(Icons.Outlined.LocationOn, contentDescription = "Agregar Tianguis")
+            }
+        },
         content = { innerPadding ->
             Column(
                 modifier = Modifier
@@ -174,7 +193,9 @@ private fun InfoSaleStall(saleStall: SalesStallsModel) {
             Image(
                 painter = painterResource(R.drawable.default_image),
                 contentDescription = "img_seller",
-                modifier = Modifier.height(250.dp).width(300.dp)
+                modifier = Modifier
+                    .height(250.dp)
+                    .width(300.dp)
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -190,7 +211,10 @@ private fun InfoSaleStall(saleStall: SalesStallsModel) {
         ) {
             InformationField("Nombre", saleStall.name)
             Spacer(Modifier.height(24.dp))
-            InformationField("Vendedor", "${saleStall.sellerId.name} ${saleStall.sellerId.lastName}")
+            InformationField(
+                "Vendedor",
+                "${saleStall.sellerId.name} ${saleStall.sellerId.lastName}"
+            )
             Spacer(Modifier.height(24.dp))
             InformationField("Categoría", saleStall.subCategoryId.categoryId.name)
             Spacer(Modifier.height(24.dp))

@@ -1,23 +1,44 @@
 package com.fernandokh.koonol_management.ui.screen.tianguis
 
-import android.widget.Toast
 import android.util.Log
-import androidx.compose.foundation.layout.*
+import android.widget.Toast
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import com.fernandokh.koonol_management.R
-import com.fernandokh.koonol_management.ui.components.shared.DropdownMenuC
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -27,16 +48,16 @@ import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.fernandokh.koonol_management.R
 import com.fernandokh.koonol_management.Screen
 import com.fernandokh.koonol_management.data.models.TianguisModel
 import com.fernandokh.koonol_management.ui.components.router.TopBarMenuTitle
 import com.fernandokh.koonol_management.ui.components.shared.AlertDialogC
-import com.fernandokh.koonol_management.ui.components.shared.DialogC
+import com.fernandokh.koonol_management.ui.components.shared.DropdownMenuC
 import com.fernandokh.koonol_management.ui.components.shared.SearchBarC
-import com.fernandokh.koonol_management.viewModel.tianguis.TianguisViewModel
-import com.fernandokh.koonol_management.utils.MenuItem
 import com.fernandokh.koonol_management.utils.MenuItem.Divider
 import com.fernandokh.koonol_management.utils.MenuItem.Option
+import com.fernandokh.koonol_management.viewModel.tianguis.TianguisViewModel
 
 @Composable
 fun TianguisScreen(
@@ -84,7 +105,10 @@ fun TianguisScreen(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
-                    Icon(painter = painterResource(R.drawable.baseline_edit_calendar_24), contentDescription = "Agregar Horario")
+                    Icon(
+                        painter = painterResource(R.drawable.baseline_edit_calendar_24),
+                        contentDescription = "Agregar Horario"
+                    )
                 }
             }
         },
@@ -222,8 +246,6 @@ private fun TianguisList(
 }
 
 
-
-
 @Composable
 private fun CardTianguisItem(
     navController: NavHostController,
@@ -267,7 +289,12 @@ private fun CardTianguisItem(
                 options = options,
                 onItemClick = { option ->
                     when (option.name) {
-                        "Más información" -> navController.navigate(Screen.InfoTianguis.createRoute(tianguis.id))
+                        "Más información" -> navController.navigate(
+                            Screen.InfoTianguis.createRoute(
+                                tianguis.id
+                            )
+                        )
+
                         "Editar" -> navController.navigate(Screen.EditTianguis.createRoute(tianguis.id))
                         "Borrar" -> onSelectedToDelete()
                     }

@@ -25,6 +25,7 @@ import com.fernandokh.koonol_management.ui.screen.categories.CategoriesScreen
 import com.fernandokh.koonol_management.ui.screen.categories.CreateCategoryScreen
 import com.fernandokh.koonol_management.ui.screen.categories.EditCategoryScreen
 import com.fernandokh.koonol_management.ui.screen.categories.InfoCategoryScreen
+import com.fernandokh.koonol_management.ui.screen.locationSalesStalls.CreateLocationSalesStallsScreen
 import com.fernandokh.koonol_management.ui.screen.profile.ChangePasswordScreen
 import com.fernandokh.koonol_management.ui.screen.profile.EditProfileScreen
 import com.fernandokh.koonol_management.ui.screen.profile.ProfileScreen
@@ -114,6 +115,10 @@ sealed class Screen(val route: String) {
     object CreateTianguis : Screen("tianguis/create")
 
     object CreateScheduleTianguis : Screen("schedule-tianguis/create")
+
+    object CreateLocationSalesStalls : Screen("location-sales-stalls/create/{salesStallId}") {
+        fun createRoute(salesStallId: String) = "location-sales-stalls/create/$salesStallId"
+    }
 
 }
 
@@ -255,5 +260,13 @@ fun AppNavHost(
             arguments = listOf(navArgument("promotionId") { type = NavType.StringType })
         ) { backStackEntry -> InfoPromotionScreen(navController, backStackEntry.arguments?.getString("promotionId"), tokenManager) }
         protectedComposable(Screen.CreatePromotion.route, navController, tokenManager) { CreatePromotionScreen(navController, tokenManager) }
+
+        protectedComposable(
+            Screen.CreateLocationSalesStalls.route, navController, tokenManager,
+            arguments = listOf(navArgument("salesStallId") { type = NavType.StringType })
+        ) {
+            backStackEntry ->
+            CreateLocationSalesStallsScreen(navController, backStackEntry.arguments?.getString("salesStallId"))
+        }
     }
 }

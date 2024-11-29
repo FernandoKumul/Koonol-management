@@ -83,6 +83,8 @@ class CreateScheduleTianguisViewModel : ViewModel() {
         Option("Miércoles", "Miércoles"),
         Option("Jueves", "Jueves"),
         Option("Viernes", "Viernes"),
+        Option("Sábado", "Sábado"),
+        Option("Domingo", "Domingo")
     )
 
     private fun showToast(message: String) {
